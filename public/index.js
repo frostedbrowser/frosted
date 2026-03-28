@@ -358,7 +358,9 @@ function bindEvents() {
 function initParticles() {
 	if (!particlesLayer || !browserStage) return;
 	if (particlesLayer.parentElement !== browserStage) {
-		browserStage.prepend(particlesLayer);
+		browserStage.appendChild(particlesLayer);
+	} else if (particlesLayer !== browserStage.lastElementChild) {
+		browserStage.appendChild(particlesLayer);
 	}
 	particleCanvas = document.createElement("canvas");
 	particleCanvas.className = "particles-canvas";
@@ -437,6 +439,16 @@ function stopParticlesAnimation() {
 	if (!particleFrameId) return;
 	cancelAnimationFrame(particleFrameId);
 	particleFrameId = 0;
+}
+
+function setParticlesVisible(visible) {
+	if (!particlesLayer) return;
+	particlesLayer.style.display = visible ? "block" : "none";
+	if (visible) {
+		startParticlesAnimation();
+		return;
+	}
+	stopParticlesAnimation();
 }
 
 function tickParticles(ts) {
@@ -742,10 +754,12 @@ function showBlank() {
 	tabFrames.forEach((item) => {
 		item.element.style.display = "none";
 	});
+	setParticlesVisible(true);
 }
 
 function hideBlank() {
 	blankState.style.display = "none";
+	setParticlesVisible(false);
 }
 
 function showSettingsPage() {
@@ -758,6 +772,7 @@ function showSettingsPage() {
 	if (aiPage) aiPage.classList.remove("active");
 	if (settingsPage) settingsPage.classList.add("active");
 	addressInput.value = "bypass://settings";
+	setParticlesVisible(false);
 }
 
 function showGamesPage() {
@@ -770,6 +785,7 @@ function showGamesPage() {
 	if (gamesPage) gamesPage.classList.add("active");
 	if (aiPage) aiPage.classList.remove("active");
 	addressInput.value = gamesInternalUrl;
+	setParticlesVisible(false);
 }
 
 function showAiPage() {
@@ -782,6 +798,7 @@ function showAiPage() {
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.add("active");
 	addressInput.value = aiInternalUrl;
+	setParticlesVisible(false);
 }
 
 function showCreditsPage() {
@@ -794,6 +811,7 @@ function showCreditsPage() {
 	if (aiPage) aiPage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.add("active");
 	addressInput.value = "bypass://credits";
+	setParticlesVisible(false);
 }
 
 function hideInternalPages() {
