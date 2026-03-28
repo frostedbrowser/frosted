@@ -22,7 +22,6 @@ const loadingBanner = qs("#loadingBanner");
 const browserStage = qs(".browser-stage");
 const searchEngine = qs("#sj-search-engine");
 const randomTagline = qs("#randomTagline");
-const homeLogo = qs("#homeLogo");
 const historyContainer = qs("#historyContainer");
 const particlesLayer = qs("#particles-js");
 
@@ -83,7 +82,6 @@ const visibleAppTitle = "FilterBrowser";
 const visibleFaviconHref = "favicon.ico";
 const startupBrandTitle = "IXL | Math, Language Arts, Science, Social Studies, and Spanish";
 const startupBrandFaviconHref = "/ixl.ico";
-const startupBrandDurationMs = 2200;
 const defaultCloakTitle = "IXL | Math, Language Arts, Science, Social Studies, and Spanish";
 const defaultCloakFaviconHref = "/ixl.ico";
 const cloakPresets = {
@@ -219,19 +217,12 @@ function init() {
 }
 
 function runStartupBrandSequence() {
-	if (homeLogo) {
-		homeLogo.innerHTML =
-			'<span class="startup-brand"><img src="/ixl.ico" alt="" class="startup-brand-icon" />IXL</span>';
-	}
 	document.title = startupBrandTitle;
 	setDocumentFavicon(startupBrandFaviconHref);
 
-	window.setTimeout(() => {
-		if (homeLogo) {
-			homeLogo.textContent = visibleAppTitle;
-		}
+	requestAnimationFrame(() => {
 		applyCloakVisualState(document.hidden || !document.hasFocus());
-	}, startupBrandDurationMs);
+	});
 }
 
 function bindEvents() {
