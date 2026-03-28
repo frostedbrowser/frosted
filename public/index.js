@@ -81,11 +81,12 @@ const aiModeKey = "fb_ai_mode";
 const visibleAppTitle = "FilterBrowser";
 const visibleFaviconHref = "favicon.ico";
 const startupBrandTitle = "IXL | Math, Language Arts, Science, Social Studies, and Spanish";
-const startupBrandFaviconHref = "/ixl.ico";
+const startupBrandFaviconHref = "ixl.ico";
+const startupBrandDurationMs = 120;
 const defaultCloakTitle = "IXL | Math, Language Arts, Science, Social Studies, and Spanish";
-const defaultCloakFaviconHref = "/ixl.ico";
+const defaultCloakFaviconHref = "ixl.ico";
 const cloakPresets = {
-	ixl: { title: "IXL | Math, Language Arts, Science, Social Studies, and Spanish", favicon: "/ixl.ico" },
+	ixl: { title: "IXL | Math, Language Arts, Science, Social Studies, and Spanish", favicon: "ixl.ico" },
 	google: { title: "Google", favicon: "https://www.google.com/favicon.ico" },
 	docs: { title: "Google Docs", favicon: "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico" },
 	drive: { title: "My Drive - Google Drive", favicon: "https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png" },
@@ -218,11 +219,11 @@ function init() {
 
 function runStartupBrandSequence() {
 	document.title = startupBrandTitle;
-	setDocumentFavicon(startupBrandFaviconHref);
+	setDocumentFavicon(`${startupBrandFaviconHref}?startup=1`);
 
-	requestAnimationFrame(() => {
+	setTimeout(() => {
 		applyCloakVisualState(document.hidden || !document.hasFocus());
-	});
+	}, startupBrandDurationMs);
 }
 
 function bindEvents() {
@@ -1386,8 +1387,21 @@ function loadCloakSettings() {
 }
 
 function setDocumentFavicon(href) {
-	if (!faviconLink) return;
-	faviconLink.setAttribute("href", href);
+	const targetHref = String(href || "").trim();
+	if (!targetHref) return;
+	const rels = ["icon", "shortcut icon", "apple-touch-icon"];
+	rels.forEach((relValue) => {
+		let link = document.querySelector(`link[rel='${relValue}']`);
+		if (!link) {
+			link = document.createElement("link");
+			link.setAttribute("rel", relValue);
+			document.head.appendChild(link);
+		}
+		link.setAttribute("href", targetHref);
+	});
+	if (faviconLink) {
+		faviconLink.setAttribute("href", targetHref);
+	}
 }
 
 function applyCloakVisualState(isHidden) {
@@ -1439,8 +1453,8 @@ function saveCloakFavicon() {
 function normalizeCloakFaviconValue(raw) {
 	const value = String(raw || "").trim();
 	if (!value) return "";
-	if (/^https?:\/\/(www\.)?ixl\.com\/favicon\.ico$/i.test(value)) return "/ixl.ico";
-	if (/^https?:\/\/(www\.)?ixl\.com\/ixl-favicon\.png$/i.test(value)) return "/ixl.ico";
+	if (/^https?:\/\/(www\.)?ixl\.com\/favicon\.ico$/i.test(value)) return "ixl.ico";
+	if (/^https?:\/\/(www\.)?ixl\.com\/ixl-favicon\.png$/i.test(value)) return "ixl.ico";
 	return value;
 }
 
