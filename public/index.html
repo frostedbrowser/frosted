@@ -3,15 +3,15 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>FliterBrowser</title>
+		<title>FilterBrowser</title>
 				<!-- Google tag (gtag.js) -->
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-7F988TQC21"></script>
 		<script>
-		  window.dataLayer = window.dataLayer || [];
-		  function gtag(){dataLayer.push(arguments);}
-		  gtag('js', new Date());
-		
-		  gtag('config', 'G-7F988TQC21');
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'G-7F988TQC21');
 		</script>
 		<meta name="theme-color" content="#0a0f14" />
 		<meta property="og:title" content="IXL | Math, Language Arts, Science, Social Studies, and Spanish">
@@ -41,7 +41,7 @@
 			window.GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 			window.GROQ_API_KEY = "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";
 			window.GROQ_SYSTEM_PROMPT =
-				"You are a helpful assistant for users of FilterBrowser. You are a helpful ai assistant that codes.";
+				"You are a helpful assistant for users of this browser app. Keep answers concise and clear.";
 			window.GROQ_MODEL_AUTO = "llama-3.1-8b-instant";
 			window.GROQ_MODEL_FAST = "llama-3.1-8b-instant";
 			window.GROQ_MODEL_SMART = "llama-3.3-70b-versatile";
@@ -102,7 +102,7 @@
 						<iframe id="browserFrame" title="Browser content"></iframe>
 						<div class="browser-overlay" id="blankState">
 							<div class="home-shell">
-								<div class="home-logo">FliterBrowser</div>
+								<div class="home-logo" id="homeLogo">FilterBrowser</div>
 								<div class="home-tagline" id="randomTagline">
 									breaking things since day one
 								</div>

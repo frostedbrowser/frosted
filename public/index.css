@@ -321,6 +321,18 @@ body {
 	text-shadow: 0 0 18px var(--glow-color-1);
 }
 
+.startup-brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.55rem;
+}
+
+.startup-brand-icon {
+	width: 1.05em;
+	height: 1.05em;
+	display: block;
+}
+
 .home-tagline {
 	font-size: 0.9rem;
 	color: var(--muted);
