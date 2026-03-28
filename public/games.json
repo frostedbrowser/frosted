@@ -6950,5 +6950,16 @@
     "special": [
       "flash"
     ]
+  },
+{
+    "id": 781,
+    "name": "now.gg emulator",
+    "cover": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQq5Jt3fdnYDxAmloV4l7ughwQnOihmT8gpOQ&s",
+    "url": "https://nowgg.fun/",
+    "author": "Now.gg (frogies arcade)",
+    "authorLink": "https://www.now.gg/",
+    "special": [
+      "port"
+    ]
   }
 ]
