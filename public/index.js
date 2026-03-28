@@ -110,53 +110,21 @@ const presets = {
 	graphite: { team1: "#9ca3af", team2: "#6b7280", bg1: "#0b0f14", bg2: "#131a23" },
 	midnight: { team1: "#4f46e5", team2: "#0ea5e9", bg1: "#05060d", bg2: "#0b1220" },
 	deepsea: { team1: "#22d3ee", team2: "#0ea5e9", bg1: "#04121a", bg2: "#072431" },
-	aurora: { team1: "#34d399", team2: "#60a5fa", bg1: "#07170f", bg2: "#0e1d2d" },
 	ember: { team1: "#f97316", team2: "#ef4444", bg1: "#140b08", bg2: "#1f0c0b" },
 	glacier: { team1: "#93c5fd", team2: "#a7f3d0", bg1: "#0b1220", bg2: "#142036" },
 	dusk: { team1: "#f472b6", team2: "#a78bfa", bg1: "#130c16", bg2: "#1e1324" },
 	slate: { team1: "#94a3b8", team2: "#64748b", bg1: "#0b0f14", bg2: "#151b23" },
-	obsidian: { team1: "#38bdf8", team2: "#0ea5e9", bg1: "#06080b", bg2: "#0f1115" },
 	forest: { team1: "#22c55e", team2: "#16a34a", bg1: "#07110b", bg2: "#0e1a13" },
 	ocean: { team1: "#06b6d4", team2: "#3b82f6", bg1: "#05131b", bg2: "#0a1e2a" },
 	sand: { team1: "#fbbf24", team2: "#f59e0b", bg1: "#1a140a", bg2: "#241b0d" },
-	latte: { team1: "#f59e0b", team2: "#f97316", bg1: "#1a120c", bg2: "#23170f" },
-	pearl: { team1: "#a5b4fc", team2: "#f472b6", bg1: "#0f1119", bg2: "#171b2a" },
-	paper: { team1: "#64748b", team2: "#94a3b8", bg1: "#101216", bg2: "#161a22" },
-	sunrise: { team1: "#fb7185", team2: "#f97316", bg1: "#140c0b", bg2: "#1c120c" },
 	neon: { team1: "#22d3ee", team2: "#a78bfa", bg1: "#08080f", bg2: "#0f101a" },
-	violet: { team1: "#8b5cf6", team2: "#ec4899", bg1: "#0d0a14", bg2: "#160f24" },
-	moss: { team1: "#84cc16", team2: "#10b981", bg1: "#0b120c", bg2: "#101a12" },
 	steel: { team1: "#9ca3af", team2: "#cbd5f5", bg1: "#0d1117", bg2: "#151b24" },
-	daybreak: { team1: "#38bdf8", team2: "#fbbf24", bg1: "#0b1016", bg2: "#111a22" },
-	mist: { team1: "#e2e8f0", team2: "#94a3b8", bg1: "#0d1015", bg2: "#151a22" },
-	cloud: { team1: "#cbd5f5", team2: "#e2e8f0", bg1: "#0f1219", bg2: "#171e28" },
-	ivory: { team1: "#f8fafc", team2: "#e2e8f0", bg1: "#0e1016", bg2: "#141923" },
-	alabaster: { team1: "#f1f5f9", team2: "#cbd5f5", bg1: "#0f1117", bg2: "#151b25" },
-	mint: { team1: "#6ee7b7", team2: "#34d399", bg1: "#071110", bg2: "#0e1a16" },
-	sky: { team1: "#38bdf8", team2: "#0ea5e9", bg1: "#071016", bg2: "#0d1a24" },
-	peach: { team1: "#fdba74", team2: "#f97316", bg1: "#120d0b", bg2: "#1b120d" },
-	dune: { team1: "#fbbf24", team2: "#eab308", bg1: "#171109", bg2: "#22170d" },
-	lavender: { team1: "#c4b5fd", team2: "#a78bfa", bg1: "#0f0d16", bg2: "#181326" },
 	crimson: { team1: "#fb7185", team2: "#f43f5e", bg1: "#1a0b12", bg2: "#240f1a" },
-	cobalt: { team1: "#60a5fa", team2: "#2563eb", bg1: "#081122", bg2: "#0e1a33" },
 	citrus: { team1: "#facc15", team2: "#84cc16", bg1: "#161407", bg2: "#1f210b" },
 	arcade: { team1: "#22d3ee", team2: "#f472b6", bg1: "#0b0b1a", bg2: "#16102a" },
-	ruby: { team1: "#f87171", team2: "#fb7185", bg1: "#180a0a", bg2: "#261010" },
-	lagoon: { team1: "#2dd4bf", team2: "#38bdf8", bg1: "#061418", bg2: "#0d2028" },
-	orchid: { team1: "#c084fc", team2: "#f0abfc", bg1: "#120b18", bg2: "#1d1226" },
-	copper: { team1: "#fb923c", team2: "#f59e0b", bg1: "#170d07", bg2: "#23140b" },
-	storm: { team1: "#94a3b8", team2: "#64748b", bg1: "#0a1118", bg2: "#121b24" },
-	matrix: { team1: "#4ade80", team2: "#22c55e", bg1: "#071207", bg2: "#0e1b10" },
-	volcano: { team1: "#fb7185", team2: "#f97316", bg1: "#1a0b08", bg2: "#2b120b" },
-	sapphire: { team1: "#22d3ee", team2: "#2563eb", bg1: "#07101b", bg2: "#0d1a2f" },
-	arctic: { team1: "#bae6fd", team2: "#93c5fd", bg1: "#0b141f", bg2: "#122235" },
-	rosewood: { team1: "#fb7185", team2: "#c084fc", bg1: "#180c15", bg2: "#26142a" },
-	desert: { team1: "#fbbf24", team2: "#fb923c", bg1: "#171109", bg2: "#2a1a0e" },
 	jungle: { team1: "#34d399", team2: "#84cc16", bg1: "#07140f", bg2: "#102317" },
 	mono: { team1: "#d1d5db", team2: "#9ca3af", bg1: "#0d1117", bg2: "#1a1f29" },
-	candy: { team1: "#ff4fd8", team2: "#ffb347", bg1: "#2a0f28", bg2: "#4a1b45" },
-	aurora_night: { team1: "#60a5fa", team2: "#34d399", bg1: "#08101a", bg2: "#0f1e2a" },
-	autumn: { team1: "#f59e0b", team2: "#ef4444", bg1: "#160d08", bg2: "#26140f" },
+	matrix: { team1: "#7dff9b", team2: "#22c55e", bg1: "#020a06", bg2: "#04110a" },
 };
 
 const { ScramjetController } = $scramjetLoadController();
@@ -185,11 +153,16 @@ const gameBlobUrlsByTab = new Map();
 let particleCanvas = null;
 let particleCtx = null;
 let particleDots = [];
+let matrixDrops = [];
+let matrixFontSize = 14;
+let particleMode = "dots";
+const matrixGlyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&*+-=<>[]{}()/\\|";
 let particleFrameId = 0;
 let particleResizeFrameId = 0;
 let particleLastTs = 0;
 let particleRgb = { r: 136, g: 192, b: 208 };
 let particleAltRgb = { r: 129, g: 161, b: 193 };
+let particleBgRgb = { r: 10, g: 15, b: 20 };
 const reducedMotionQuery = window.matchMedia
 	? window.matchMedia("(prefers-reduced-motion: reduce)")
 	: null;
@@ -413,7 +386,11 @@ function resizeParticles() {
 	particleCanvas.style.width = `${width}px`;
 	particleCanvas.style.height = `${height}px`;
 	particleCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-	seedParticles(width, height);
+	if (particleMode === "matrix") {
+		seedMatrixRain(width, height);
+	} else {
+		seedParticles(width, height);
+	}
 	drawParticles();
 }
 
@@ -433,11 +410,17 @@ function seedParticles(width, height) {
 	}));
 }
 
+function seedMatrixRain(width, height) {
+	matrixFontSize = Math.max(10, Math.min(14, Math.round(width / 150)));
+	const columns = Math.max(1, Math.floor(width / matrixFontSize));
+	matrixDrops = Array.from({ length: columns }, () => Math.random() * height);
+}
+
 function startParticlesAnimation() {
 	if (!particleCtx || !particleCanvas || document.hidden) return;
 	stopParticlesAnimation();
 	particleLastTs = 0;
-	if (reducedMotionQuery?.matches) {
+	if (reducedMotionQuery?.matches && particleMode !== "matrix") {
 		drawParticles();
 		return;
 	}
@@ -464,6 +447,19 @@ function setParticlesVisible(visible) {
 	stopParticlesAnimation();
 }
 
+function shouldShowParticlesForCurrentView() {
+	const matrixActive = isMatrixThemeActive();
+	const onBlank = blankState?.style.display === "flex";
+	const onInternal =
+		settingsPage?.classList.contains("active") ||
+		gamesPage?.classList.contains("active") ||
+		aiPage?.classList.contains("active") ||
+		creditsPage?.classList.contains("active");
+	if (onBlank) return true;
+	if (onInternal) return matrixActive;
+	return false;
+}
+
 function tickParticles(ts) {
 	if (!particleCtx || !particleCanvas) return;
 	if (!particleLastTs) particleLastTs = ts;
@@ -471,8 +467,15 @@ function tickParticles(ts) {
 	particleLastTs = ts;
 	const width = parseFloat(particleCanvas.style.width) || window.innerWidth;
 	const height = parseFloat(particleCanvas.style.height) || window.innerHeight;
-	const speed = dt / 16.666;
+	const speedBase = dt / 16.666;
+	const speed = reducedMotionQuery?.matches && particleMode === "matrix" ? speedBase * 0.45 : speedBase;
 	const t = ts / 1000;
+
+	if (particleMode === "matrix") {
+		drawMatrixRain(width, height, speed);
+		particleFrameId = requestAnimationFrame(tickParticles);
+		return;
+	}
 
 	for (const dot of particleDots) {
 		dot.x += dot.vx * speed;
@@ -495,6 +498,14 @@ function drawParticles() {
 	if (!particleCtx || !particleCanvas) return;
 	const width = parseFloat(particleCanvas.style.width) || window.innerWidth;
 	const height = parseFloat(particleCanvas.style.height) || window.innerHeight;
+
+	if (particleMode === "matrix") {
+		particleCtx.fillStyle = `rgba(${particleBgRgb.r}, ${particleBgRgb.g}, ${particleBgRgb.b}, 1)`;
+		particleCtx.fillRect(0, 0, width, height);
+		drawMatrixRain(width, height, 0);
+		return;
+	}
+
 	particleCtx.clearRect(0, 0, width, height);
 	for (const dot of particleDots) {
 		particleCtx.beginPath();
@@ -511,12 +522,67 @@ function drawParticles() {
 	particleCtx.shadowBlur = 0;
 }
 
+function drawMatrixRain(width, height, speed) {
+	if (!particleCtx || !matrixDrops.length) return;
+	particleCtx.fillStyle = `rgba(${particleBgRgb.r}, ${particleBgRgb.g}, ${particleBgRgb.b}, 0.13)`;
+	particleCtx.fillRect(0, 0, width, height);
+	particleCtx.font = `${matrixFontSize}px "JetBrains Mono", monospace`;
+	particleCtx.textBaseline = "top";
+	particleCtx.shadowBlur = 9;
+	particleCtx.shadowColor = `rgba(${particleRgb.r}, ${particleRgb.g}, ${particleRgb.b}, 0.62)`;
+
+	for (let i = 0; i < matrixDrops.length; i++) {
+		const x = i * matrixFontSize;
+		const y = matrixDrops[i];
+		const mix = (i % 5) / 4;
+		const r = Math.round(particleRgb.r * (1 - mix) + particleAltRgb.r * mix);
+		const g = Math.round(particleRgb.g * (1 - mix) + particleAltRgb.g * mix);
+		const b = Math.round(particleRgb.b * (1 - mix) + particleAltRgb.b * mix);
+		const trail = 11 + (i % 10);
+		for (let t = trail; t >= 0; t--) {
+			const ty = y - t * matrixFontSize;
+			if (ty < -matrixFontSize || ty > height + matrixFontSize) continue;
+			const char = matrixGlyphs[Math.floor(Math.random() * matrixGlyphs.length)];
+			const alpha = Math.max(0.1, 0.9 - t * 0.07);
+			particleCtx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+			particleCtx.fillText(char, x, ty);
+		}
+		const headChar = matrixGlyphs[Math.floor(Math.random() * matrixGlyphs.length)];
+		particleCtx.fillStyle = "rgba(230, 255, 238, 0.95)";
+		particleCtx.fillText(headChar, x, y - matrixFontSize * 0.82);
+		particleCtx.fillStyle = "rgba(194, 255, 212, 0.58)";
+		particleCtx.fillText(headChar, x, y - matrixFontSize * 1.62);
+
+		matrixDrops[i] += (1 + Math.random() * 0.95) * matrixFontSize * 0.1 * speed * 10;
+		if (matrixDrops[i] > height + Math.random() * 180) {
+			matrixDrops[i] = -Math.random() * (height * 0.55);
+		}
+	}
+
+	particleCtx.shadowBlur = 0;
+}
+
+function isMatrixThemeActive() {
+	const current = normalizePresetKey(themePresetSelect?.value || "");
+	return current === "matrix";
+}
+
 function updateParticleColorFromTheme() {
 	const style = getComputedStyle(document.documentElement);
 	const teamColor = style.getPropertyValue("--team-color-1").trim() || "#88c0d0";
 	const teamColorAlt = style.getPropertyValue("--team-color-2").trim() || "#81a1c1";
+	const bgColor = style.getPropertyValue("--bg").trim() || "#0a0f14";
 	particleRgb = parseHexToRgb(teamColor) || { r: 136, g: 192, b: 208 };
 	particleAltRgb = parseHexToRgb(teamColorAlt) || { r: 129, g: 161, b: 193 };
+	particleBgRgb = parseHexToRgb(bgColor) || { r: 10, g: 15, b: 20 };
+	const nextMode = isMatrixThemeActive() ? "matrix" : "dots";
+	document.body.classList.toggle("matrix-theme-active", nextMode === "matrix");
+	if (nextMode !== particleMode) {
+		particleMode = nextMode;
+		resizeParticles();
+		restartParticlesAnimation();
+	}
+	setParticlesVisible(shouldShowParticlesForCurrentView());
 }
 
 function parseHexToRgb(value) {
@@ -785,7 +851,7 @@ function showSettingsPage() {
 	if (aiPage) aiPage.classList.remove("active");
 	if (settingsPage) settingsPage.classList.add("active");
 	addressInput.value = "bypass://settings";
-	setParticlesVisible(false);
+	setParticlesVisible(isMatrixThemeActive());
 }
 
 function showGamesPage() {
@@ -798,7 +864,7 @@ function showGamesPage() {
 	if (gamesPage) gamesPage.classList.add("active");
 	if (aiPage) aiPage.classList.remove("active");
 	addressInput.value = gamesInternalUrl;
-	setParticlesVisible(false);
+	setParticlesVisible(isMatrixThemeActive());
 }
 
 function showAiPage() {
@@ -811,7 +877,7 @@ function showAiPage() {
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.add("active");
 	addressInput.value = aiInternalUrl;
-	setParticlesVisible(false);
+	setParticlesVisible(isMatrixThemeActive());
 }
 
 function showCreditsPage() {
@@ -824,7 +890,7 @@ function showCreditsPage() {
 	if (aiPage) aiPage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.add("active");
 	addressInput.value = "bypass://credits";
-	setParticlesVisible(false);
+	setParticlesVisible(isMatrixThemeActive());
 }
 
 function hideInternalPages() {
@@ -1549,64 +1615,23 @@ function populateThemePresetOptions() {
 	const groups = [
 		{
 			label: "Core",
-			items: ["nord", "dracula", "solarized", "graphite", "slate", "obsidian"],
+			items: ["nord", "dracula", "solarized", "graphite", "slate", "mono"],
 		},
 		{
 			label: "Cool",
-			items: [
-				"midnight",
-				"deepsea",
-				"aurora",
-				"glacier",
-				"ocean",
-				"lagoon",
-				"sapphire",
-				"arctic",
-				"aurora_night",
-				"cobalt",
-				"sky",
-				"storm",
-				"cloud",
-				"mist",
-				"ivory",
-				"alabaster",
-			],
+			items: ["midnight", "deepsea", "glacier", "ocean", "steel"],
 		},
 		{
 			label: "Warm",
-			items: [
-				"ember",
-				"sunrise",
-				"sand",
-				"latte",
-				"peach",
-				"dune",
-				"copper",
-				"desert",
-				"autumn",
-				"volcano",
-				"ruby",
-				"crimson",
-				"paper",
-				"pearl",
-			],
+			items: ["ember", "sand", "crimson", "citrus"],
 		},
 		{
 			label: "Vibrant",
-			items: [
-				"dusk",
-				"neon",
-				"violet",
-				"lavender",
-				"orchid",
-				"arcade",
-				"candy",
-				"rosewood",
-			],
+			items: ["dusk", "neon", "arcade", "matrix"],
 		},
 		{
 			label: "Natural",
-			items: ["forest", "moss", "mint", "jungle", "citrus", "matrix", "daybreak", "steel", "mono"],
+			items: ["forest", "jungle"],
 		},
 	];
 

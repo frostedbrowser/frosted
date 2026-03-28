@@ -46,7 +46,7 @@ body {
 #particles-js {
 	position: absolute;
 	inset: 0;
-	z-index: 8;
+	z-index: 5;
 	background: transparent;
 	pointer-events: none;
 }
@@ -274,6 +274,10 @@ body {
 	z-index: 6;
 }
 
+body.matrix-theme-active .browser-overlay {
+	background: radial-gradient(circle at top, rgba(2, 10, 6, 0.16), rgba(4, 17, 10, 0.24));
+}
+
 .internal-page {
 	position: absolute;
 	inset: 0;
@@ -282,6 +286,14 @@ body {
 	background: radial-gradient(circle at top, rgba(10, 15, 20, 0.84), rgba(20, 28, 36, 0.9));
 	padding: 1rem;
 	overflow-y: auto;
+}
+
+body.matrix-theme-active .internal-page {
+	background: radial-gradient(circle at top, rgba(2, 8, 6, 0.72), rgba(3, 12, 9, 0.82));
+}
+
+body.matrix-theme-active #aiPage {
+	background: radial-gradient(circle at top, rgba(3, 12, 9, 0.48), rgba(4, 16, 12, 0.58));
 }
 
 #aiPage {
