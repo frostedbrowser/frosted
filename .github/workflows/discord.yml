@@ -1,0 +1,19 @@
+name: github changes to discord webhook
+
+on:
+  push:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: send commits to discord
+        run: |
+          COMMITS=$(jq -r '.commits[] | "- [" + .message + "](" + .url + ")"' "$GITHUB_EVENT_PATH")
+
+          curl -H "Content-Type: application/json" \
+          -d "{
+            \"content\": \"🚀 **New push to ${{ github.repository }}**\n👤 **${{ github.actor }}** pushed:\n$COMMITS\"
+          }" \
+          ${{ secrets.DISCORD_WEBHOOK }}
