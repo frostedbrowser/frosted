@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>FliterBrowser</title>
+		<meta name="theme-color" content="#0a0f14" />
+
+		<link rel="icon" href="favicon.ico" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+		/>
+
+		<script src="/scram/scramjet.all.js"></script>
+		<script src="/baremux/index.js"></script>
+		<link rel="stylesheet" href="index.css" />
+		<script src="register-sw.js" defer></script>
+		<script src="search.js" defer></script>
+		<script>
+			window.GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+			window.GROQ_API_KEY = "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";
+			window.GROQ_SYSTEM_PROMPT =
+				"You are a helpful assistant for users of this browser app. Keep answers concise and clear.";
+			window.GROQ_MODEL_AUTO = "llama-3.1-8b-instant";
+			window.GROQ_MODEL_FAST = "llama-3.1-8b-instant";
+			window.GROQ_MODEL_SMART = "llama-3.3-70b-versatile";
+		</script>
+		<script src="index.js" defer></script>
+	</head>
+	<body>
+		<div id="particles-js"></div>
+
+		<div class="app-shell">
+			<div class="chrome">
+				<div class="tabs-row">
+					<div class="tabs" id="tabs"></div>
+					<button class="tab-add" id="newTabBtn" aria-label="New Tab">+</button>
+					<div class="tab-metrics">
+						<span class="shortcut-counter" id="tabCounter">Tabs: 1</span>
+					</div>
+				</div>
+				<div class="toolbar">
+					<div class="toolbar-nav">
+						<button class="nav-btn" id="backBtn" aria-label="Back">
+							<i class="fa-solid fa-arrow-left"></i>
+						</button>
+						<button class="nav-btn" id="forwardBtn" aria-label="Forward">
+							<i class="fa-solid fa-arrow-right"></i>
+						</button>
+						<button class="nav-btn" id="reloadBtn" aria-label="Reload">
+							<i class="fa-solid fa-rotate-right"></i>
+						</button>
+					</div>
+					<form class="address-bar" id="toolbarForm">
+						<input id="addressInput" type="text" placeholder="Search or enter address" />
+						<button id="goBtn" aria-label="Go">
+							<i class="fa-solid fa-arrow-right"></i>
+						</button>
+					</form>
+					<div class="toolbar-actions">
+						<button class="toolbar-btn" id="homeBtn" aria-label="Home">
+							<i class="fa-solid fa-house"></i>
+						</button>
+						<button class="toolbar-btn" id="gamesBtn" aria-label="Games">
+							<i class="fa-solid fa-gamepad"></i>
+						</button>
+						<button class="toolbar-btn" id="aiBtn" aria-label="AI Utilities">
+							<img src="/chatgpt-logo.svg" alt="ChatGPT" class="toolbar-btn-logo" />
+						</button>
+						<button class="toolbar-btn" id="settingsBtn" aria-label="Settings">
+							<i class="fa-solid fa-gear"></i>
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="browser-shell">
+				<div class="browser-main">
+					<div class="browser-stage">
+						<div class="loading-banner" id="loadingBanner">Loading...</div>
+						<iframe id="browserFrame" title="Browser content"></iframe>
+						<div class="browser-overlay" id="blankState">
+							<div class="home-shell">
+								<div class="home-logo">FliterBrowser</div>
+								<div class="home-tagline" id="randomTagline">
+									breaking things since day one
+								</div>
+								<form class="home-search" id="homeForm">
+									<span class="home-search-icon">
+										<i class="fa-solid fa-magnifying-glass"></i>
+									</span>
+									<input id="homeSearchInput" type="text" placeholder="Search for anything..." />
+									<button id="homeSearchBtn" aria-label="Search">
+										<i class="fa-solid fa-arrow-right"></i>
+									</button>
+								</form>
+								<div class="home-tiles">
+									<button class="home-tile" data-url="https://invidious.materialio.us/feed/popular">
+										<div class="tile-icon"><i class="fa-brands fa-youtube"></i></div>
+										<div class="tile-label">YouTube (Invidious)</div>
+									</button>
+								</div>
+								<div class="home-credits">
+									<a href="bypass://credits" id="creditsLink">Credits</a>
+								</div>
+							</div>
+						</div>
+						<div id="settingsPage" class="internal-page">
+							<div class="settings-page-shell">
+								<div class="settings-page-header">
+									<h2>Settings</h2>
+								</div>
+								<div class="settings-page-body">
+									<div class="settings-section">
+										<label class="settings-label" for="themePresetSelect">Theme Preset</label>
+										<select class="settings-select" id="themePresetSelect"></select>
+									</div>
+									<div class="settings-section">
+										<label class="settings-label">Theme Colors</label>
+										<div class="settings-row">
+											<input class="settings-color" id="themeColor1" type="color" />
+											<input class="settings-color" id="themeColor2" type="color" />
+										</div>
+									</div>
+									<div class="settings-section">
+										<label class="settings-label">Background Colors</label>
+										<div class="settings-row">
+											<input class="settings-color" id="themeBg1" type="color" />
+											<input class="settings-color" id="themeBg2" type="color" />
+										</div>
+									</div>
+									<div class="settings-section">
+										<label class="settings-label">Open in ...</label>
+										<div class="settings-row open-mode-row">
+											<button class="settings-btn open-mode-btn" id="openModeAboutBtn" type="button">
+												Open in about:blank
+											</button>
+											<button class="settings-btn open-mode-btn" id="openModeBlobBtn" type="button">
+												Open in blob:
+											</button>
+										</div>
+									</div>
+									<div class="settings-section">
+										<label class="settings-label">Panic Key</label>
+										<div class="panic-box">
+											<h3 class="panic-title">Current Panic Key:</h3>
+											<div class="settings-row">
+												<span id="current-panic-key" class="panic-key-pill">`</span>
+												<button class="settings-btn" id="change-panic-key-btn" type="button">
+													Change Key
+												</button>
+											</div>
+											<p class="settings-hint" id="listening-status"></p>
+										</div>
+										<label class="settings-label" for="panic-url">Panic URL</label>
+										<div class="settings-row">
+											<input
+												class="settings-input"
+												id="panic-url"
+												type="text"
+												placeholder="https://google.com"
+											/>
+											<button class="settings-btn" id="save-panic-btn" type="button">
+												Save URL
+											</button>
+										</div>
+										<div class="settings-hint" id="panic-status">Panic key is active</div>
+									</div>
+									<div class="settings-section">
+										<label class="settings-label" for="cloakEnabledToggle">Cloak</label>
+										<div class="settings-row">
+											<input id="cloakEnabledToggle" type="checkbox" />
+											<label for="cloakEnabledToggle" class="settings-hint">
+												When hidden, show "Home - Classroom" with classroom favicon
+											</label>
+										</div>
+										<div class="settings-row">
+											<label class="settings-label" for="cloakPresetSelect">Preset</label>
+											<select class="settings-select" id="cloakPresetSelect">
+												<option value="classroom">Classroom</option>
+												<option value="google">Google</option>
+												<option value="docs">Google Docs</option>
+												<option value="drive">Google Drive</option>
+												<option value="custom">Custom</option>
+											</select>
+										</div>
+										<div class="settings-row">
+											<input
+												class="settings-input"
+												id="cloak-title"
+												type="text"
+												placeholder="Home - Classroom"
+											/>
+											<button class="settings-btn" id="save-cloak-title-btn" type="button">
+												Save Title
+											</button>
+										</div>
+										<div class="settings-row">
+											<input
+												class="settings-input"
+												id="cloak-favicon"
+												type="text"
+												placeholder="classroom.png or https://raw.githubusercontent.com/.../icon.png"
+											/>
+											<button class="settings-btn" id="save-cloak-favicon-btn" type="button">
+												Save Icon
+											</button>
+										</div>
+										<div class="settings-hint" id="cloak-status">
+											Tip: favicon can be a local file (`classroom.png`) or a direct raw image URL.
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="creditsPage" class="internal-page">
+							<div class="credits-page-shell">
+								<div class="settings-page-header">
+									<h2>Credits</h2>
+								</div>
+								<div class="settings-page-body">
+									<div class="settings-section">
+										<p class="settings-hint">Built with these projects:</p>
+										<p>
+											<a
+												class="credits-link"
+												href="https://github.com/titaniumnetwork-dev/Ultraviolet"
+												target="_blank"
+												rel="noopener noreferrer"
+												>UltraViolet by Titanium Network</a
+											>
+										</p>
+										<p>
+											<a
+												class="credits-link"
+												href="https://github.com/MercuryWorkshop/scramjet"
+												target="_blank"
+												rel="noopener noreferrer"
+												>Scramjet by Mercury Workshop</a
+											>
+										</p>
+										chudportal (idea for cloaker)
+										<p>
+											<p>
+												GN-MATH / Games
+												</p>
+												<p>
+													groq / AI Chatbot
+													</p>
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="gamesPage" class="internal-page">
+							<div class="games-page-shell">
+								<div class="settings-page-header">
+									<h2>Games</h2>
+									<div class="settings-hint" id="gamesCount">Games: 0</div>
+								</div>
+								<div class="games-toolbar">
+									<input
+										id="gamesSearchInput"
+										class="settings-input games-search"
+										type="text"
+										placeholder="Search games..."
+									/>
+								</div>
+								<div class="games-grid" id="gamesGrid"></div>
+							</div>
+						</div>
+						<div id="aiPage" class="internal-page">
+							<div class="ai-page-shell">
+								<div class="settings-page-header">
+									<h2>AI</h2>
+								</div>
+								<div class="ai-body">
+									<div class="ai-chat">
+										<div id="aiResult" class="ai-result">Ask me anything.</div>
+										<div class="ai-speed-row">
+											<label class="settings-label" for="aiSpeedSelect">Speed</label>
+											<select id="aiSpeedSelect" class="settings-select ai-Speed-select">
+												<option value="auto">Auto</option>
+												<option value="fast">Fast</option>
+												<option value="smart">Smart</option>
+											</select>
+										</div>
+										<div class="ai-prompt-wrap">
+											<input
+												id="aiPromptInput"
+												class="settings-input ai-prompt"
+												type="text"
+												placeholder="Type your prompt..."
+											/>
+											<button id="aiSolveBtn" class="settings-btn" type="button">Send</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<input id="sj-search-engine" type="hidden" value="https://html.duckduckgo.com/html/search?q=fhttps://html.duckduckgo.com/html/search?q=%s" />
+	</body>
+</html>
