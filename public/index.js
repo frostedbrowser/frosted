@@ -80,10 +80,10 @@ const aiInternalUrl = "bypass://ai";
 const aiModeKey = "fb_ai_mode";
 const visibleAppTitle = "FliterBrowser";
 const visibleFaviconHref = "favicon.ico";
-const defaultCloakTitle = "Home - Classroom";
-const defaultCloakFaviconHref = "classroom.png";
+const defaultCloakTitle = "IXL | Math, Language Arts, Science, Social Studies, and Spanish";
+const defaultCloakFaviconHref = "/ixl.ico";
 const cloakPresets = {
-	classroom: { title: "Home - Classroom", favicon: "classroom.png" },
+	ixl: { title: "IXL | Math, Language Arts, Science, Social Studies, and Spanish", favicon: "/ixl.ico" },
 	google: { title: "Google", favicon: "https://www.google.com/favicon.ico" },
 	docs: { title: "Google Docs", favicon: "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico" },
 	drive: { title: "My Drive - Google Drive", favicon: "https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png" },
@@ -1399,7 +1399,10 @@ function getCloakTitle() {
 }
 
 function getCloakFaviconHref() {
-	const value = String(localStorage.getItem(cloakFaviconStorage) || "").trim();
+	const value = normalizeCloakFaviconValue(localStorage.getItem(cloakFaviconStorage));
+	if (value !== String(localStorage.getItem(cloakFaviconStorage) || "").trim()) {
+		localStorage.setItem(cloakFaviconStorage, value);
+	}
 	return value || defaultCloakFaviconHref;
 }
 
@@ -1413,12 +1416,20 @@ function saveCloakTitle() {
 }
 
 function saveCloakFavicon() {
-	const icon = String(cloakFaviconInput?.value || "").trim() || defaultCloakFaviconHref;
+	const icon = normalizeCloakFaviconValue(cloakFaviconInput?.value) || defaultCloakFaviconHref;
 	localStorage.setItem(cloakFaviconStorage, icon);
 	if (cloakFaviconInput) cloakFaviconInput.value = icon;
 	syncCloakPresetSelection();
 	applyCloakVisualState(document.hidden || !document.hasFocus());
 	setCloakStatus("Cloak icon saved.");
+}
+
+function normalizeCloakFaviconValue(raw) {
+	const value = String(raw || "").trim();
+	if (!value) return "";
+	if (/^https?:\/\/(www\.)?ixl\.com\/favicon\.ico$/i.test(value)) return "/ixl.ico";
+	if (/^https?:\/\/(www\.)?ixl\.com\/ixl-favicon\.png$/i.test(value)) return "/ixl.ico";
+	return value;
 }
 
 function setCloakStatus(message) {
