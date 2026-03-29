@@ -1,5 +1,16 @@
-"use strict";
+console.log(String.raw`
+  ____              _         _    _     _ _
+ |  _ \  ___  _ __ | |_   ___| | _(_) __| | |
+ | | | |/ _ \| '_ \| __| / __| |/ / |/ _\` | |  _____
+ | |_| | (_) | | | | |_  \__ \   <| | (_| |_| |_____|
+ |____/ \___/|_| |_|\__| |___/_|\_\_|\__,_(_)
+   __| | __ ___   _(_) __| |
+  / _\` |/ _\` \ \ / / |/ _\` |
+ | (_| | (_| |\ V /| | (_| |
+  \__,_|\__,_| \_/ |_|\__,_|
+`);
 
+"use strict";
 const qs = (sel) => document.querySelector(sel);
 const qsa = (sel) => Array.from(document.querySelectorAll(sel));
 
@@ -16,6 +27,8 @@ const reloadBtn = qs("#reloadBtn");
 const homeBtn = qs("#homeBtn");
 const gamesBtn = qs("#gamesBtn");
 const aiBtn = qs("#aiBtn");
+const codeBtn = qs("#codeBtn");
+const adsToggleBtn = qs("#adsToggleBtn");
 const settingsBtn = qs("#settingsBtn");
 const blankState = qs("#blankState");
 const loadingBanner = qs("#loadingBanner");
@@ -37,11 +50,8 @@ const aiSolveBtn = qs("#aiSolveBtn");
 const aiResult = qs("#aiResult");
 const aiModelSelect = qs("#aiModelSelect");
 const creditsLink = qs("#creditsLink");
-const themePresetSelect = qs("#themePresetSelect");
-const themeColor1 = qs("#themeColor1");
-const themeColor2 = qs("#themeColor2");
-const themeBg1 = qs("#themeBg1");
-const themeBg2 = qs("#themeBg2");
+const wallpaperSelect = qs("#wallpaperSelect");
+
 const currentPanicKey = qs("#current-panic-key");
 const changePanicKeyBtn = qs("#change-panic-key-btn");
 const listeningStatus = qs("#listening-status");
@@ -51,6 +61,8 @@ const panicStatus = qs("#panic-status");
 const openModeAboutBtn = qs("#openModeAboutBtn");
 const openModeBlobBtn = qs("#openModeBlobBtn");
 const openModeStatus = qs("#openModeStatus");
+
+
 const cloakEnabledToggle = qs("#cloakEnabledToggle");
 const cloakTitleInput = qs("#cloak-title");
 const cloakFaviconInput = qs("#cloak-favicon");
@@ -63,69 +75,6 @@ const faviconLink = document.querySelector("link[rel~='icon']");
 const errorPanel = qs("#error-panel");
 const errorTitle = qs("#sj-error");
 const errorDetails = qs("#sj-error-code");
-
-const historyKey = "fb_history";
-const themeKey = "fb_theme";
-const legacyThemeKey = "fc_theme";
-const panicKeyStorage = "fb_panic_key";
-const panicUrlStorage = "fb_panic_url";
-const openModeStorage = "fb_open_mode";
-const cloakEnabledStorage = "fb_cloak_enabled";
-const cloakTitleStorage = "fb_cloak_title";
-const cloakFaviconStorage = "fb_cloak_favicon";
-const panicDefaultKey = "`";
-const panicDefaultUrl = "https://google.com";
-const gamesInternalUrl = "bypass://games";
-const aiInternalUrl = "bypass://ai";
-const aiModeKey = "fb_ai_mode";
-const visibleAppTitle = "FilterBrowser";
-const visibleFaviconHref = "favicon.ico";
-const startupBrandTitle = "IXL | Math, Language Arts, Science, Social Studies, and Spanish";
-const startupBrandFaviconHref = "ixl.ico";
-const startupBrandDurationMs = 120;
-const defaultCloakTitle = "IXL | Math, Language Arts, Science, Social Studies, and Spanish";
-const defaultCloakFaviconHref = "ixl.ico";
-const cloakPresets = {
-	ixl: { title: "IXL | Math, Language Arts, Science, Social Studies, and Spanish", favicon: "ixl.ico" },
-	google: { title: "Google", favicon: "https://www.google.com/favicon.ico" },
-	docs: { title: "Google Docs", favicon: "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico" },
-	drive: { title: "My Drive - Google Drive", favicon: "https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png" },
-};
-let isListeningForKey = false;
-let ignoreNextPanicPress = false;
-
-const taglines = [
-	"probably works as expected",
-	"still loading... please wait",
-	"not entirely sure why this works",
-	"this might crash, but hopefully not",
-	"one more update should do it",
-	"seemed like a good idea at the time",
-];
-
-const presets = {
-	nord: { team1: "#88c0d0", team2: "#81a1c1", bg1: "#0a0f14", bg2: "#141c24" },
-	dracula: { team1: "#bd93f9", team2: "#ff79c6", bg1: "#0d0b16", bg2: "#1b1327" },
-	solarized: { team1: "#268bd2", team2: "#2aa198", bg1: "#002b36", bg2: "#073642" },
-	graphite: { team1: "#9ca3af", team2: "#6b7280", bg1: "#0b0f14", bg2: "#131a23" },
-	midnight: { team1: "#4f46e5", team2: "#0ea5e9", bg1: "#05060d", bg2: "#0b1220" },
-	deepsea: { team1: "#22d3ee", team2: "#0ea5e9", bg1: "#04121a", bg2: "#072431" },
-	ember: { team1: "#f97316", team2: "#ef4444", bg1: "#140b08", bg2: "#1f0c0b" },
-	glacier: { team1: "#93c5fd", team2: "#a7f3d0", bg1: "#0b1220", bg2: "#142036" },
-	dusk: { team1: "#f472b6", team2: "#a78bfa", bg1: "#130c16", bg2: "#1e1324" },
-	slate: { team1: "#94a3b8", team2: "#64748b", bg1: "#0b0f14", bg2: "#151b23" },
-	forest: { team1: "#22c55e", team2: "#16a34a", bg1: "#07110b", bg2: "#0e1a13" },
-	ocean: { team1: "#06b6d4", team2: "#3b82f6", bg1: "#05131b", bg2: "#0a1e2a" },
-	sand: { team1: "#fbbf24", team2: "#f59e0b", bg1: "#1a140a", bg2: "#241b0d" },
-	neon: { team1: "#22d3ee", team2: "#a78bfa", bg1: "#08080f", bg2: "#0f101a" },
-	steel: { team1: "#9ca3af", team2: "#cbd5f5", bg1: "#0d1117", bg2: "#151b24" },
-	crimson: { team1: "#fb7185", team2: "#f43f5e", bg1: "#1a0b12", bg2: "#240f1a" },
-	citrus: { team1: "#facc15", team2: "#84cc16", bg1: "#161407", bg2: "#1f210b" },
-	arcade: { team1: "#22d3ee", team2: "#f472b6", bg1: "#0b0b1a", bg2: "#16102a" },
-	jungle: { team1: "#34d399", team2: "#84cc16", bg1: "#07140f", bg2: "#102317" },
-	mono: { team1: "#d1d5db", team2: "#9ca3af", bg1: "#0d1117", bg2: "#1a1f29" },
-	matrix: { team1: "#7dff9b", team2: "#22c55e", bg1: "#020a06", bg2: "#04110a" },
-};
 
 const { ScramjetController } = $scramjetLoadController();
 const scramjet = new ScramjetController({
@@ -143,7 +92,6 @@ let tabs = [];
 let activeTabId = null;
 let nextTabId = 1;
 let transportReady = false;
-let isApplyingThemeUpdate = false;
 const tabFrames = new Map();
 const aiChatHistory = [];
 let aiTypingRunId = 0;
@@ -163,20 +111,87 @@ let particleLastTs = 0;
 let particleRgb = { r: 136, g: 192, b: 208 };
 let particleAltRgb = { r: 129, g: 161, b: 193 };
 let particleBgRgb = { r: 10, g: 15, b: 20 };
+let ghosteryEngine = null;
+let ghosteryRequestCtor = null;
+let ghosteryEnginePromise = null;
 const reducedMotionQuery = window.matchMedia
 	? window.matchMedia("(prefers-reduced-motion: reduce)")
 	: null;
 
-bootstrapThemeFromStorage();
-init();
+const taglines = [
+	"probably works as expected",
+	"still loading... please wait",
+	"not entirely sure why this works",
+	"this might crash, but hopefully not",
+	"one more update should do it",
+	"seemed like a good idea at the time",
+	"made with duct tape and optimism",
+	"works on my machine",
+	"zero bugs reported in the last minute",
+	"refresh and believe",
+	"engineering, but with vibes",
+	"if it breaks, we call it a feature",
+	"quietly overcomplicated",
+	"new build, same chaos",
+	"stability sold separately",
+	"performance may vary by moon phase",
+	"powered by caffeine and denial",
+	"this banner is not legally binding",
+	"it passed at least one test",
+	"battle tested by accident",
+	"less broken than yesterday",
+	"loading confidence... please wait",
+	"debug mode is a lifestyle",
+	"almost production ready",
+	"please clap",
+	"still faster than the school chromebook",
+	"crafted with questionable decisions",
+	"hotfixes are just updates with attitude",
+	"today's forecast: 70% chance of shipping",
+];
+
+const chromeBarConfig = {
+	toolbarBg: "rgba(42, 68, 113, 0.78)",
+	tabsBg: "rgba(22, 34, 58, 0.9)",
+	addressBg: "rgba(12, 18, 31, 0.86)",
+	buttonBg: "rgba(15, 23, 40, 0.74)",
+	borderColor: "rgba(255, 255, 255, 0.12)",
+	toolbarWidth: "clamp(420px, calc(100vw - 240px), 820px)",
+	tabsMaxWidth: "calc(100vw - 340px)",
+	toolbarBlur: "16px",
+	tabsBlur: "14px",
+	buttonSize: "30px",
+	barRadius: "999px",
+	rowGap: "0.45rem",
+};
+
+function applyChromeBarConfig(config = chromeBarConfig) {
+	const root = document.documentElement;
+	root.style.setProperty("--chrome-toolbar-bg", String(config.toolbarBg || "").trim());
+	root.style.setProperty("--chrome-tabs-bg", String(config.tabsBg || "").trim());
+	root.style.setProperty("--chrome-address-bg", String(config.addressBg || "").trim());
+	root.style.setProperty("--chrome-button-bg", String(config.buttonBg || "").trim());
+	root.style.setProperty("--chrome-border-color", String(config.borderColor || "").trim());
+	root.style.setProperty("--chrome-toolbar-width", String(config.toolbarWidth || "").trim());
+	root.style.setProperty("--chrome-tabs-max-width", String(config.tabsMaxWidth || "").trim());
+	root.style.setProperty("--chrome-toolbar-blur", String(config.toolbarBlur || "").trim());
+	root.style.setProperty("--chrome-tabs-blur", String(config.tabsBlur || "").trim());
+	root.style.setProperty("--chrome-button-size", String(config.buttonSize || "").trim());
+	root.style.setProperty("--chrome-bar-radius", String(config.barRadius || "").trim());
+	root.style.setProperty("--chrome-row-gap", String(config.rowGap || "").trim());
+}
 
 function init() {
+	applyChromeBarConfig();
+	updateAdblockToggleLabel();
+	void ensureGhosteryEngine();
+
 	if (randomTagline) {
 		randomTagline.textContent = taglines[Math.floor(Math.random() * taglines.length)];
 	}
 
-	populateThemePresetOptions();
-	loadTheme();
+	populateWallpaperOptions();
+	loadWallpaper();
 	initParticles();
 	loadPanicSettings();
 	loadOpenModeSettings();
@@ -190,14 +205,43 @@ function init() {
 	void loadGamesCatalog();
 }
 
+const startupBrandTitle = "IXL | Math, Language Arts, Science, Social Studies, and Spanish";
+const startupBrandFaviconHref = "ixl.ico";
+const startupBrandDurationMs = 120;
+const autoOpenAboutBlankAfterStartup = true;
+const autoOpenAboutBlankDelayMs = 180;
+const autoOpenAboutBlankSessionKey = "fb_auto_aboutblank_done";
+
 function runStartupBrandSequence() {
 	document.title = startupBrandTitle;
 	setDocumentFavicon(`${startupBrandFaviconHref}?startup=1`);
 
 	setTimeout(() => {
 		applyCloakVisualState(document.hidden || !document.hasFocus());
+		maybeAutoOpenAboutBlankAfterStartup();
 	}, startupBrandDurationMs);
 }
+
+function maybeAutoOpenAboutBlankAfterStartup() {
+	if (!autoOpenAboutBlankAfterStartup) return;
+	try {
+		if (window.top && window.top !== window) return;
+	} catch {
+		return;
+	}
+	try {
+		if (sessionStorage.getItem(autoOpenAboutBlankSessionKey) === "1") return;
+		sessionStorage.setItem(autoOpenAboutBlankSessionKey, "1");
+	} catch {
+	}
+	setTimeout(() => {
+		openCurrentPageInMode("aboutblank");
+	}, autoOpenAboutBlankDelayMs);
+}
+
+const gamesInternalUrl = "bypass://games";
+const aiInternalUrl = "bypass://ai";
+const aiModeKey = "fb_ai_mode";
 
 function bindEvents() {
 	newTabBtn.addEventListener("click", () => createTab(""));
@@ -217,6 +261,12 @@ function bindEvents() {
 
 	gamesBtn.addEventListener("click", () => navigateFromInput(gamesInternalUrl));
 	aiBtn.addEventListener("click", () => navigateFromInput(aiInternalUrl));
+	if (codeBtn) {
+		codeBtn.addEventListener("click", injectErudaIntoActiveTab);
+	}
+	if (adsToggleBtn) {
+		adsToggleBtn.addEventListener("click", toggleAdblock);
+	}
 	settingsBtn.addEventListener("click", () => navigateFromInput("bypass://settings"));
 	if (creditsLink) {
 		creditsLink.addEventListener("click", (event) => {
@@ -231,31 +281,11 @@ function bindEvents() {
 		});
 	});
 
-	const onThemePresetSelect = () => {
-		const rawValue = themePresetSelect?.selectedOptions?.[0]?.value || themePresetSelect.value;
-		const selected = normalizePresetKey(rawValue);
-		if (selected === "custom") {
-			applyCustomTheme();
-			return;
-		}
-		themePresetSelect.value = selected;
-		applyPreset(selected);
-		setTimeout(() => {
-			if (themePresetSelect.value !== "custom") {
-				applyPreset(normalizePresetKey(themePresetSelect.value));
-			}
-		}, 0);
-	};
-	themePresetSelect.addEventListener("change", onThemePresetSelect);
-	themePresetSelect.addEventListener("input", onThemePresetSelect);
-
-	[themeColor1, themeColor2, themeBg1, themeBg2].forEach((el) => {
-		el.addEventListener("input", (event) => {
-			if (isApplyingThemeUpdate || !event.isTrusted) return;
-			themePresetSelect.value = "custom";
-			applyCustomTheme();
+	if (wallpaperSelect) {
+		wallpaperSelect.addEventListener("change", () => {
+			applyWallpaper(wallpaperSelect.value);
 		});
-	});
+	}
 
 	changePanicKeyBtn.addEventListener("click", listenForPanicKey);
 	panicUrlSaveBtn.addEventListener("click", savePanicUrl);
@@ -563,8 +593,7 @@ function drawMatrixRain(width, height, speed) {
 }
 
 function isMatrixThemeActive() {
-	const current = normalizePresetKey(themePresetSelect?.value || "");
-	return current === "matrix";
+	return false;
 }
 
 function updateParticleColorFromTheme() {
@@ -668,7 +697,27 @@ function renderTabs() {
 		const node = document.createElement("div");
 		node.className = `tab${tab.id === activeTabId ? " active" : ""}`;
 		node.dataset.tabId = tab.id;
-		node.textContent = tab.title || "New Tab";
+
+		const favicon = document.createElement("img");
+		favicon.className = "tab-favicon";
+		favicon.alt = "";
+		const faviconCandidates = getTabFaviconCandidates(tab.url);
+		let faviconIdx = 0;
+		favicon.src = faviconCandidates[faviconIdx];
+		favicon.loading = "lazy";
+		favicon.decoding = "async";
+		favicon.addEventListener("error", () => {
+			faviconIdx += 1;
+			if (faviconIdx < faviconCandidates.length) {
+				favicon.src = faviconCandidates[faviconIdx];
+			}
+		});
+		node.appendChild(favicon);
+
+		const title = document.createElement("span");
+		title.className = "tab-title";
+		title.textContent = tab.title || "New Tab";
+		node.appendChild(title);
 
 		const close = document.createElement("button");
 		close.className = "tab-close";
@@ -682,7 +731,31 @@ function renderTabs() {
 		node.addEventListener("click", () => setActiveTab(tab.id, true));
 		tabsEl.appendChild(node);
 	});
-	tabCounter.textContent = `Tabs: ${tabs.length}`;
+	if (tabCounter) tabCounter.textContent = String(tabs.length);
+	const widthTabCount = Math.min(Math.max(tabs.length, 1), 10);
+	const tabsRowEl = tabsEl.closest(".tabs-row");
+	if (tabsRowEl) {
+		tabsRowEl.style.setProperty("--tab-count-for-width", String(widthTabCount));
+	}
+}
+
+function getTabFaviconCandidates(url) {
+	if (!url) return ["favicon.ico"];
+	if (url === "bypass://settings" || url === "bypass://credits") return ["favicon.ico"];
+	if (isGamesInternalUrl(url)) return ["favicon.ico"];
+	if (isAiInternalUrl(url)) return ["chatgpt-logo.svg"];
+	try {
+		const host = new URL(url).hostname;
+		if (!host) return ["favicon.ico"];
+		return [
+			`https://${host}/favicon.ico`,
+			`https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`,
+			`https://icons.duckduckgo.com/ip3/${encodeURIComponent(host)}.ico`,
+			"favicon.ico",
+		];
+	} catch {
+		return ["favicon.ico"];
+	}
 }
 
 function getActiveTab() {
@@ -717,6 +790,308 @@ async function navigateFromInput(input, pushHistory = true) {
 	const target = normalizeInput(input);
 	if (!target) return;
 	await loadUrl(target, pushHistory);
+}
+
+const adblockHostPatterns = [
+	// Ads
+	/(^|\.)doubleclick\.net$/i,
+	/(^|\.)googlesyndication\.com$/i,
+	/(^|\.)googleadservices\.com$/i,
+	/(^|\.)adservice\.google\./i,
+	/(^|\.)media\.net$/i,
+	/(^|\.)contextweb\.com$/i,
+	/(^|\.)fastclick\.net$/i,
+	/(^|\.)amazon-adsystem\.com$/i,
+
+	// Analytics
+	/(^|\.)googletagmanager\.com$/i,
+	/(^|\.)google-analytics\.com$/i,
+	/(^|\.)analytics\.google\.com$/i,
+	/(^|\.)hotjar\.com$/i,
+	/(^|\.)hotjar\.io$/i,
+	/(^|\.)mouseflow\.com$/i,
+	/(^|\.)freshmarketer\.com$/i,
+	/(^|\.)luckyorange\.com$/i,
+	/(^|\.)stats\.wp\.com$/i,
+
+	// Error trackers
+	/(^|\.)bugsnag\.com$/i,
+	/(^|\.)sentry\.io$/i,
+
+	// Social trackers
+	/(^|\.)facebook\.com$/i,
+	/(^|\.)fbcdn\.net$/i,
+	/(^|\.)twitter\.com$/i,
+	/(^|\.)twimg\.com$/i,
+	/(^|\.)t\.co$/i,
+	/(^|\.)linkedin\.com$/i,
+	/(^|\.)licdn\.com$/i,
+	/(^|\.)pinterest\.com$/i,
+	/(^|\.)pinimg\.com$/i,
+	/(^|\.)reddit\.com$/i,
+	/(^|\.)redditmedia\.com$/i,
+	/(^|\.)youtube\.com$/i,
+	/(^|\.)ytimg\.com$/i,
+	/(^|\.)googlevideo\.com$/i,
+	/(^|\.)tiktok\.com$/i,
+	/(^|\.)tiktokcdn\.com$/i,
+	/(^|\.)byteoversea\.com$/i,
+
+	// Mix
+	/(^|\.)yahoo\.com$/i,
+	/(^|\.)yimg\.com$/i,
+	/(^|\.)yandex\./i,
+
+	// OEM ad / telemetry ecosystems
+	/(^|\.)xiaomi\./i,
+	/(^|\.)miui\.com$/i,
+	/(^|\.)mistat\.xiaomi\.com$/i,
+	/(^|\.)ad\.xiaomi\.com$/i,
+	/(^|\.)hicloud\.com$/i,
+	/(^|\.)data\.hicloud\.com$/i,
+	/(^|\.)huawei\.com$/i,
+	/(^|\.)oneplus\./i,
+	/(^|\.)samsungads\.com$/i,
+	/(^|\.)samsung\.com$/i,
+	/(^|\.)metrics\.apple\.com$/i,
+	/(^|\.)securemetrics\.apple\.com$/i,
+	/(^|\.)supportmetrics\.apple\.com$/i,
+	/(^|\.)metrics\.icloud\.com$/i,
+	/(^|\.)metrics\.mzstatic\.com$/i,
+
+	// Existing broad ad/tracker nets
+	/(^|\.)taboola\.com$/i,
+	/(^|\.)outbrain\.com$/i,
+	/(^|\.)criteo\.com$/i,
+	/(^|\.)adsrvr\.org$/i,
+	/(^|\.)scorecardresearch\.com$/i,
+];
+
+const adblockUrlPatterns = [
+	/\/ads?(\/|\.|\?|$)/i,
+	/\/adserver/i,
+	/advert/i,
+	/analytics/i,
+	/tracker/i,
+	/pixel/i,
+	/beacon/i,
+	/prebid/i,
+	/sentry/i,
+	/bugsnag/i,
+	/hotjar/i,
+	/mouseflow/i,
+	/luckyorange/i,
+	/freshmarketer/i,
+	/metrics\d*\.data\.hicloud\.com/i,
+	/mistat\./i,
+	/sdkconfig\.ad\./i,
+	/metrics\.apple\.com/i,
+	/securemetrics\.apple\.com/i,
+	/supportmetrics\.apple\.com/i,
+	/metrics\.icloud\.com/i,
+	/metrics\.mzstatic\.com/i,
+];
+
+const adblockEnabledStorage = "fb_adblock_enabled";
+
+function isAdblockEnabled() {
+	const raw = localStorage.getItem(adblockEnabledStorage);
+	if (raw === null) {
+		localStorage.setItem(adblockEnabledStorage, "true");
+		return true;
+	}
+	return String(raw).toLowerCase() === "true";
+}
+
+function setAdblockEnabled(enabled) {
+	localStorage.setItem(adblockEnabledStorage, enabled ? "true" : "false");
+	updateAdblockToggleLabel();
+}
+
+function updateAdblockToggleLabel() {
+	if (!adsToggleBtn) return;
+	const enabled = isAdblockEnabled();
+	adsToggleBtn.textContent = enabled ? "ads: off" : "ads: on";
+	adsToggleBtn.setAttribute("aria-pressed", enabled ? "true" : "false");
+	adsToggleBtn.title = enabled
+		? "Ad blocker is enabled (ads are off)"
+		: "Ad blocker is disabled (ads are on)";
+}
+
+function toggleAdblock() {
+	setAdblockEnabled(!isAdblockEnabled());
+	if (isAdblockEnabled()) void ensureGhosteryEngine();
+}
+
+async function ensureGhosteryEngine() {
+	if (ghosteryEngine) return ghosteryEngine;
+	if (ghosteryEnginePromise) return ghosteryEnginePromise;
+
+	ghosteryEnginePromise = (async () => {
+		try {
+			const mod = await import("/vendor/adblocker/index.js");
+			const FiltersEngine = mod?.FiltersEngine;
+			const RequestCtor = mod?.Request;
+			if (!FiltersEngine || !RequestCtor) {
+				throw new Error("Ghostery adblocker exports were not found.");
+			}
+			ghosteryRequestCtor = RequestCtor;
+			ghosteryEngine = await FiltersEngine.fromPrebuiltAdsAndTracking(window.fetch.bind(window));
+			return ghosteryEngine;
+		} catch (error) {
+			console.warn("Ghostery adblocker failed to initialize; using fallback blocker.", error);
+			ghosteryEngine = null;
+			ghosteryRequestCtor = null;
+			return null;
+		}
+	})();
+
+	return ghosteryEnginePromise;
+}
+
+function normalizeAdblockRequestType(type) {
+	const raw = String(type || "other").trim().toLowerCase();
+	if (!raw) return "other";
+	if (raw === "document" || raw === "main_frame" || raw === "navigate") return "main_frame";
+	if (raw === "sub_frame" || raw === "frame" || raw === "iframe") return "sub_frame";
+	if (raw === "xhr" || raw === "xmlhttprequest" || raw === "fetch") return "xmlhttprequest";
+	if (raw === "beacon") return "ping";
+	if (raw === "ws") return "websocket";
+	if (raw === "img") return "image";
+	return raw;
+}
+
+function inferFetchRequestType(input, init) {
+	const requestLike = input && typeof input === "object" ? input : null;
+	const destination = String(requestLike?.destination || init?.destination || "")
+		.trim()
+		.toLowerCase();
+	if (destination) return normalizeAdblockRequestType(destination);
+
+	const mode = String(requestLike?.mode || init?.mode || "")
+		.trim()
+		.toLowerCase();
+	if (mode === "navigate") return "main_frame";
+
+	return "xmlhttprequest";
+}
+
+function shouldBlockWithGhostery(rawUrl, baseHref, requestType = "other", sourceUrl = "") {
+	if (!ghosteryEngine || !ghosteryRequestCtor) return null;
+	try {
+		const absoluteUrl = new URL(String(rawUrl), baseHref || window.location.href).href;
+		const parsed = new URL(absoluteUrl);
+		const protocol = parsed.protocol.toLowerCase();
+		if (
+			protocol === "data:" ||
+			protocol === "blob:" ||
+			protocol === "about:" ||
+			protocol === "javascript:"
+		) {
+			return false;
+		}
+
+		const request = ghosteryRequestCtor.fromRawDetails({
+			type: normalizeAdblockRequestType(requestType),
+			url: absoluteUrl,
+			sourceUrl: sourceUrl || baseHref || window.location.href,
+		});
+		const result = ghosteryEngine.match(request);
+		return Boolean(result?.match);
+	} catch {
+		return null;
+	}
+}
+
+function shouldBlockAdRequest(rawUrl, baseHref, requestType = "other", sourceUrl = "") {
+	if (!rawUrl) return false;
+	try {
+		const parsed = new URL(String(rawUrl), baseHref || window.location.href);
+		const protocol = parsed.protocol.toLowerCase();
+		if (protocol === "data:" || protocol === "blob:" || protocol === "about:") return false;
+
+		const ghosteryDecision = shouldBlockWithGhostery(parsed.href, baseHref, requestType, sourceUrl);
+		if (ghosteryDecision === true) return true;
+
+		const host = parsed.hostname.toLowerCase();
+		if (adblockHostPatterns.some((pattern) => pattern.test(host))) return true;
+		const target = `${host}${parsed.pathname}${parsed.search}`.toLowerCase();
+		return adblockUrlPatterns.some((pattern) => pattern.test(target));
+	} catch {
+		return false;
+	}
+}
+
+function injectAdblockIntoFrame(frameElement) {
+	const frameWindow = frameElement?.contentWindow;
+	if (!frameWindow) return;
+	if (frameWindow.__fbAdblockInstalled) return;
+	frameWindow.__fbAdblockInstalled = true;
+	void ensureGhosteryEngine();
+
+	const shouldBlock = (target, requestType = "other", sourceUrl = "") =>
+		isAdblockEnabled() &&
+		shouldBlockAdRequest(target, frameWindow.location?.href, requestType, sourceUrl);
+	const responseCtor = frameWindow.Response || Response;
+
+	if (typeof frameWindow.fetch === "function") {
+		const originalFetch = frameWindow.fetch.bind(frameWindow);
+		frameWindow.fetch = (input, init) => {
+			const target = typeof input === "string" ? input : input?.url;
+			const sourceUrl = typeof input === "object" ? input?.referrer || "" : "";
+			if (shouldBlock(target, inferFetchRequestType(input, init), sourceUrl)) {
+				return Promise.resolve(
+					new responseCtor("", {
+						status: 204,
+						statusText: "Blocked by FilterBrowser adblock",
+					})
+				);
+			}
+			return originalFetch(input, init);
+		};
+	}
+
+	const xhrProto = frameWindow.XMLHttpRequest?.prototype;
+	if (xhrProto && !xhrProto.__fbAdblockPatched) {
+		xhrProto.__fbAdblockPatched = true;
+		const originalOpen = xhrProto.open;
+		const originalSend = xhrProto.send;
+		xhrProto.open = function (method, url, ...args) {
+			this.__fbAdblockTarget = url;
+			return originalOpen.call(this, method, url, ...args);
+		};
+		xhrProto.send = function (...args) {
+			if (shouldBlock(this.__fbAdblockTarget, "xmlhttprequest", frameWindow.location?.href)) {
+				try {
+					this.abort();
+				} catch {
+				}
+				return;
+			}
+			return originalSend.apply(this, args);
+		};
+	}
+
+	if (typeof frameWindow.navigator?.sendBeacon === "function") {
+		const originalSendBeacon = frameWindow.navigator.sendBeacon.bind(frameWindow.navigator);
+		frameWindow.navigator.sendBeacon = (url, data) => {
+			if (shouldBlock(url, "ping", frameWindow.location?.href)) return false;
+			return originalSendBeacon(url, data);
+		};
+	}
+
+	if (typeof frameWindow.WebSocket === "function") {
+		const OriginalWebSocket = frameWindow.WebSocket;
+		frameWindow.WebSocket = function FilterBrowserAdblockWebSocket(url, protocols) {
+			if (shouldBlock(url, "websocket", frameWindow.location?.href)) {
+				throw new Error("Blocked by FilterBrowser adblock");
+			}
+			return protocols === undefined
+				? new OriginalWebSocket(url)
+				: new OriginalWebSocket(url, protocols);
+		};
+		frameWindow.WebSocket.prototype = OriginalWebSocket.prototype;
+	}
 }
 
 async function loadUrl(url, pushHistory = true) {
@@ -781,6 +1156,12 @@ function ensureTabFrame(tabId) {
 	created.frame.style.border = "none";
 	created.frame.style.position = "absolute";
 	created.frame.style.inset = "0";
+	created.frame.addEventListener("load", () => {
+		try {
+			injectAdblockIntoFrame(created.frame);
+		} catch {
+		}
+	});
 	browserStage.appendChild(created.frame);
 	tabFrames.set(tabId, { go: created.go.bind(created), element: created.frame });
 	return tabFrames.get(tabId);
@@ -921,6 +1302,8 @@ async function ensureTransport() {
 	await connection.setTransport("/libcurl/index.mjs", [{ websocket: wispUrl }]);
 	transportReady = true;
 }
+
+const historyKey = "fb_history";
 
 function addHistory(url) {
 	const items = readHistory();
@@ -1428,6 +1811,20 @@ function loadAiMode() {
 	aiModelSelect.value = allowed.has(saved) ? saved : "auto";
 }
 
+const cloakEnabledStorage = "fb_cloak_enabled";
+const cloakTitleStorage = "fb_cloak_title";
+const cloakFaviconStorage = "fb_cloak_favicon";
+const defaultCloakTitle = "IXL | Math, Language Arts, Science, Social Studies, and Spanish";
+const defaultCloakFaviconHref = "ixl.ico";
+const cloakPresets = {
+	ixl: { title: "IXL | Math, Language Arts, Science, Social Studies, and Spanish", favicon: "ixl.ico" },
+	google: { title: "Google", favicon: "https://www.google.com/favicon.ico" },
+	docs: { title: "Google Docs", favicon: "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico" },
+	drive: { title: "My Drive - Google Drive", favicon: "https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png" },
+};
+const visibleAppTitle = "FilterBrowser";
+const visibleFaviconHref = "favicon.ico";
+
 function isCloakEnabled() {
 	const raw = localStorage.getItem(cloakEnabledStorage);
 	if (raw === null) {
@@ -1561,183 +1958,200 @@ function hexToRgba(hex, alpha) {
 	return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-function applyTheme(team1, team2, bg1, bg2) {
-	document.documentElement.style.setProperty("--team-color-1", team1);
-	document.documentElement.style.setProperty("--team-color-2", team2);
-	document.documentElement.style.setProperty("--glow-color-1", hexToRgba(team1, 0.35));
-	document.documentElement.style.setProperty("--glow-color-2", hexToRgba(team2, 0.2));
-	document.documentElement.style.setProperty("--accent-soft", hexToRgba(team1, 0.45));
+function applyTheme(
+	color1 = "#93b8ff",
+	color2 = "#8dd8ff",
+	bg1 = "#081427",
+	bg2 = "#0f2743",
+	nav1 = color1,
+	nav2 = color2
+) {
+	document.documentElement.style.setProperty("--team-color-1", color1);
+	document.documentElement.style.setProperty("--team-color-2", color2);
+	document.documentElement.style.setProperty("--glow-color-1", hexToRgba(color1, 0.35));
+	document.documentElement.style.setProperty("--glow-color-2", hexToRgba(color2, 0.2));
+	document.documentElement.style.setProperty("--accent-soft", hexToRgba(color1, 0.45));
 	document.documentElement.style.setProperty("--bg", bg1);
 	document.documentElement.style.setProperty("--bg-darker", bg2);
-	document.documentElement.style.setProperty("--bg-card", hexToRgba(bg1, 0.92));
-	document.documentElement.style.setProperty("--bg-input", hexToRgba(bg2, 0.85));
-	document.documentElement.style.setProperty("--surface-1", hexToRgba(bg1, 0.92));
-	document.documentElement.style.setProperty("--surface-2", hexToRgba(bg2, 0.84));
-	document.documentElement.style.setProperty("--surface-3", hexToRgba(bg2, 0.64));
+	document.documentElement.style.setProperty("--bg-card", hexToRgba(bg1, 0.74));
+	document.documentElement.style.setProperty("--bg-input", hexToRgba(bg2, 0.72));
+	document.documentElement.style.setProperty("--surface-1", hexToRgba(bg1, 0.82));
+	document.documentElement.style.setProperty("--surface-2", hexToRgba(bg2, 0.78));
+	document.documentElement.style.setProperty("--surface-3", hexToRgba(bg2, 0.56));
+	document.documentElement.style.setProperty("--chrome-toolbar-bg", hexToRgba(nav1, 0.78));
+	document.documentElement.style.setProperty("--chrome-tabs-bg", hexToRgba(nav2, 0.9));
+	document.documentElement.style.setProperty("--chrome-address-bg", hexToRgba(nav1, 0.56));
+	document.documentElement.style.setProperty("--chrome-button-bg", hexToRgba(nav2, 0.74));
+	document.documentElement.style.setProperty("--chrome-border-color", hexToRgba(nav2, 0.24));
 	updateParticleColorFromTheme();
 }
 
-function applyPreset(name) {
-	const preset = presets[name] || presets.nord;
-	isApplyingThemeUpdate = true;
+const wallpaperKey = "fb_wallpaper";
+const wallpaperRevisionKey = "fb_wallpaper_rev";
+const wallpapers = {
+	onyx: {
+		label: "Onyx",
+		file: "wallpapers/onyx.jpg",
+		theme: {
+			color1: "#000001",
+			color2: "#464646",
+			nav1: "#12151b",
+			nav2: "#3a414f",
+			bg1: "#07070a",
+			bg2: "#0f1013",
+		},
+	},
+	skynight: {
+		label: "Sky Night",
+		file: "wallpapers/skynight.jpg",
+		theme: {
+			color1: "#8ac3d6",
+			color2: "#9ab0d8",
+			nav1: "#2b4c77",
+			nav2: "#1a2f54",
+			bg1: "#081427",
+			bg2: "#0f2743",
+		},
+	},
+	eveningmountains: {
+		label: "Evening Mountains",
+		file: "wallpapers/evening-mountains.jpg",
+		theme: {
+			color1: "#c49564",
+			color2: "#7c6454",
+			nav1: "#5a3d2c",
+			nav2: "#3d2a24",
+			bg1: "#1a1622",
+			bg2: "#2b2037",
+		},
+	},
+	twilightridge: {
+		label: "Twilight Ridge",
+		file: "wallpapers/twilight-ridge.png",
+		theme: {
+			color1: "#a7b7ff",
+			color2: "#86d0ff",
+			nav1: "#30457d",
+			nav2: "#24365f",
+			bg1: "#111936",
+			bg2: "#1e2a4f",
+		},
+	},
+};
+const defaultWallpaperTheme = {
+	color1: "#93b8ff",
+	color2: "#8dd8ff",
+	nav1: "#2a4471",
+	nav2: "#16223a",
+	bg1: "#081427",
+	bg2: "#0f2743",
+};
+
+function normalizeWallpaperKey(value) {
+	const key = String(value || "").trim().toLowerCase();
+	if (wallpapers[key]) return key;
+	const compact = key.replace(/[^a-z0-9]/g, "");
+	return wallpapers[compact] ? compact : "skynight";
+}
+
+function getWallpaperFile(key) {
+	const normalized = normalizeWallpaperKey(key);
+	const file = wallpapers[normalized].file;
 	try {
-		themeColor1.value = preset.team1;
-		themeColor2.value = preset.team2;
-		themeBg1.value = preset.bg1;
-		themeBg2.value = preset.bg2;
-		applyTheme(preset.team1, preset.team2, preset.bg1, preset.bg2);
-		saveTheme(name, preset.team1, preset.team2, preset.bg1, preset.bg2);
-	} finally {
-		isApplyingThemeUpdate = false;
+		return new URL(file, window.location.href).toString();
+	} catch {
+		return file;
 	}
 }
 
-function formatPresetLabel(name) {
-	return name
-		.replace(/_/g, " ")
-		.replace(/\b\w/g, (c) => c.toUpperCase());
+function getWallpaperTheme(key) {
+	const normalized = normalizeWallpaperKey(key);
+	const theme = wallpapers[normalized]?.theme;
+	if (!theme) return defaultWallpaperTheme;
+	return {
+		color1: theme.color1 || defaultWallpaperTheme.color1,
+		color2: theme.color2 || defaultWallpaperTheme.color2,
+		nav1: theme.nav1 || theme.color1 || defaultWallpaperTheme.nav1,
+		nav2: theme.nav2 || theme.color2 || defaultWallpaperTheme.nav2,
+		bg1: theme.bg1 || defaultWallpaperTheme.bg1,
+		bg2: theme.bg2 || defaultWallpaperTheme.bg2,
+	};
 }
 
-function normalizePresetKey(value) {
-	const raw = String(value || "").trim();
-	if (!raw) return "nord";
-	const lower = raw.toLowerCase();
-	if (lower === "custom") return "custom";
-	if (presets[lower]) return lower;
-	const byLabel = Object.keys(presets).find((key) => formatPresetLabel(key).toLowerCase() === lower);
-	return byLabel || "nord";
+function getWallpaperRevision() {
+	const raw = Number.parseInt(localStorage.getItem(wallpaperRevisionKey) || "0", 10);
+	return Number.isFinite(raw) ? raw : 0;
 }
 
-function populateThemePresetOptions() {
-	if (!themePresetSelect) return;
-	themePresetSelect.innerHTML = "";
+function bumpWallpaperRevision() {
+	const next = getWallpaperRevision() + 1;
+	localStorage.setItem(wallpaperRevisionKey, String(next));
+	return next;
+}
 
-	const groups = [
-		{
-			label: "Core",
-			items: ["nord", "dracula", "solarized", "graphite", "slate", "mono"],
-		},
-		{
-			label: "Cool",
-			items: ["midnight", "deepsea", "glacier", "ocean", "steel"],
-		},
-		{
-			label: "Warm",
-			items: ["ember", "sand", "crimson", "citrus"],
-		},
-		{
-			label: "Vibrant",
-			items: ["dusk", "neon", "arcade", "matrix"],
-		},
-		{
-			label: "Natural",
-			items: ["forest", "jungle"],
-		},
-	];
+function buildWallpaperCssValue(key, revision = getWallpaperRevision()) {
+	const wallpaperFile = getWallpaperFile(key);
+	try {
+		const url = new URL(wallpaperFile, window.location.href);
+		url.searchParams.set("v", String(revision));
+		return `url("${url.toString()}")`;
+	} catch {
+		const separator = String(wallpaperFile).includes("?") ? "&" : "?";
+		return `url("${wallpaperFile}${separator}v=${revision}")`;
+	}
+}
 
-	const seen = new Set();
-	groups.forEach((group) => {
-		const optgroup = document.createElement("optgroup");
-		optgroup.label = group.label;
-		group.items.forEach((name) => {
-			if (!presets[name] || seen.has(name)) return;
-			seen.add(name);
-			const option = document.createElement("option");
-			option.value = name;
-			option.textContent = formatPresetLabel(name);
-			optgroup.appendChild(option);
-		});
-		if (optgroup.children.length) {
-			themePresetSelect.appendChild(optgroup);
-		}
-	});
+function renderWallpaperBackground(wallpaperCssUrl) {
+	const value = String(wallpaperCssUrl || "").trim();
+	if (!value) return;
+	document.documentElement.style.setProperty("--wallpaper-image", value);
+	document.body.style.backgroundImage =
+		`linear-gradient(180deg, rgba(5, 13, 26, 0.36), rgba(9, 20, 36, 0.58)), ${value}, ` +
+		"linear-gradient(180deg, var(--bg), var(--bg-darker))";
+}
 
-	Object.keys(presets).forEach((name) => {
-		if (seen.has(name)) return;
+function applyWallpaper(key) {
+	const normalized = normalizeWallpaperKey(key);
+	const revision = bumpWallpaperRevision();
+	const theme = getWallpaperTheme(normalized);
+	renderWallpaperBackground(buildWallpaperCssValue(normalized, revision));
+	document.body.dataset.wallpaper = normalized;
+	if (wallpaperSelect) wallpaperSelect.value = normalized;
+	localStorage.setItem(wallpaperKey, normalized);
+	applyTheme(theme.color1, theme.color2, theme.bg1, theme.bg2, theme.nav1, theme.nav2);
+}
+
+function populateWallpaperOptions() {
+	if (!wallpaperSelect) return;
+	wallpaperSelect.innerHTML = "";
+	Object.entries(wallpapers).forEach(([key, wallpaper]) => {
 		const option = document.createElement("option");
-		option.value = name;
-		option.textContent = formatPresetLabel(name);
-		themePresetSelect.appendChild(option);
+		option.value = key;
+		option.textContent = wallpaper.label;
+		wallpaperSelect.appendChild(option);
 	});
-
-	const customOption = document.createElement("option");
-	customOption.value = "custom";
-	customOption.textContent = "Custom";
-	themePresetSelect.appendChild(customOption);
 }
 
-function applyCustomTheme() {
-	const team1 = themeColor1.value || presets.nord.team1;
-	const team2 = themeColor2.value || presets.nord.team2;
-	const bg1 = themeBg1.value || presets.nord.bg1;
-	const bg2 = themeBg2.value || presets.nord.bg2;
-	applyTheme(team1, team2, bg1, bg2);
-	saveTheme("custom", team1, team2, bg1, bg2);
+function loadWallpaper() {
+	const saved = normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "skynight");
+	applyWallpaper(saved);
 }
 
-function saveTheme(preset, team1, team2, bg1, bg2) {
-	const payload = JSON.stringify({ preset, team1, team2, bg1, bg2 });
-	localStorage.setItem(themeKey, payload);
-	localStorage.setItem(legacyThemeKey, payload);
+function bootstrapWallpaperFromStorage() {
+	const saved = normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "skynight");
+	const theme = getWallpaperTheme(saved);
+	renderWallpaperBackground(buildWallpaperCssValue(saved));
+	document.body.dataset.wallpaper = saved;
+	applyTheme(theme.color1, theme.color2, theme.bg1, theme.bg2, theme.nav1, theme.nav2);
 }
 
-function readStoredThemeRaw() {
-	const primary = localStorage.getItem(themeKey);
-	if (primary) return primary;
-	return localStorage.getItem(legacyThemeKey);
-}
-
-function loadTheme() {
-	const raw = readStoredThemeRaw();
-	if (!raw) {
-		themePresetSelect.value = "nord";
-		applyPreset("nord");
-		return;
-	}
-	try {
-		const data = JSON.parse(raw);
-		const preset = normalizePresetKey(data.preset || "nord");
-		if (preset !== "custom" && presets[preset]) {
-			const p = presets[preset];
-			themePresetSelect.value = preset;
-			themeColor1.value = p.team1;
-			themeColor2.value = p.team2;
-			themeBg1.value = p.bg1;
-			themeBg2.value = p.bg2;
-			applyTheme(p.team1, p.team2, p.bg1, p.bg2);
-			return;
-		}
-		themePresetSelect.value = "custom";
-		themeColor1.value = data.team1 || data.teamColor1 || presets.nord.team1;
-		themeColor2.value = data.team2 || data.teamColor2 || presets.nord.team2;
-		themeBg1.value = data.bg1 || data.background1 || presets.nord.bg1;
-		themeBg2.value = data.bg2 || data.background2 || presets.nord.bg2;
-		applyTheme(themeColor1.value, themeColor2.value, themeBg1.value, themeBg2.value);
-	} catch {
-		themePresetSelect.value = "nord";
-		applyPreset("nord");
-	}
-}
-
-function bootstrapThemeFromStorage() {
-	const raw = readStoredThemeRaw();
-	if (!raw) return;
-	try {
-		const data = JSON.parse(raw);
-		const preset = normalizePresetKey(data.preset || "nord");
-		if (preset !== "custom" && presets[preset]) {
-			const p = presets[preset];
-			applyTheme(p.team1, p.team2, p.bg1, p.bg2);
-			return;
-		}
-		const team1 = data.team1 || data.teamColor1 || presets.nord.team1;
-		const team2 = data.team2 || data.teamColor2 || presets.nord.team2;
-		const bg1 = data.bg1 || data.background1 || presets.nord.bg1;
-		const bg2 = data.bg2 || data.background2 || presets.nord.bg2;
-		applyTheme(team1, team2, bg1, bg2);
-	} catch {
-	}
-}
+const panicKeyStorage = "fb_panic_key";
+const panicUrlStorage = "fb_panic_url";
+const panicDefaultKey = "`";
+const panicDefaultUrl = "https://google.com";
+const openModeStorage = "fb_open_mode";
+let isListeningForKey = false;
+let ignoreNextPanicPress = false;
 
 function getPanicKey() {
 	const raw = localStorage.getItem(panicKeyStorage);
@@ -1979,8 +2393,41 @@ function showError(title, detail) {
 	if (errorPanel) errorPanel.classList.add("show");
 }
 
+function injectErudaIntoActiveTab() {
+	const tab = getActiveTab();
+	if (!tab) return;
+	const frameItem = tabFrames.get(tab.id);
+	const targetWindow = frameItem?.element?.contentWindow;
+	if (!targetWindow) return;
+
+	try {
+		const targetDocument = targetWindow.document;
+		if (targetDocument.getElementById("fb-eruda-script")) {
+			targetWindow.eruda?.init?.();
+			return;
+		}
+		const script = targetDocument.createElement("script");
+		script.id = "fb-eruda-script";
+		script.src = "//cdn.jsdelivr.net/npm/eruda";
+		targetDocument.body.appendChild(script);
+		script.onload = function () {
+			targetWindow.eruda?.init?.();
+		};
+	} catch {
+		try {
+			targetWindow.eval(
+				"(function () { var script = document.createElement('script'); script.id='fb-eruda-script'; script.src='//cdn.jsdelivr.net/npm/eruda'; document.body.appendChild(script); script.onload = function () { eruda.init() }; })();"
+			);
+		} catch {
+		}
+	}
+}
+
 function resetError() {
 	if (errorTitle) errorTitle.textContent = "";
 	if (errorDetails) errorDetails.textContent = "";
 	if (errorPanel) errorPanel.classList.remove("show");
 }
+
+bootstrapWallpaperFromStorage();
+init();

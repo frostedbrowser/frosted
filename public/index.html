@@ -4,14 +4,14 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>FilterBrowser</title>
-				<!-- Google tag (gtag.js) -->
+		<!-- Google tag (gtag.js) -->
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-5DPHJM6D6T"></script>
 		<script>
-		  window.dataLayer = window.dataLayer || [];
-		  function gtag(){dataLayer.push(arguments);}
-		  gtag('js', new Date());
-		
-		  gtag('config', 'G-5DPHJM6D6T');
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'G-5DPHJM6D6T');
 		</script>
 		<meta name="theme-color" content="#0a0f14" />
 		<meta property="og:title" content="IXL | Math, Language Arts, Science, Social Studies, and Spanish">
@@ -39,6 +39,7 @@
 		<script src="search.js" defer></script>
 		<script>
 			window.GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+			// go make your own api key lmao (seriously, it's free)
 			window.GROQ_API_KEY = "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";
 			window.GROQ_SYSTEM_PROMPT =
 				"You are a helpful assistant for users of this browser app. Keep answers concise and clear.";
@@ -53,44 +54,47 @@
 
 		<div class="app-shell">
 			<div class="chrome">
-				<div class="tabs-row">
-					<div class="tabs" id="tabs"></div>
-					<button class="tab-add" id="newTabBtn" aria-label="New Tab">+</button>
-					<div class="tab-metrics">
-						<span class="shortcut-counter" id="tabCounter">Tabs: 1</span>
+				<div class="chrome-row">
+					<div class="toolbar">
+						<div class="toolbar-nav">
+							<button class="nav-btn" id="backBtn" aria-label="Back">
+								<i class="fa-solid fa-arrow-left"></i>
+							</button>
+							<button class="nav-btn" id="forwardBtn" aria-label="Forward">
+								<i class="fa-solid fa-arrow-right"></i>
+							</button>
+							<button class="nav-btn" id="reloadBtn" aria-label="Reload">
+								<i class="fa-solid fa-rotate-right"></i>
+							</button>
+						</div>
+						<form class="address-bar" id="toolbarForm">
+							<input id="addressInput" type="text" placeholder="Search or enter address" />
+							<button id="goBtn" aria-label="Go">
+								<i class="fa-solid fa-arrow-right"></i>
+							</button>
+						</form>
+						<div class="toolbar-actions">
+							<button class="toolbar-btn" id="homeBtn" aria-label="Home">
+								<i class="fa-solid fa-house"></i>
+							</button>
+							<button class="toolbar-btn" id="gamesBtn" aria-label="Games">
+								<i class="fa-solid fa-gamepad"></i>
+							</button>
+							<button class="toolbar-btn" id="aiBtn" aria-label="AI Utilities">
+								<img src="/chatgpt-logo.svg" alt="ChatGPT" class="toolbar-btn-logo" />
+							</button>
+							<button class="toolbar-btn code-btn" id="codeBtn" aria-label="Run Console Script">&lt;/&gt;</button>
+							<button class="toolbar-btn ads-toggle-btn" id="adsToggleBtn" type="button" aria-label="Toggle ad blocking">
+								ads: off
+							</button>
+							<button class="toolbar-btn" id="settingsBtn" aria-label="Settings">
+								<i class="fa-solid fa-gear"></i>
+							</button>
+						</div>
 					</div>
-				</div>
-				<div class="toolbar">
-					<div class="toolbar-nav">
-						<button class="nav-btn" id="backBtn" aria-label="Back">
-							<i class="fa-solid fa-arrow-left"></i>
-						</button>
-						<button class="nav-btn" id="forwardBtn" aria-label="Forward">
-							<i class="fa-solid fa-arrow-right"></i>
-						</button>
-						<button class="nav-btn" id="reloadBtn" aria-label="Reload">
-							<i class="fa-solid fa-rotate-right"></i>
-						</button>
-					</div>
-					<form class="address-bar" id="toolbarForm">
-						<input id="addressInput" type="text" placeholder="Search or enter address" />
-						<button id="goBtn" aria-label="Go">
-							<i class="fa-solid fa-arrow-right"></i>
-						</button>
-					</form>
-					<div class="toolbar-actions">
-						<button class="toolbar-btn" id="homeBtn" aria-label="Home">
-							<i class="fa-solid fa-house"></i>
-						</button>
-						<button class="toolbar-btn" id="gamesBtn" aria-label="Games">
-							<i class="fa-solid fa-gamepad"></i>
-						</button>
-						<button class="toolbar-btn" id="aiBtn" aria-label="AI Utilities">
-							<img src="/chatgpt-logo.svg" alt="ChatGPT" class="toolbar-btn-logo" />
-						</button>
-						<button class="toolbar-btn" id="settingsBtn" aria-label="Settings">
-							<i class="fa-solid fa-gear"></i>
-						</button>
+					<div class="tabs-row">
+						<div class="tabs" id="tabs"></div>
+						<button class="tab-add" id="newTabBtn" aria-label="New Tab">+</button>
 					</div>
 				</div>
 			</div>
@@ -126,6 +130,10 @@
 									</div>
 									<div class="tile-label">Nowgg.fun</div>
 									</button>
+									<button class="home-tile" data-url="https://cineby.gd/">
+										<div class="tile-icon"><i class="fa-movies"></i></div>
+										<div class="tile-label">Cineby (Movies)</div>
+									</button>
 								</div>
 								<div class="home-credits">
 									<a href="bypass://credits" id="creditsLink">Credits</a>
@@ -139,22 +147,8 @@
 								</div>
 								<div class="settings-page-body">
 									<div class="settings-section">
-										<label class="settings-label" for="themePresetSelect">Theme Preset</label>
-										<select class="settings-select" id="themePresetSelect"></select>
-									</div>
-									<div class="settings-section">
-										<label class="settings-label">Theme Colors</label>
-										<div class="settings-row">
-											<input class="settings-color" id="themeColor1" type="color" />
-											<input class="settings-color" id="themeColor2" type="color" />
-										</div>
-									</div>
-									<div class="settings-section">
-										<label class="settings-label">Background Colors</label>
-										<div class="settings-row">
-											<input class="settings-color" id="themeBg1" type="color" />
-											<input class="settings-color" id="themeBg2" type="color" />
-										</div>
+										<label class="settings-label" for="wallpaperSelect">Wallpaper</label>
+										<select class="settings-select" id="wallpaperSelect"></select>
 									</div>
 									<div class="settings-section">
 										<label class="settings-label">Open in ...</label>
@@ -198,7 +192,7 @@
 										<div class="settings-row">
 											<input id="cloakEnabledToggle" type="checkbox" />
 											<label for="cloakEnabledToggle" class="settings-hint">
-												When hidden, show "IXL" with IXL favicon
+												When hidden, Cloak replaces the page's title and favicon with custom ones to help disguise it.
 											</label>
 										</div>
 										<div class="settings-row">
@@ -330,6 +324,6 @@
 			</div>
 		</div>
 
-		<input id="sj-search-engine" type="hidden" value="https://html.duckduckgo.com/html/search?q=fhttps://html.duckduckgo.com/html/search?q=%s" />
+		<input id="sj-search-engine" type="hidden" value="https://html.duckduckgo.com/html/search?q=%s" />
 	</body>
 </html>
