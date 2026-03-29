@@ -1,5 +1,5 @@
 # FilterBrowser
-filterbrowser is a proxy from scramjet (the sucessor to ultraviolet / uv) that is basically a browser but worse
+filterbrowser is a proxy from scramjet (the sucessor to uv) that is basically a browser but worse
 
 # Main Features
 - Open in Blob
