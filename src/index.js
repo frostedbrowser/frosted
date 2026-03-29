@@ -59,11 +59,6 @@ const fastify = Fastify({
 });
 
 fastify.register(fastifyStatic, {
-	root: publicPath,
-	decorateReply: true,
-});
-
-fastify.register(fastifyStatic, {
 	root: scramjetPath,
 	prefix: "/scram/",
 	decorateReply: false,
@@ -79,6 +74,13 @@ fastify.register(fastifyStatic, {
 	root: baremuxPath,
 	prefix: "/baremux/",
 	decorateReply: false,
+});
+
+// Register the app's root static files last so prefixed assets
+// like /scram/* and /baremux/* are not shadowed by the public wildcard route.
+fastify.register(fastifyStatic, {
+	root: publicPath,
+	decorateReply: true,
 });
 
 fastify.post("/api/ai", async (request, reply) => {
