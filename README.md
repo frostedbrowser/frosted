@@ -23,4 +23,5 @@ Q: Is this code written by AI?
 A: Only for errors / debugging.
 -
 Q: How does the Cloak Feature work?
-A: The Cloak works by leaving the tab and sets the icon and title of the website to IXL or a different 1. (History Cloak works by loading the favicon and title first then applying filterbrowser title and favicon)
+A: The Cloak works by leaving the tab and sets the icon and title of the website to IXL or a different 1. 
+(History Cloak works by loading the favicon and title first then applying filterbrowser title and favicon)
