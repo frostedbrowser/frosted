@@ -1,4 +1,4 @@
-name: github changes to discord webhook
+name: Discord Webhook
 
 on:
   push:
@@ -8,12 +8,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: send commits to discord
+      - name: send events to Discord
         run: |
           COMMITS=$(jq -r '.commits[] | "- [" + .message + "](" + .url + ")"' "$GITHUB_EVENT_PATH")
 
           curl -H "Content-Type: application/json" \
           -d "{
-            \"content\": \" **New push to ${{ github.repository }}**\n👤 **${{ github.actor }}** pushed:\n$COMMITS\"
+            \"embeds\": [{
+              \"title\": \"🚀 New Push to ${{ github.repository }}\",
+              \"color\": 5814783,
+              \"author\": {
+                \"name\": \"${{ github.actor }}\",
+                \"icon_url\": \"https://github.com/${{ github.actor }}.png\"
+              },
+              \"description\": \"$COMMITS\",
+              \"footer\": {
+                \"text\": \"GitHub Actions\"
+              },
+              \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+            }]
           }" \
           ${{ secrets.DISCORD_WEBHOOK }}
