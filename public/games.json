@@ -1,9 +1,10 @@
 [
   {
     "id": -1,
-    "name": "[!] FilterCheck",
-    "cover": "https://cdn.jsdelivr.net/gh/gn-math/covers@main/dc.png",
-    "url": "https://discord.gg/GX7kz7P5zN"
+    "name": "[!] Blooket Cheats (JOIN GAME)",
+    "cover": "https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/bh.png",
+    "url": "https://play.blooket.com/play",
+    "defaultClickScript": "/gui.js"
   },
   {
     "id": 0,

@@ -20,6 +20,7 @@ const newTabBtn = qs("#newTabBtn");
 const toolbarForm = qs("#toolbarForm");
 const homeForm = qs("#homeForm");
 const addressInput = qs("#addressInput");
+const partnershipBtn = qs("#partnershipBtn");
 const homeSearchInput = qs("#homeSearchInput");
 const backBtn = qs("#backBtn");
 const forwardBtn = qs("#forwardBtn");
@@ -40,6 +41,7 @@ const particlesLayer = qs("#particles-js");
 
 const settingsPage = qs("#settingsPage");
 const creditsPage = qs("#creditsPage");
+const partnersPage = qs("#partnersPage");
 const gamesPage = qs("#gamesPage");
 const aiPage = qs("#aiPage");
 const gamesGrid = qs("#gamesGrid");
@@ -98,6 +100,9 @@ let aiTypingRunId = 0;
 const aiUiThread = [];
 let gamesCatalog = [];
 const gameBlobUrlsByTab = new Map();
+const rawHtmlFallbackTriedUrlByTab = new Map();
+const pendingGameClickScriptsByTab = new Map();
+const gameClickScriptDelayMs = 4200;
 let particleCanvas = null;
 let particleCtx = null;
 let particleDots = [];
@@ -156,8 +161,8 @@ const chromeBarConfig = {
 	addressBg: "rgba(12, 18, 31, 0.86)",
 	buttonBg: "rgba(15, 23, 40, 0.74)",
 	borderColor: "rgba(255, 255, 255, 0.12)",
-	toolbarWidth: "clamp(420px, calc(100vw - 240px), 820px)",
-	tabsMaxWidth: "calc(100vw - 340px)",
+	toolbarWidth: "clamp(460px, calc(100vw - 220px), 980px)",
+	tabsMaxWidth: "calc(100vw - 300px)",
 	toolbarBlur: "16px",
 	tabsBlur: "14px",
 	buttonSize: "30px",
@@ -241,6 +246,7 @@ function maybeAutoOpenAboutBlankAfterStartup() {
 
 const gamesInternalUrl = "bypass://games";
 const aiInternalUrl = "bypass://ai";
+const partnersInternalUrl = "bypass://partners";
 const aiModeKey = "fb_ai_mode";
 
 function bindEvents() {
@@ -249,6 +255,11 @@ function bindEvents() {
 		e.preventDefault();
 		navigateFromInput(addressInput.value);
 	});
+	if (partnershipBtn) {
+		partnershipBtn.addEventListener("click", () => {
+			navigateFromInput(partnersInternalUrl);
+		});
+	}
 	homeForm.addEventListener("submit", (e) => {
 		e.preventDefault();
 		navigateFromInput(homeSearchInput.value);
@@ -484,6 +495,7 @@ function shouldShowParticlesForCurrentView() {
 		settingsPage?.classList.contains("active") ||
 		gamesPage?.classList.contains("active") ||
 		aiPage?.classList.contains("active") ||
+		partnersPage?.classList.contains("active") ||
 		creditsPage?.classList.contains("active");
 	if (onBlank) return true;
 	if (onInternal) return matrixActive;
@@ -646,6 +658,7 @@ function closeTab(id) {
 		URL.revokeObjectURL(oldGameBlob);
 		gameBlobUrlsByTab.delete(removed.id);
 	}
+	rawHtmlFallbackTriedUrlByTab.delete(removed.id);
 	const frame = tabFrames.get(removed.id);
 	if (frame) {
 		frame.element.remove();
@@ -741,7 +754,7 @@ function renderTabs() {
 
 function getTabFaviconCandidates(url) {
 	if (!url) return ["favicon.ico"];
-	if (url === "bypass://settings" || url === "bypass://credits") return ["favicon.ico"];
+	if (url === "bypass://settings" || url === "bypass://credits" || isPartnersInternalUrl(url)) return ["favicon.ico"];
 	if (isGamesInternalUrl(url)) return ["favicon.ico"];
 	if (isAiInternalUrl(url)) return ["chatgpt-logo.svg"];
 	try {
@@ -765,6 +778,7 @@ function getActiveTab() {
 function getDisplayTitle(url) {
 	if (!url) return "New Tab";
 	if (url === "bypass://settings") return "Settings";
+	if (isPartnersInternalUrl(url)) return "Partners";
 	if (isGamesInternalUrl(url)) return "Games";
 	if (isAiInternalUrl(url)) return "AI";
 	if (url === "bypass://credits") return "Credits";
@@ -780,6 +794,7 @@ function normalizeInput(input) {
 	if (!input || !searchEngine) return "";
 	const raw = String(input).trim();
 	if (raw.toLowerCase() === "bypass://settings") return "bypass://settings";
+	if (isPartnersInternalUrl(raw)) return partnersInternalUrl;
 	if (isGamesInternalUrl(raw)) return gamesInternalUrl;
 	if (isAiInternalUrl(raw)) return aiInternalUrl;
 	if (raw.toLowerCase() === "bypass://credits") return "bypass://credits";
@@ -929,7 +944,25 @@ async function ensureGhosteryEngine() {
 
 	ghosteryEnginePromise = (async () => {
 		try {
-			const mod = await import("/vendor/adblocker/index.js");
+			let mod = null;
+			const moduleCandidates = [
+				// Browser-bundled module (no bare package specifiers).
+				"https://esm.sh/@ghostery/adblocker?bundle",
+				// Legacy local path fallback (works only if pre-bundled in this project).
+				"/vendor/adblocker/index.js",
+			];
+			let lastError = null;
+			for (const candidate of moduleCandidates) {
+				try {
+					mod = await import(candidate);
+					if (mod) break;
+				} catch (error) {
+					lastError = error;
+				}
+			}
+			if (!mod) {
+				throw lastError || new Error("Unable to load Ghostery adblocker module.");
+			}
 			const FiltersEngine = mod?.FiltersEngine;
 			const RequestCtor = mod?.Request;
 			if (!FiltersEngine || !RequestCtor) {
@@ -1115,6 +1148,10 @@ async function loadUrl(url, pushHistory = true) {
 		showSettingsPage();
 		return;
 	}
+	if (isPartnersInternalUrl(url)) {
+		showPartnersPage();
+		return;
+	}
 	if (isGamesInternalUrl(url)) {
 		showGamesPage();
 		return;
@@ -1158,13 +1195,28 @@ function ensureTabFrame(tabId) {
 	created.frame.style.inset = "0";
 	created.frame.addEventListener("load", () => {
 		try {
-			injectAdblockIntoFrame(created.frame);
+			if (shouldInjectAdblockForTab(tabId)) {
+				injectAdblockIntoFrame(created.frame);
+			}
 		} catch {
 		}
+		void runQueuedGameClickScriptForTab(tabId, created.frame);
+		void maybeRecoverRawHtmlCatalogGame(tabId, created.frame);
 	});
 	browserStage.appendChild(created.frame);
 	tabFrames.set(tabId, { go: created.go.bind(created), element: created.frame });
 	return tabFrames.get(tabId);
+}
+
+function shouldInjectAdblockForTab(tabId) {
+	const tab = tabs.find((entry) => entry.id === tabId);
+	if (!tab) return true;
+	const currentUrl = String(tab.url || "").trim();
+	if (!currentUrl) return true;
+	if (isCatalogGameUrl(currentUrl)) return false;
+	const catalogBlobUrl = String(gameBlobUrlsByTab.get(tabId) || "").trim();
+	if (catalogBlobUrl && currentUrl === catalogBlobUrl) return false;
+	return true;
 }
 
 function showFrameForTab(tabId) {
@@ -1228,10 +1280,25 @@ function showSettingsPage() {
 		item.element.style.display = "none";
 	});
 	if (creditsPage) creditsPage.classList.remove("active");
+	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.remove("active");
 	if (settingsPage) settingsPage.classList.add("active");
 	addressInput.value = "bypass://settings";
+	setParticlesVisible(isMatrixThemeActive());
+}
+
+function showPartnersPage() {
+	blankState.style.display = "none";
+	tabFrames.forEach((item) => {
+		item.element.style.display = "none";
+	});
+	if (settingsPage) settingsPage.classList.remove("active");
+	if (creditsPage) creditsPage.classList.remove("active");
+	if (gamesPage) gamesPage.classList.remove("active");
+	if (aiPage) aiPage.classList.remove("active");
+	if (partnersPage) partnersPage.classList.add("active");
+	addressInput.value = partnersInternalUrl;
 	setParticlesVisible(isMatrixThemeActive());
 }
 
@@ -1242,6 +1309,7 @@ function showGamesPage() {
 	});
 	if (settingsPage) settingsPage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.remove("active");
+	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.add("active");
 	if (aiPage) aiPage.classList.remove("active");
 	addressInput.value = gamesInternalUrl;
@@ -1255,6 +1323,7 @@ function showAiPage() {
 	});
 	if (settingsPage) settingsPage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.remove("active");
+	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.add("active");
 	addressInput.value = aiInternalUrl;
@@ -1267,6 +1336,7 @@ function showCreditsPage() {
 		item.element.style.display = "none";
 	});
 	if (settingsPage) settingsPage.classList.remove("active");
+	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.add("active");
@@ -1277,6 +1347,7 @@ function showCreditsPage() {
 function hideInternalPages() {
 	if (settingsPage) settingsPage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.remove("active");
+	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.remove("active");
 }
@@ -1394,11 +1465,11 @@ function renderGames() {
 		card.appendChild(thumb);
 		card.appendChild(body);
 
-		card.addEventListener("click", () => {
+		card.addEventListener("click", async () => {
 			const target = resolveGameUrl(game.url);
-			if (target) {
-				openGameFromCatalog(target);
-			}
+			if (!target) return;
+			queueGameClickScriptForActiveTab(game.clickScript);
+			await openGameFromCatalog(target, { useBlob: game.useBlob });
 		});
 		gamesGrid.appendChild(card);
 	});
@@ -1419,6 +1490,8 @@ async function loadGamesCatalog() {
 				desc: String(entry?.desc || entry?.description || entry?.author || "").trim(),
 				url: String(entry?.url || "").trim(),
 				image: String(entry?.image || entry?.cover || "").trim(),
+				clickScript: String(entry?.clickScript || entry?.defaultClickScript || "").trim(),
+				useBlob: Boolean(entry?.useBlob),
 			}))
 			.filter((entry) => entry.title && entry.url);
 	} catch {
@@ -1427,9 +1500,171 @@ async function loadGamesCatalog() {
 	renderGames();
 }
 
+function queueGameClickScriptForActiveTab(scriptPath) {
+	const tab = getActiveTab();
+	if (!tab) return;
+	const rawPath = String(scriptPath || "").trim();
+	if (!rawPath) return;
+	pendingGameClickScriptsByTab.set(tab.id, rawPath);
+}
+
+async function runQueuedGameClickScriptForTab(tabId, frameElement) {
+	const queuedScriptPath = String(pendingGameClickScriptsByTab.get(tabId) || "").trim();
+	if (!queuedScriptPath) return;
+	pendingGameClickScriptsByTab.delete(tabId);
+	await new Promise((resolve) => setTimeout(resolve, gameClickScriptDelayMs));
+	await runGameClickScriptInFrame(queuedScriptPath, frameElement);
+}
+
+async function runGameClickScriptInFrame(scriptPath, frameElement) {
+	const rawPath = String(scriptPath || "").trim();
+	if (!rawPath) return;
+	const normalizedPath = rawPath.startsWith("/")
+		? rawPath
+		: `/${rawPath.replace(/^\.?\//, "")}`;
+	const cacheBustedPath = `${normalizedPath}${normalizedPath.includes("?") ? "&" : "?"}t=${Date.now()}`;
+	const localScriptUrl = new URL(cacheBustedPath, window.location.origin).href;
+	const targetWindow = frameElement?.contentWindow;
+	const scriptSource = await fetchGameClickScriptSource(localScriptUrl);
+	if (!targetWindow) {
+		await runGameClickScriptInShell(localScriptUrl, scriptSource);
+		return;
+	}
+
+	if (scriptSource && looksLikeEncodedBookmarklet(scriptSource)) {
+		const handled = executeBookmarkletLikeSource(targetWindow, scriptSource);
+		if (handled) return;
+	}
+
+	if (scriptSource) {
+		const executedFromSource = await new Promise((resolve) => {
+			try {
+				const sourceTag = `\n//# sourceURL=${normalizedPath}`;
+				targetWindow.eval(`${scriptSource}${sourceTag}`);
+				resolve(true);
+			} catch {
+				resolve(false);
+			}
+		});
+		if (executedFromSource) return;
+	}
+
+	const injectedInFrame = await new Promise((resolve) => {
+		try {
+			const targetDocument = targetWindow.document;
+			const script = targetDocument.createElement("script");
+			script.src = localScriptUrl;
+			script.async = true;
+			script.onload = () => resolve(true);
+			script.onerror = () => resolve(false);
+			(targetDocument.body || targetDocument.head || targetDocument.documentElement).appendChild(script);
+		} catch {
+			resolve(false);
+		}
+	});
+	if (!injectedInFrame) {
+		await runGameClickScriptInShell(localScriptUrl, scriptSource);
+	}
+}
+
+async function fetchGameClickScriptSource(scriptUrl) {
+	const target = String(scriptUrl || "").trim();
+	if (!target) return "";
+	try {
+		const response = await fetch(target, { cache: "no-store" });
+		if (!response.ok) return "";
+		return await response.text();
+	} catch {
+		return "";
+	}
+}
+
+function looksLikeEncodedBookmarklet(source) {
+	const text = String(source || "").trim();
+	if (!text) return false;
+	if (/^javascript\s*:/i.test(text)) return true;
+	return /^function\s*\(\)\s*%\s*[0-9a-fA-F]\s*[0-9a-fA-F]/.test(text);
+}
+
+function decodeLegacyBookmarkletSource(rawSource) {
+	let text = String(rawSource || "");
+	if (!text) return "";
+	text = text.replace(/%[\t \r\n]*([0-9a-fA-F])[\t \r\n]*([0-9a-fA-F])/g, "%$1$2");
+	text = text.trim().replace(/^javascript:\s*/i, "");
+	for (let i = 0; i < 2; i += 1) {
+		const next = text.replace(/%([0-9a-fA-F]{2})/g, (_, hex) =>
+			String.fromCharCode(parseInt(hex, 16))
+		);
+		if (next === text) break;
+		text = next;
+	}
+
+	// This source is bookmarklet-style and often inserts whitespace between operator symbols.
+	text = text
+		.replace(/=\s+>/g, "=>")
+		.replace(/\|\s+\|/g, "||")
+		.replace(/&\s+&/g, "&&")
+		.replace(/!\s+=\s+=/g, "!==")
+		.replace(/=\s+=\s+=/g, "===")
+		.replace(/!\s+=/g, "!=")
+		.replace(/=\s+=/g, "==")
+		.replace(/<\s+=/g, "<=")
+		.replace(/>\s+=/g, ">=")
+		.replace(/\+\s+\+/g, "++")
+		.replace(/-\s+-/g, "--");
+
+	const trimmed = text.trim();
+	if (/^function\s*\(/.test(trimmed)) {
+		return `(${trimmed})()`;
+	}
+	return trimmed;
+}
+
+function executeBookmarkletLikeSource(targetWindow, rawSource) {
+	if (!targetWindow) return false;
+	try {
+		const decoded = decodeLegacyBookmarkletSource(rawSource);
+		if (!decoded) return false;
+		targetWindow.eval(decoded);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+function runGameClickScriptInShell(scriptUrl, scriptSource = "") {
+	const sourceText = String(scriptSource || "").trim();
+	if (sourceText && looksLikeEncodedBookmarklet(sourceText)) {
+		try {
+			const decoded = decodeLegacyBookmarkletSource(sourceText);
+			if (decoded) {
+				try {
+					window.eval(decoded);
+					return Promise.resolve();
+				} catch {
+				}
+			}
+		} catch {
+		}
+	}
+	return new Promise((resolve) => {
+		const script = document.createElement("script");
+		script.src = String(scriptUrl || "");
+		script.async = true;
+		script.onload = () => resolve();
+		script.onerror = () => resolve();
+		document.head.appendChild(script);
+	});
+}
+
 function isGamesInternalUrl(url) {
 	const normalized = String(url || "").trim().toLowerCase();
 	return normalized === "bypass://games" || normalized === "bypass://games";
+}
+
+function isPartnersInternalUrl(url) {
+	const normalized = String(url || "").trim().toLowerCase();
+	return normalized === "bypass://partners";
 }
 
 function isAiInternalUrl(url) {
@@ -1437,14 +1672,18 @@ function isAiInternalUrl(url) {
 	return normalized === "bypass://ai" || normalized === "bypass://ai";
 }
 
-async function openGameFromCatalog(url) {
+async function openGameFromCatalog(url, options = {}) {
 	const tab = getActiveTab();
 	if (!tab) return;
+	const useBlob = Boolean(options?.useBlob);
 	let finalUrl = url;
-	try {
-		finalUrl = await materializeGameBlobUrl(url);
-	} catch {
-		finalUrl = url;
+	rawHtmlFallbackTriedUrlByTab.delete(tab.id);
+	if (useBlob) {
+		try {
+			finalUrl = await materializeGameBlobUrl(url);
+		} catch {
+			finalUrl = url;
+		}
 	}
 
 	const previousBlob = gameBlobUrlsByTab.get(tab.id);
@@ -1456,6 +1695,94 @@ async function openGameFromCatalog(url) {
 		gameBlobUrlsByTab.set(tab.id, finalUrl);
 	}
 	await loadUrl(finalUrl, true);
+}
+
+function isCatalogGameUrl(url) {
+	const target = String(url || "").trim();
+	if (!target) return false;
+	return gamesCatalog.some((entry) => resolveGameUrl(entry?.url) === target);
+}
+
+function looksLikeRawHtmlSourceDocument(doc) {
+	try {
+		if (!doc || !doc.body) return false;
+		const contentType = String(doc.contentType || "").toLowerCase();
+		const bodyText = String(doc.body.textContent || "").trim();
+		if (!bodyText) return false;
+
+		const startsLikeHtmlSource = /^\s*(?:<!doctype|<html|<head|<body|<script|<meta|<title|<link|<style)\b/i.test(
+			bodyText
+		);
+		const hasManyTags = (bodyText.match(/</g) || []).length > 20;
+		const closesHtmlLikeMarkup = /<\/(?:html|head|body|script|style)>/i.test(bodyText);
+		const noRenderedChildren = doc.body.children.length === 0;
+		const plainTextType =
+			contentType.includes("text/plain") || contentType.includes("application/octet-stream");
+
+		return (plainTextType || noRenderedChildren) && (startsLikeHtmlSource || (hasManyTags && closesHtmlLikeMarkup));
+	} catch {
+		return false;
+	}
+}
+
+function ensureHtmlHasBase(rawHtml, pageUrl) {
+	const source = String(rawHtml || "");
+	if (!source) return source;
+	const base = String(pageUrl || "").replace(/[^/]*([?#].*)?$/, "");
+	if (!base) return source;
+	const hasBase = /<base\s[^>]*href=/i.test(source);
+	if (hasBase) return source;
+	return source.replace(/<head([^>]*)>/i, `<head$1><base href="${base}">`);
+}
+
+function recoverRawHtmlByDocumentWrite(targetDocument, currentUrl) {
+	try {
+		if (!targetDocument?.body) return false;
+		const rawHtml = String(targetDocument.body.textContent || "");
+		if (!rawHtml.trim()) return false;
+		const patchedHtml = ensureHtmlHasBase(rawHtml, currentUrl);
+		targetDocument.open();
+		targetDocument.write(patchedHtml);
+		targetDocument.close();
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+async function maybeRecoverRawHtmlCatalogGame(tabId, frameElement) {
+	if (tabId !== activeTabId) return;
+	const tab = tabs.find((entry) => entry.id === tabId);
+	if (!tab) return;
+
+	const currentUrl = String(tab.url || "").trim();
+	if (!/^https?:\/\//i.test(currentUrl)) return;
+	if (!/\.html?(?:[?#]|$)/i.test(currentUrl)) return;
+	if (!isCatalogGameUrl(currentUrl)) return;
+	if (rawHtmlFallbackTriedUrlByTab.get(tabId) === currentUrl) return;
+
+	const targetWindow = frameElement?.contentWindow;
+	const targetDocument = targetWindow?.document;
+	if (!targetDocument || !looksLikeRawHtmlSourceDocument(targetDocument)) return;
+
+	rawHtmlFallbackTriedUrlByTab.set(tabId, currentUrl);
+	const recoveredInPlace = recoverRawHtmlByDocumentWrite(targetDocument, currentUrl);
+	if (recoveredInPlace) return;
+
+	let blobUrl = currentUrl;
+	try {
+		blobUrl = await materializeGameBlobUrl(currentUrl);
+	} catch {
+		blobUrl = currentUrl;
+	}
+	if (!String(blobUrl).startsWith("blob:")) return;
+
+	const previousBlob = gameBlobUrlsByTab.get(tabId);
+	if (previousBlob && previousBlob !== blobUrl) {
+		URL.revokeObjectURL(previousBlob);
+	}
+	gameBlobUrlsByTab.set(tabId, blobUrl);
+	await loadUrl(blobUrl, false);
 }
 
 function resolveGameUrl(url) {

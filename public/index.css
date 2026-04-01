@@ -20,8 +20,8 @@
 	--chrome-address-bg: rgba(12, 18, 31, 0.86);
 	--chrome-button-bg: rgba(15, 23, 40, 0.74);
 	--chrome-border-color: rgba(255, 255, 255, 0.12);
-	--chrome-toolbar-width: clamp(420px, calc(100vw - 240px), 820px);
-	--chrome-tabs-max-width: calc(100vw - 340px);
+	--chrome-toolbar-width: clamp(460px, calc(100vw - 220px), 980px);
+	--chrome-tabs-max-width: calc(100vw - 300px);
 	--chrome-toolbar-blur: 16px;
 	--chrome-tabs-blur: 14px;
 	--chrome-button-size: 28px;
@@ -129,9 +129,9 @@ body {
 
 .tabs {
 	display: flex;
-	gap: 0.3rem;
+	gap: 0.48rem;
 	flex: 0 1 auto;
-	max-width: calc(100vw - 460px);
+	max-width: calc(100vw - 380px);
 	overflow-x: auto;
 	scrollbar-width: none;
 	-ms-overflow-style: none;
@@ -144,18 +144,18 @@ body {
 .tab {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.32rem;
-	padding: 0.33rem 0.64rem;
+	gap: 0.4rem;
+	padding: 0.38rem 0.78rem;
 	border-radius: 999px;
 	background: rgba(10, 14, 22, 0.82);
 	border: 1px solid rgba(255, 255, 255, 0.1);
 	color: #f4f6fb;
-	font-size: 0.67rem;
+	font-size: 0.7rem;
 	font-weight: 500;
 	cursor: pointer;
 	white-space: nowrap;
-	max-width: 180px;
-	min-width: 0;
+	max-width: 220px;
+	min-width: 120px;
 	flex: 0 0 auto;
 	overflow: hidden;
 }
@@ -171,7 +171,7 @@ body {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	max-width: 128px;
+	max-width: 160px;
 }
 
 .tab.active {
@@ -330,6 +330,20 @@ body {
 	cursor: pointer;
 }
 
+#partnershipBtn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+#partnershipBtnImg {
+	width: 16px;
+	height: 16px;
+	object-fit: cover;
+	border-radius: 4px;
+	display: block;
+}
+
 .browser-shell {
 	display: grid;
 	grid-template-columns: 1fr;
@@ -418,6 +432,121 @@ body.matrix-theme-active #aiPage {
 
 .internal-page.active {
 	display: block;
+}
+
+#partnersPage {
+	background:
+		radial-gradient(circle at top, rgba(8, 15, 30, 0.42), rgba(4, 7, 14, 0.72)),
+		transparent;
+}
+
+.partners-page-shell {
+	max-width: 1200px;
+	margin: 0 auto;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 1rem;
+	background: rgba(5, 9, 16, 0.68);
+	backdrop-filter: blur(6px);
+	padding-bottom: 1rem;
+}
+
+.partners-header h2 {
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	font-size: 0.92rem;
+}
+
+.partners-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 1rem;
+	padding: 1rem;
+}
+
+.partner-card {
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	border-radius: 0.85rem;
+	background: rgba(3, 7, 14, 0.86);
+	padding: 0.75rem;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+.partner-card-top {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	margin-bottom: 0.75rem;
+}
+
+.partner-dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	display: inline-block;
+}
+
+.partner-dot.red {
+	background: #ff5f56;
+}
+
+.partner-dot.yellow {
+	background: #ffbd2e;
+}
+
+.partner-dot.green {
+	background: #27c93f;
+}
+
+.partner-logo-wrap {
+	height: 74px;
+	border: 1px solid rgba(255, 255, 255, 0.09);
+	border-radius: 0.65rem;
+	background: rgba(5, 10, 18, 0.94);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 0.75rem;
+}
+
+.partner-logo {
+	width: 56px;
+	height: 56px;
+	border-radius: 0.8rem;
+	background: linear-gradient(140deg, #10182c, #223764);
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 700;
+	font-size: 1rem;
+	letter-spacing: 0.05em;
+	color: #edf3ff;
+}
+
+.partner-card h3 {
+	font-size: 1rem;
+	font-weight: 600;
+	margin-bottom: 0.45rem;
+}
+
+.partner-card p {
+	font-size: 0.86rem;
+	color: rgba(222, 229, 243, 0.8);
+	line-height: 1.55;
+	min-height: 82px;
+}
+
+.partner-btn {
+	display: inline-flex;
+	width: 100%;
+	height: 32px;
+	border-radius: 0.5rem;
+	align-items: center;
+	justify-content: center;
+	text-decoration: none;
+	color: #f4f8ff;
+	background: linear-gradient(180deg, rgba(17, 26, 62, 0.95), rgba(14, 21, 53, 0.95));
+	border: 1px solid rgba(83, 109, 214, 0.45);
 }
 
 .settings-page-shell {
