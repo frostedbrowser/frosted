@@ -207,7 +207,7 @@
                         fontWeight: "700",
                         userSelect: "text",
                     },
-                    innerHTML: "FilterBrowser!",
+                    innerHTML: "Frosted!",
                 }),
                 (controlButtons = createElement(
                     "div",
@@ -3438,6 +3438,6 @@
         img.onerror = img.onabort = null;
         cheat();
         let iframe = document.querySelector("iframe");
-        iframe.contentWindow.alert("FilterBrowser V.1.1 BlooketCheats (very bugged) \n\nCheat by 5konzz")
+        iframe.contentWindow.alert("Frosted V.1.1 BlooketCheats (very bugged) \n\nCheat by 5konzz")
     }
 })();

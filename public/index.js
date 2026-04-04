@@ -1,4 +1,4 @@
-console.log(String.raw`
+﻿console.log(String.raw`
   ____              _         _    _     _ _
  |  _ \  ___  _ __ | |_   ___| | _(_) __| | |
  | | | |/ _ \| '_ \| __| / __| |/ / |/ _\` | |  _____
@@ -11,75 +11,201 @@ console.log(String.raw`
 `);
 
 "use strict";
-const qs = (sel) => document.querySelector(sel);
-const qsa = (sel) => Array.from(document.querySelectorAll(sel));
+var qs = (sel) => document.querySelector(sel);
+var qsa = (sel) => Array.from(document.querySelectorAll(sel));
 
-const tabsEl = qs("#tabs");
-const tabCounter = qs("#tabCounter");
-const newTabBtn = qs("#newTabBtn");
-const toolbarForm = qs("#toolbarForm");
-const homeForm = qs("#homeForm");
-const addressInput = qs("#addressInput");
-const partnershipBtn = qs("#partnershipBtn");
-const homeSearchInput = qs("#homeSearchInput");
-const backBtn = qs("#backBtn");
-const forwardBtn = qs("#forwardBtn");
-const reloadBtn = qs("#reloadBtn");
-const homeBtn = qs("#homeBtn");
-const gamesBtn = qs("#gamesBtn");
-const aiBtn = qs("#aiBtn");
-const codeBtn = qs("#codeBtn");
-const adsToggleBtn = qs("#adsToggleBtn");
-const settingsBtn = qs("#settingsBtn");
-const blankState = qs("#blankState");
-const loadingBanner = qs("#loadingBanner");
-const browserStage = qs(".browser-stage");
-const searchEngine = qs("#sj-search-engine");
-const randomTagline = qs("#randomTagline");
-const historyContainer = qs("#historyContainer");
-const particlesLayer = qs("#particles-js");
+var shellRefs = {
+	tabsEl: qs("#tabs"),
+	tabCounter: qs("#tabCounter"),
+	newTabBtn: qs("#newTabBtn"),
+	toolbarForm: qs("#toolbarForm"),
+	homeForm: qs("#homeForm"),
+	addressInput: qs("#addressInput"),
+	partnershipBtn: qs("#partnershipBtn"),
+	homeSearchInput: qs("#homeSearchInput"),
+	backBtn: qs("#backBtn"),
+	forwardBtn: qs("#forwardBtn"),
+	reloadBtn: qs("#reloadBtn"),
+	homeBtn: qs("#homeBtn"),
+	wallpaperAppBtn: qs("#wallpaperAppBtn"),
+	gamesBtn: qs("#gamesBtn"),
+	aiBtn: qs("#aiBtn"),
+	erudaBtn: qs("#erudaBtn"),
+	adsToggleBtn: qs("#adsToggleBtn"),
+	actionMenuBtn: qs("#actionMenuBtn"),
+	actionMenu: qs("#actionMenu"),
+	settingsBtn: qs("#settingsBtn"),
+	blankState: qs("#blankState"),
+	loadingBanner: qs("#loadingBanner"),
+	browserStage: qs(".browser-stage"),
+	searchEngine: qs("#sj-search-engine"),
+	randomTagline: qs("#randomTagline"),
+	historyContainer: qs("#historyContainer"),
+	particlesLayer: qs("#particles-js"),
+};
 
-const settingsPage = qs("#settingsPage");
-const creditsPage = qs("#creditsPage");
-const partnersPage = qs("#partnersPage");
-const gamesPage = qs("#gamesPage");
-const aiPage = qs("#aiPage");
-const gamesGrid = qs("#gamesGrid");
-const gamesCount = qs("#gamesCount");
-const gamesSearchInput = qs("#gamesSearchInput");
-const aiPromptInput = qs("#aiPromptInput");
-const aiSolveBtn = qs("#aiSolveBtn");
-const aiResult = qs("#aiResult");
-const aiModelSelect = qs("#aiModelSelect");
-const creditsLink = qs("#creditsLink");
-const wallpaperSelect = qs("#wallpaperSelect");
+var pageRefs = {
+	settingsPage: qs("#settingsPage"),
+	creditsPage: qs("#creditsPage"),
+	partnersPage: qs("#partnersPage"),
+	gamesPage: qs("#gamesPage"),
+	aiPage: qs("#aiPage"),
+	extensionPage: qs("#extensionPage"),
+	extensionStorePage: qs("#extensionStorePage"),
+	gamesGrid: qs("#gamesGrid"),
+	gamesCount: qs("#gamesCount"),
+	gamesSearchInput: qs("#gamesSearchInput"),
+	aiPromptInput: qs("#aiPromptInput"),
+	aiSolveBtn: qs("#aiSolveBtn"),
+	aiResult: qs("#aiResult"),
+	aiModelSelect: qs("#aiModelSelect"),
+	wallpaperExtensionEnabledToggle: qs("#wallpaperExtensionEnabledToggle"),
+	wallpaperExtensionStatus: qs("#wallpaperExtensionStatus"),
+	frostedWallpapersInstalledCount: qs("#frostedWallpapersInstalledCount"),
+	wallpaperStoreStatus: qs("#wallpaperStoreStatus"),
+	wallpaperStoreGrid: qs("#wallpaperStoreGrid"),
+	wallpaperStoreTabInstalled: qs("#wallpaperStoreTabInstalled"),
+	wallpaperStoreTabDiscover: qs("#wallpaperStoreTabDiscover"),
+	wallpaperStoreTabStore: qs("#wallpaperStoreTabStore"),
+	wallpaperStoreSearchInput: qs("#wallpaperStoreSearchInput"),
+	wallpaperStoreExitBtn: qs("#wallpaperStoreExitBtn"),
+	wallpaperStorePreviewTitle: qs("#wallpaperStorePreviewTitle"),
+	wallpaperStorePreviewMeta: qs("#wallpaperStorePreviewMeta"),
+	wallpaperStorePreviewMedia: qs("#wallpaperStorePreviewMedia"),
+	wallpaperStoreInstallBtn: qs("#wallpaperStoreInstallBtn"),
+	wallpaperStoreUninstallBtn: qs("#wallpaperStoreUninstallBtn"),
+	wallpaperStoreApplyBtn: qs("#wallpaperStoreApplyBtn"),
+	creditsLink: qs("#creditsLink"),
+	wallpaperSelect: qs("#wallpaperSelect"),
+};
 
-const currentPanicKey = qs("#current-panic-key");
-const changePanicKeyBtn = qs("#change-panic-key-btn");
-const listeningStatus = qs("#listening-status");
-const panicUrlInput = qs("#panic-url");
-const panicUrlSaveBtn = qs("#save-panic-btn");
-const panicStatus = qs("#panic-status");
-const openModeAboutBtn = qs("#openModeAboutBtn");
-const openModeBlobBtn = qs("#openModeBlobBtn");
-const openModeStatus = qs("#openModeStatus");
+var panicRefs = {
+	currentPanicKey: qs("#current-panic-key"),
+	changePanicKeyBtn: qs("#change-panic-key-btn"),
+	listeningStatus: qs("#listening-status"),
+	panicUrlInput: qs("#panic-url"),
+	panicUrlSaveBtn: qs("#save-panic-btn"),
+	panicNowBtn: qs("#panic-now-btn"),
+	panicStatus: qs("#panic-status"),
+	openModeAboutBtn: qs("#openModeAboutBtn"),
+	openModeBlobBtn: qs("#openModeBlobBtn"),
+	openModeStatus: qs("#openModeStatus"),
+	autoBlobToggle: qs("#autoBlobToggle"),
+	autoBlobStatus: qs("#autoBlobStatus"),
+};
 
+var cloakRefs = {
+	cloakEnabledToggle: qs("#cloakEnabledToggle"),
+	cloakTitleInput: qs("#cloak-title"),
+	cloakFaviconInput: qs("#cloak-favicon"),
+	cloakPresetSelect: qs("#cloakPresetSelect"),
+	cloakTitleSaveBtn: qs("#save-cloak-title-btn"),
+	cloakFaviconSaveBtn: qs("#save-cloak-favicon-btn"),
+	cloakStatus: qs("#cloak-status"),
+	faviconLink: document.querySelector("link[rel~='icon']"),
+};
 
-const cloakEnabledToggle = qs("#cloakEnabledToggle");
-const cloakTitleInput = qs("#cloak-title");
-const cloakFaviconInput = qs("#cloak-favicon");
-const cloakPresetSelect = qs("#cloakPresetSelect");
-const cloakTitleSaveBtn = qs("#save-cloak-title-btn");
-const cloakFaviconSaveBtn = qs("#save-cloak-favicon-btn");
-const cloakStatus = qs("#cloak-status");
-const faviconLink = document.querySelector("link[rel~='icon']");
+var errorRefs = {
+	errorPanel: qs("#error-panel"),
+	errorTitle: qs("#sj-error"),
+	errorDetails: qs("#sj-error-code"),
+};
 
-const errorPanel = qs("#error-panel");
-const errorTitle = qs("#sj-error");
-const errorDetails = qs("#sj-error-code");
+var {
+	tabsEl,
+	tabCounter,
+	newTabBtn,
+	toolbarForm,
+	homeForm,
+	addressInput,
+	partnershipBtn,
+	homeSearchInput,
+	backBtn,
+	forwardBtn,
+	reloadBtn,
+	homeBtn,
+	wallpaperAppBtn,
+	gamesBtn,
+	aiBtn,
+	erudaBtn,
+	adsToggleBtn,
+	actionMenuBtn,
+	actionMenu,
+	settingsBtn,
+	blankState,
+	loadingBanner,
+	browserStage,
+	searchEngine,
+	randomTagline,
+	historyContainer,
+	particlesLayer,
+} = shellRefs;
 
-const { ScramjetController } = $scramjetLoadController();
-const scramjet = new ScramjetController({
+var {
+	settingsPage,
+	creditsPage,
+	partnersPage,
+	gamesPage,
+	aiPage,
+	extensionPage,
+	extensionStorePage,
+	gamesGrid,
+	gamesCount,
+	gamesSearchInput,
+	aiPromptInput,
+	aiSolveBtn,
+	aiResult,
+	aiModelSelect,
+	wallpaperExtensionEnabledToggle,
+	wallpaperExtensionStatus,
+	frostedWallpapersInstalledCount,
+	wallpaperStoreStatus,
+	wallpaperStoreGrid,
+	wallpaperStoreTabInstalled,
+	wallpaperStoreTabDiscover,
+	wallpaperStoreTabStore,
+	wallpaperStoreSearchInput,
+	wallpaperStoreExitBtn,
+	wallpaperStorePreviewTitle,
+	wallpaperStorePreviewMeta,
+	wallpaperStorePreviewMedia,
+	wallpaperStoreInstallBtn,
+	wallpaperStoreUninstallBtn,
+	wallpaperStoreApplyBtn,
+	creditsLink,
+	wallpaperSelect,
+} = pageRefs;
+
+var {
+	currentPanicKey,
+	changePanicKeyBtn,
+	listeningStatus,
+	panicUrlInput,
+	panicUrlSaveBtn,
+	panicNowBtn,
+	panicStatus,
+	openModeAboutBtn,
+	openModeBlobBtn,
+	openModeStatus,
+	autoBlobToggle,
+	autoBlobStatus,
+} = panicRefs;
+
+var {
+	cloakEnabledToggle,
+	cloakTitleInput,
+	cloakFaviconInput,
+	cloakPresetSelect,
+	cloakTitleSaveBtn,
+	cloakFaviconSaveBtn,
+	cloakStatus,
+	faviconLink,
+} = cloakRefs;
+
+var { errorPanel, errorTitle, errorDetails } = errorRefs;
+
+var { ScramjetController } = $scramjetLoadController();
+var scramjet = new ScramjetController({
 	files: {
 		wasm: "/scram/scramjet.wasm.wasm",
 		all: "/scram/scramjet.all.js",
@@ -88,42 +214,51 @@ const scramjet = new ScramjetController({
 });
 scramjet.init();
 
-const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
+var connection = new BareMux.BareMuxConnection("/baremux/worker.js");
 
-let tabs = [];
-let activeTabId = null;
-let nextTabId = 1;
-let transportReady = false;
-const tabFrames = new Map();
-const aiChatHistory = [];
-let aiTypingRunId = 0;
-const aiUiThread = [];
-let gamesCatalog = [];
-const gameBlobUrlsByTab = new Map();
-const rawHtmlFallbackTriedUrlByTab = new Map();
-const pendingGameClickScriptsByTab = new Map();
-const gameClickScriptDelayMs = 4200;
-let particleCanvas = null;
-let particleCtx = null;
-let particleDots = [];
-let matrixDrops = [];
-let matrixFontSize = 14;
-let particleMode = "dots";
-const matrixGlyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&*+-=<>[]{}()/\\|";
-let particleFrameId = 0;
-let particleResizeFrameId = 0;
-let particleLastTs = 0;
-let particleRgb = { r: 136, g: 192, b: 208 };
-let particleAltRgb = { r: 129, g: 161, b: 193 };
-let particleBgRgb = { r: 10, g: 15, b: 20 };
-let ghosteryEngine = null;
-let ghosteryRequestCtor = null;
-let ghosteryEnginePromise = null;
-const reducedMotionQuery = window.matchMedia
+// App state and caches.
+var tabs = [];
+var activeTabId = null;
+var nextTabId = 1;
+var transportReady = false;
+var tabFrames = new Map();
+var suppressNextFrameNavSyncByTab = new Set();
+var aiChatHistory = [];
+var aiTypingRunId = 0;
+var aiUiThread = [];
+var gamesCatalog = [];
+var gameBlobUrlsByTab = new Map();
+var rawHtmlFallbackTriedUrlByTab = new Map();
+var pendingGameClickScriptsByTab = new Map();
+var gameClickScriptDelayMs = 4200;
+
+// Visual/particles state.
+var particleCanvas = null;
+var particleCtx = null;
+var particleDots = [];
+var matrixDrops = [];
+var matrixFontSize = 14;
+var particleMode = "dots";
+var matrixGlyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&*+-=<>[]{}()/\\|";
+var particleFrameId = 0;
+var particleResizeFrameId = 0;
+var particleLastTs = 0;
+var particleRgb = { r: 136, g: 192, b: 208 };
+var particleAltRgb = { r: 129, g: 161, b: 193 };
+var particleBgRgb = { r: 10, g: 15, b: 20 };
+var ghosteryEngine = null;
+var ghosteryRequestCtor = null;
+var ghosteryEnginePromise = null;
+var quickContextMenuEl = null;
+var defaultAppIconHref =
+	"https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/icons/frosted.png";
+
+// Device/accessibility state.
+var reducedMotionQuery = window.matchMedia
 	? window.matchMedia("(prefers-reduced-motion: reduce)")
 	: null;
 
-const taglines = [
+var taglines = [
 	"probably works as expected",
 	"still loading... please wait",
 	"not entirely sure why this works",
@@ -155,7 +290,7 @@ const taglines = [
 	"today's forecast: 70% chance of shipping",
 ];
 
-const chromeBarConfig = {
+var chromeBarConfig = {
 	toolbarBg: "rgba(42, 68, 113, 0.78)",
 	tabsBg: "rgba(22, 34, 58, 0.9)",
 	addressBg: "rgba(12, 18, 31, 0.86)",
@@ -171,7 +306,7 @@ const chromeBarConfig = {
 };
 
 function applyChromeBarConfig(config = chromeBarConfig) {
-	const root = document.documentElement;
+	var root = document.documentElement;
 	root.style.setProperty("--chrome-toolbar-bg", String(config.toolbarBg || "").trim());
 	root.style.setProperty("--chrome-tabs-bg", String(config.tabsBg || "").trim());
 	root.style.setProperty("--chrome-address-bg", String(config.addressBg || "").trim());
@@ -190,6 +325,7 @@ function init() {
 	applyChromeBarConfig();
 	updateAdblockToggleLabel();
 	void ensureGhosteryEngine();
+	loadInstalledExtensionWallpapers();
 
 	if (randomTagline) {
 		randomTagline.textContent = taglines[Math.floor(Math.random() * taglines.length)];
@@ -200,6 +336,7 @@ function init() {
 	initParticles();
 	loadPanicSettings();
 	loadOpenModeSettings();
+	loadAutoBlobSettings();
 	loadCloakSettings();
 	applyCloakVisualState(document.hidden || !document.hasFocus());
 	runStartupBrandSequence();
@@ -208,14 +345,16 @@ function init() {
 	bindEvents();
 	renderHistory();
 	void loadGamesCatalog();
+	void loadWallpaperStoreCatalog();
 }
 
-const startupBrandTitle = "IXL | Math, Language Arts, Science, Social Studies, and Spanish";
-const startupBrandFaviconHref = "ixl.ico";
-const startupBrandDurationMs = 120;
-const autoOpenAboutBlankAfterStartup = true;
-const autoOpenAboutBlankDelayMs = 180;
-const autoOpenAboutBlankSessionKey = "fb_auto_aboutblank_done";
+var startupBrandTitle = "IXL | Math, Language Arts, Science, Social Studies, and Spanish";
+var startupBrandFaviconHref = "ixl.ico";
+var startupBrandDurationMs = 120;
+var autoOpenBlobAfterStartup = true;
+var autoOpenBlobDelayMs = 180;
+var autoOpenBlobSessionKey = "fb_auto_blob_done";
+var autoBlobEnabledStorage = "fb_auto_blob_enabled";
 
 function runStartupBrandSequence() {
 	document.title = startupBrandTitle;
@@ -223,31 +362,54 @@ function runStartupBrandSequence() {
 
 	setTimeout(() => {
 		applyCloakVisualState(document.hidden || !document.hasFocus());
-		maybeAutoOpenAboutBlankAfterStartup();
+		maybeAutoOpenBlobAfterStartup();
 	}, startupBrandDurationMs);
 }
 
-function maybeAutoOpenAboutBlankAfterStartup() {
-	if (!autoOpenAboutBlankAfterStartup) return;
+function maybeAutoOpenBlobAfterStartup() {
+	if (!autoOpenBlobAfterStartup || !isAutoBlobEnabled()) return;
 	try {
 		if (window.top && window.top !== window) return;
 	} catch {
 		return;
 	}
 	try {
-		if (sessionStorage.getItem(autoOpenAboutBlankSessionKey) === "1") return;
-		sessionStorage.setItem(autoOpenAboutBlankSessionKey, "1");
+		if (sessionStorage.getItem(autoOpenBlobSessionKey) === "1") return;
+		sessionStorage.setItem(autoOpenBlobSessionKey, "1");
 	} catch {
 	}
 	setTimeout(() => {
-		openCurrentPageInMode("aboutblank");
-	}, autoOpenAboutBlankDelayMs);
+		openCurrentPageInMode("blob");
+	}, autoOpenBlobDelayMs);
 }
 
-const gamesInternalUrl = "bypass://games";
-const aiInternalUrl = "bypass://ai";
-const partnersInternalUrl = "bypass://partners";
-const aiModeKey = "fb_ai_mode";
+function isAutoBlobEnabled() {
+	var raw = String(localStorage.getItem(autoBlobEnabledStorage) || "").trim().toLowerCase();
+	if (raw === "true") return true;
+	if (raw === "false") return false;
+	return autoOpenBlobAfterStartup;
+}
+
+function updateAutoBlobStatusText() {
+	if (!autoBlobStatus) return;
+	autoBlobStatus.textContent = `Auto Blob on startup: ${
+		isAutoBlobEnabled() ? "enabled" : "disabled"
+	}`;
+}
+
+function loadAutoBlobSettings() {
+	var enabled = isAutoBlobEnabled();
+	if (autoBlobToggle) autoBlobToggle.checked = enabled;
+	updateAutoBlobStatusText();
+}
+
+var settingsInternalUrl = "frosted://settings";
+var creditsInternalUrl = "frosted://credits";
+var gamesInternalUrl = "frosted://games";
+var aiInternalUrl = "frosted://ai";
+var partnersInternalUrl = "frosted://partners";
+var wallpapersInternalUrl = "frosted://wallpapers";
+var aiModeKey = "fb_ai_mode";
 
 function bindEvents() {
 	newTabBtn.addEventListener("click", () => createTab(""));
@@ -260,6 +422,33 @@ function bindEvents() {
 			navigateFromInput(partnersInternalUrl);
 		});
 	}
+	if (actionMenuBtn && actionMenu) {
+		var closeActionMenu = () => {
+			actionMenu.classList.remove("open");
+			actionMenuBtn.setAttribute("aria-expanded", "false");
+		};
+		var toggleActionMenu = () => {
+			var open = actionMenu.classList.toggle("open");
+			actionMenuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+		};
+		actionMenuBtn.addEventListener("click", (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+			toggleActionMenu();
+		});
+		actionMenu.addEventListener("click", () => {
+			closeActionMenu();
+		});
+		document.addEventListener("click", (event) => {
+			if (!actionMenu.classList.contains("open")) return;
+			if (actionMenu.contains(event.target) || actionMenuBtn.contains(event.target)) return;
+			closeActionMenu();
+		});
+		window.addEventListener("keydown", (event) => {
+			if (event.key === "Escape") closeActionMenu();
+		});
+	}
+	bindQuickContextMenu();
 	homeForm.addEventListener("submit", (e) => {
 		e.preventDefault();
 		navigateFromInput(homeSearchInput.value);
@@ -271,18 +460,25 @@ function bindEvents() {
 	homeBtn.addEventListener("click", goHome);
 
 	gamesBtn.addEventListener("click", () => navigateFromInput(gamesInternalUrl));
+	if (wallpaperAppBtn) {
+		wallpaperAppBtn.addEventListener("click", () => navigateFromInput(wallpapersInternalUrl));
+		wallpaperAppBtn.addEventListener("contextmenu", (event) => {
+			event.preventDefault();
+			navigateFromInput(wallpapersInternalUrl);
+		});
+	}
 	aiBtn.addEventListener("click", () => navigateFromInput(aiInternalUrl));
-	if (codeBtn) {
-		codeBtn.addEventListener("click", injectErudaIntoActiveTab);
+	if (erudaBtn) {
+		erudaBtn.addEventListener("click", injectErudaIntoActiveTab);
 	}
 	if (adsToggleBtn) {
 		adsToggleBtn.addEventListener("click", toggleAdblock);
 	}
-	settingsBtn.addEventListener("click", () => navigateFromInput("bypass://settings"));
+	settingsBtn.addEventListener("click", () => navigateFromInput(settingsInternalUrl));
 	if (creditsLink) {
 		creditsLink.addEventListener("click", (event) => {
 			event.preventDefault();
-			navigateFromInput("bypass://credits");
+			navigateFromInput(creditsInternalUrl);
 		});
 	}
 
@@ -292,6 +488,64 @@ function bindEvents() {
 		});
 	});
 
+	if (wallpaperExtensionEnabledToggle) {
+		wallpaperExtensionEnabledToggle.addEventListener("change", () => {
+			setWallpaperExtensionEnabled(Boolean(wallpaperExtensionEnabledToggle.checked));
+		});
+	}
+	if (wallpaperStoreTabInstalled) {
+		wallpaperStoreTabInstalled.addEventListener("click", () => {
+			setWallpaperStoreView("installed");
+		});
+	}
+	if (wallpaperStoreTabDiscover) {
+		wallpaperStoreTabDiscover.addEventListener("click", () => {
+			setWallpaperStoreView("discover");
+		});
+	}
+	if (wallpaperStoreTabStore) {
+		wallpaperStoreTabStore.addEventListener("click", () => {
+			setWallpaperStoreView("store");
+		});
+	}
+	if (wallpaperStoreSearchInput) {
+		wallpaperStoreSearchInput.addEventListener("input", () => {
+			wallpaperStoreQuery = String(wallpaperStoreSearchInput.value || "").trim().toLowerCase();
+			renderWallpaperStoreGrid();
+		});
+	}
+	if (wallpaperStoreExitBtn) {
+		wallpaperStoreExitBtn.addEventListener("click", () => {
+			goHome();
+		});
+	}
+	if (wallpaperStoreInstallBtn) {
+		wallpaperStoreInstallBtn.addEventListener("click", () => {
+			var selected = getSelectedWallpaperStoreEntry();
+			if (!selected) return;
+			if (!isWallpaperExtensionEnabled()) return;
+			installWallpaperFromStore(selected);
+		});
+	}
+	if (wallpaperStoreUninstallBtn) {
+		wallpaperStoreUninstallBtn.addEventListener("click", () => {
+			var selected = getSelectedWallpaperStoreEntry();
+			if (!selected) return;
+			if (!isWallpaperExtensionEnabled()) return;
+			uninstallWallpaperFromStore(selected);
+		});
+	}
+	if (wallpaperStoreApplyBtn) {
+		wallpaperStoreApplyBtn.addEventListener("click", () => {
+			var selected = getSelectedWallpaperStoreEntry();
+			if (!selected) return;
+			if (!isWallpaperExtensionEnabled()) return;
+			if (!isStoreWallpaperInstalled(selected.key)) return;
+			if (wallpaperStoreView !== "installed") return;
+			applyWallpaper(selected.key);
+		});
+	}
+
 	if (wallpaperSelect) {
 		wallpaperSelect.addEventListener("change", () => {
 			applyWallpaper(wallpaperSelect.value);
@@ -300,6 +554,11 @@ function bindEvents() {
 
 	changePanicKeyBtn.addEventListener("click", listenForPanicKey);
 	panicUrlSaveBtn.addEventListener("click", savePanicUrl);
+	if (panicNowBtn) {
+		panicNowBtn.addEventListener("click", () => {
+			setOpenMode("aboutblank", true);
+		});
+	}
 	if (openModeAboutBtn) {
 		openModeAboutBtn.addEventListener("click", () => {
 			setOpenMode("aboutblank", true);
@@ -310,6 +569,13 @@ function bindEvents() {
 			setOpenMode("blob", true);
 		});
 	}
+	if (autoBlobToggle) {
+		autoBlobToggle.addEventListener("change", () => {
+			localStorage.setItem(autoBlobEnabledStorage, autoBlobToggle.checked ? "true" : "false");
+			updateAutoBlobStatusText();
+		});
+	}
+
 	if (aiSolveBtn) {
 		aiSolveBtn.addEventListener("click", solveAiPrompt);
 	}
@@ -346,7 +612,7 @@ function bindEvents() {
 	}
 	if (cloakPresetSelect) {
 		cloakPresetSelect.addEventListener("change", () => {
-			const value = String(cloakPresetSelect.value || "custom");
+			var value = String(cloakPresetSelect.value || "custom");
 			if (value === "custom") return;
 			applyCloakPreset(value);
 		});
@@ -419,9 +685,9 @@ function queueParticlesResize() {
 
 function resizeParticles() {
 	if (!particleCanvas || !particleCtx || !particlesLayer) return;
-	const width = Math.max(1, Math.floor(particlesLayer.clientWidth || window.innerWidth));
-	const height = Math.max(1, Math.floor(particlesLayer.clientHeight || window.innerHeight));
-	const dpr = Math.min(window.devicePixelRatio || 1, 2);
+	var width = Math.max(1, Math.floor(particlesLayer.clientWidth || window.innerWidth));
+	var height = Math.max(1, Math.floor(particlesLayer.clientHeight || window.innerHeight));
+	var dpr = Math.min(window.devicePixelRatio || 1, 2);
 	particleCanvas.width = Math.floor(width * dpr);
 	particleCanvas.height = Math.floor(height * dpr);
 	particleCanvas.style.width = `${width}px`;
@@ -436,8 +702,8 @@ function resizeParticles() {
 }
 
 function seedParticles(width, height) {
-	const area = width * height;
-	const count = Math.max(34, Math.min(92, Math.round(area / 17000)));
+	var area = width * height;
+	var count = Math.max(34, Math.min(92, Math.round(area / 17000)));
 	particleDots = Array.from({ length: count }, () => ({
 		x: Math.random() * width,
 		y: Math.random() * height,
@@ -453,7 +719,7 @@ function seedParticles(width, height) {
 
 function seedMatrixRain(width, height) {
 	matrixFontSize = Math.max(10, Math.min(14, Math.round(width / 150)));
-	const columns = Math.max(1, Math.floor(width / matrixFontSize));
+	var columns = Math.max(1, Math.floor(width / matrixFontSize));
 	matrixDrops = Array.from({ length: columns }, () => Math.random() * height);
 }
 
@@ -489,14 +755,16 @@ function setParticlesVisible(visible) {
 }
 
 function shouldShowParticlesForCurrentView() {
-	const matrixActive = isMatrixThemeActive();
-	const onBlank = blankState?.style.display === "flex";
-	const onInternal =
+	var matrixActive = isMatrixThemeActive();
+	var onBlank = blankState?.style.display === "flex";
+	var onInternal =
 		settingsPage?.classList.contains("active") ||
 		gamesPage?.classList.contains("active") ||
 		aiPage?.classList.contains("active") ||
 		partnersPage?.classList.contains("active") ||
-		creditsPage?.classList.contains("active");
+		creditsPage?.classList.contains("active") ||
+		extensionPage?.classList.contains("active") ||
+		extensionStorePage?.classList.contains("active");
 	if (onBlank) return true;
 	if (onInternal) return matrixActive;
 	return false;
@@ -505,13 +773,13 @@ function shouldShowParticlesForCurrentView() {
 function tickParticles(ts) {
 	if (!particleCtx || !particleCanvas) return;
 	if (!particleLastTs) particleLastTs = ts;
-	const dt = Math.min(32, ts - particleLastTs);
+	var dt = Math.min(32, ts - particleLastTs);
 	particleLastTs = ts;
-	const width = parseFloat(particleCanvas.style.width) || window.innerWidth;
-	const height = parseFloat(particleCanvas.style.height) || window.innerHeight;
-	const speedBase = dt / 16.666;
-	const speed = reducedMotionQuery?.matches && particleMode === "matrix" ? speedBase * 0.45 : speedBase;
-	const t = ts / 1000;
+	var width = parseFloat(particleCanvas.style.width) || window.innerWidth;
+	var height = parseFloat(particleCanvas.style.height) || window.innerHeight;
+	var speedBase = dt / 16.666;
+	var speed = reducedMotionQuery?.matches && particleMode === "matrix" ? speedBase * 0.45 : speedBase;
+	var t = ts / 1000;
 
 	if (particleMode === "matrix") {
 		drawMatrixRain(width, height, speed);
@@ -519,7 +787,7 @@ function tickParticles(ts) {
 		return;
 	}
 
-	for (const dot of particleDots) {
+	for (var dot of particleDots) {
 		dot.x += dot.vx * speed;
 		dot.y += dot.vy * speed;
 		dot.currentAlpha = Math.min(
@@ -538,8 +806,8 @@ function tickParticles(ts) {
 
 function drawParticles() {
 	if (!particleCtx || !particleCanvas) return;
-	const width = parseFloat(particleCanvas.style.width) || window.innerWidth;
-	const height = parseFloat(particleCanvas.style.height) || window.innerHeight;
+	var width = parseFloat(particleCanvas.style.width) || window.innerWidth;
+	var height = parseFloat(particleCanvas.style.height) || window.innerHeight;
 
 	if (particleMode === "matrix") {
 		particleCtx.fillStyle = `rgba(${particleBgRgb.r}, ${particleBgRgb.g}, ${particleBgRgb.b}, 1)`;
@@ -549,13 +817,13 @@ function drawParticles() {
 	}
 
 	particleCtx.clearRect(0, 0, width, height);
-	for (const dot of particleDots) {
+	for (var dot of particleDots) {
 		particleCtx.beginPath();
 		particleCtx.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2);
-		const mix = dot.colorMix;
-		const r = Math.round(particleRgb.r * (1 - mix) + particleAltRgb.r * mix);
-		const g = Math.round(particleRgb.g * (1 - mix) + particleAltRgb.g * mix);
-		const b = Math.round(particleRgb.b * (1 - mix) + particleAltRgb.b * mix);
+		var mix = dot.colorMix;
+		var r = Math.round(particleRgb.r * (1 - mix) + particleAltRgb.r * mix);
+		var g = Math.round(particleRgb.g * (1 - mix) + particleAltRgb.g * mix);
+		var b = Math.round(particleRgb.b * (1 - mix) + particleAltRgb.b * mix);
 		particleCtx.fillStyle = `rgba(${r}, ${g}, ${b}, ${dot.currentAlpha ?? dot.alpha})`;
 		particleCtx.shadowBlur = 14;
 		particleCtx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.72)`;
@@ -573,23 +841,23 @@ function drawMatrixRain(width, height, speed) {
 	particleCtx.shadowBlur = 9;
 	particleCtx.shadowColor = `rgba(${particleRgb.r}, ${particleRgb.g}, ${particleRgb.b}, 0.62)`;
 
-	for (let i = 0; i < matrixDrops.length; i++) {
-		const x = i * matrixFontSize;
-		const y = matrixDrops[i];
-		const mix = (i % 5) / 4;
-		const r = Math.round(particleRgb.r * (1 - mix) + particleAltRgb.r * mix);
-		const g = Math.round(particleRgb.g * (1 - mix) + particleAltRgb.g * mix);
-		const b = Math.round(particleRgb.b * (1 - mix) + particleAltRgb.b * mix);
-		const trail = 11 + (i % 10);
-		for (let t = trail; t >= 0; t--) {
-			const ty = y - t * matrixFontSize;
+	for (var i = 0; i < matrixDrops.length; i++) {
+		var x = i * matrixFontSize;
+		var y = matrixDrops[i];
+		var mix = (i % 5) / 4;
+		var r = Math.round(particleRgb.r * (1 - mix) + particleAltRgb.r * mix);
+		var g = Math.round(particleRgb.g * (1 - mix) + particleAltRgb.g * mix);
+		var b = Math.round(particleRgb.b * (1 - mix) + particleAltRgb.b * mix);
+		var trail = 11 + (i % 10);
+		for (var t = trail; t >= 0; t--) {
+			var ty = y - t * matrixFontSize;
 			if (ty < -matrixFontSize || ty > height + matrixFontSize) continue;
-			const char = matrixGlyphs[Math.floor(Math.random() * matrixGlyphs.length)];
-			const alpha = Math.max(0.1, 0.9 - t * 0.07);
+			var char = matrixGlyphs[Math.floor(Math.random() * matrixGlyphs.length)];
+			var alpha = Math.max(0.1, 0.9 - t * 0.07);
 			particleCtx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
 			particleCtx.fillText(char, x, ty);
 		}
-		const headChar = matrixGlyphs[Math.floor(Math.random() * matrixGlyphs.length)];
+		var headChar = matrixGlyphs[Math.floor(Math.random() * matrixGlyphs.length)];
 		particleCtx.fillStyle = "rgba(230, 255, 238, 0.95)";
 		particleCtx.fillText(headChar, x, y - matrixFontSize * 0.82);
 		particleCtx.fillStyle = "rgba(194, 255, 212, 0.58)";
@@ -609,14 +877,14 @@ function isMatrixThemeActive() {
 }
 
 function updateParticleColorFromTheme() {
-	const style = getComputedStyle(document.documentElement);
-	const teamColor = style.getPropertyValue("--team-color-1").trim() || "#88c0d0";
-	const teamColorAlt = style.getPropertyValue("--team-color-2").trim() || "#81a1c1";
-	const bgColor = style.getPropertyValue("--bg").trim() || "#0a0f14";
+	var style = getComputedStyle(document.documentElement);
+	var teamColor = style.getPropertyValue("--team-color-1").trim() || "#88c0d0";
+	var teamColorAlt = style.getPropertyValue("--team-color-2").trim() || "#81a1c1";
+	var bgColor = style.getPropertyValue("--bg").trim() || "#0a0f14";
 	particleRgb = parseHexToRgb(teamColor) || { r: 136, g: 192, b: 208 };
 	particleAltRgb = parseHexToRgb(teamColorAlt) || { r: 129, g: 161, b: 193 };
 	particleBgRgb = parseHexToRgb(bgColor) || { r: 10, g: 15, b: 20 };
-	const nextMode = isMatrixThemeActive() ? "matrix" : "dots";
+	var nextMode = isMatrixThemeActive() ? "matrix" : "dots";
 	document.body.classList.toggle("matrix-theme-active", nextMode === "matrix");
 	if (nextMode !== particleMode) {
 		particleMode = nextMode;
@@ -627,7 +895,7 @@ function updateParticleColorFromTheme() {
 }
 
 function parseHexToRgb(value) {
-	const raw = String(value || "").trim().replace("#", "");
+	var raw = String(value || "").trim().replace("#", "");
 	if (!/^[0-9a-fA-F]{6}$/.test(raw)) return null;
 	return {
 		r: parseInt(raw.slice(0, 2), 16),
@@ -637,7 +905,7 @@ function parseHexToRgb(value) {
 }
 
 function createTab(url) {
-	const tab = {
+	var tab = {
 		id: `tab_${nextTabId++}`,
 		title: "New Tab",
 		url: url || "",
@@ -650,16 +918,16 @@ function createTab(url) {
 }
 
 function closeTab(id) {
-	const idx = tabs.findIndex((t) => t.id === id);
+	var idx = tabs.findIndex((t) => t.id === id);
 	if (idx === -1) return;
-	const [removed] = tabs.splice(idx, 1);
-	const oldGameBlob = gameBlobUrlsByTab.get(removed.id);
+	var [removed] = tabs.splice(idx, 1);
+	var oldGameBlob = gameBlobUrlsByTab.get(removed.id);
 	if (oldGameBlob) {
 		URL.revokeObjectURL(oldGameBlob);
 		gameBlobUrlsByTab.delete(removed.id);
 	}
 	rawHtmlFallbackTriedUrlByTab.delete(removed.id);
-	const frame = tabFrames.get(removed.id);
+	var frame = tabFrames.get(removed.id);
 	if (frame) {
 		frame.element.remove();
 		tabFrames.delete(removed.id);
@@ -670,7 +938,7 @@ function closeTab(id) {
 		return;
 	}
 	if (activeTabId === id) {
-		const next = tabs[Math.max(0, idx - 1)];
+		var next = tabs[Math.max(0, idx - 1)];
 		setActiveTab(next.id, true);
 	}
 	renderTabs();
@@ -678,20 +946,24 @@ function closeTab(id) {
 
 function setActiveTab(id, keepView) {
 	activeTabId = id;
-	const tab = getActiveTab();
+	var tab = getActiveTab();
 	if (!tab) return;
 
 	if (!tab.url) {
 		addressInput.value = "";
 		homeSearchInput.value = "";
 		showBlank();
-	} else if (tab.url === "bypass://settings") {
+	} else if (isSettingsInternalUrl(tab.url)) {
 		showSettingsPage();
 	} else if (isGamesInternalUrl(tab.url)) {
 		showGamesPage();
 	} else if (isAiInternalUrl(tab.url)) {
 		showAiPage();
-	} else if (tab.url === "bypass://credits") {
+	} else if (isPartnersInternalUrl(tab.url)) {
+		showPartnersPage();
+	} else if (isExtensionInternalUrl(tab.url) || isExtensionStoreInternalUrl(tab.url)) {
+		showExtensionStorePage();
+	} else if (isCreditsInternalUrl(tab.url)) {
 		showCreditsPage();
 	} else {
 		showFrameForTab(id);
@@ -707,15 +979,15 @@ function setActiveTab(id, keepView) {
 function renderTabs() {
 	tabsEl.innerHTML = "";
 	tabs.forEach((tab) => {
-		const node = document.createElement("div");
+		var node = document.createElement("div");
 		node.className = `tab${tab.id === activeTabId ? " active" : ""}`;
 		node.dataset.tabId = tab.id;
 
-		const favicon = document.createElement("img");
+		var favicon = document.createElement("img");
 		favicon.className = "tab-favicon";
 		favicon.alt = "";
-		const faviconCandidates = getTabFaviconCandidates(tab.url);
-		let faviconIdx = 0;
+		var faviconCandidates = getTabFaviconCandidates(tab.url);
+		var faviconIdx = 0;
 		favicon.src = faviconCandidates[faviconIdx];
 		favicon.loading = "lazy";
 		favicon.decoding = "async";
@@ -727,12 +999,12 @@ function renderTabs() {
 		});
 		node.appendChild(favicon);
 
-		const title = document.createElement("span");
+		var title = document.createElement("span");
 		title.className = "tab-title";
 		title.textContent = tab.title || "New Tab";
 		node.appendChild(title);
 
-		const close = document.createElement("button");
+		var close = document.createElement("button");
 		close.className = "tab-close";
 		close.type = "button";
 		close.textContent = "x";
@@ -745,29 +1017,36 @@ function renderTabs() {
 		tabsEl.appendChild(node);
 	});
 	if (tabCounter) tabCounter.textContent = String(tabs.length);
-	const widthTabCount = Math.min(Math.max(tabs.length, 1), 10);
-	const tabsRowEl = tabsEl.closest(".tabs-row");
+	var widthTabCount = Math.min(Math.max(tabs.length, 1), 10);
+	var tabsRowEl = tabsEl.closest(".tabs-row");
 	if (tabsRowEl) {
 		tabsRowEl.style.setProperty("--tab-count-for-width", String(widthTabCount));
 	}
 }
 
 function getTabFaviconCandidates(url) {
-	if (!url) return ["favicon.ico"];
-	if (url === "bypass://settings" || url === "bypass://credits" || isPartnersInternalUrl(url)) return ["favicon.ico"];
-	if (isGamesInternalUrl(url)) return ["favicon.ico"];
+	if (!url) return [defaultAppIconHref];
+	if (
+		isSettingsInternalUrl(url) ||
+		isCreditsInternalUrl(url) ||
+		isPartnersInternalUrl(url) ||
+		isExtensionInternalUrl(url) ||
+		isExtensionStoreInternalUrl(url)
+	)
+		return [defaultAppIconHref];
+	if (isGamesInternalUrl(url)) return [defaultAppIconHref];
 	if (isAiInternalUrl(url)) return ["chatgpt-logo.svg"];
 	try {
-		const host = new URL(url).hostname;
-		if (!host) return ["favicon.ico"];
+		var host = new URL(url).hostname;
+		if (!host) return [defaultAppIconHref];
 		return [
 			`https://${host}/favicon.ico`,
 			`https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`,
 			`https://icons.duckduckgo.com/ip3/${encodeURIComponent(host)}.ico`,
-			"favicon.ico",
+			defaultAppIconHref,
 		];
 	} catch {
-		return ["favicon.ico"];
+		return [defaultAppIconHref];
 	}
 }
 
@@ -777,13 +1056,14 @@ function getActiveTab() {
 
 function getDisplayTitle(url) {
 	if (!url) return "New Tab";
-	if (url === "bypass://settings") return "Settings";
+	if (isSettingsInternalUrl(url)) return "Settings";
 	if (isPartnersInternalUrl(url)) return "Partners";
 	if (isGamesInternalUrl(url)) return "Games";
 	if (isAiInternalUrl(url)) return "AI";
-	if (url === "bypass://credits") return "Credits";
+	if (isExtensionInternalUrl(url) || isExtensionStoreInternalUrl(url)) return "Wallpapers";
+	if (isCreditsInternalUrl(url)) return "Credits";
 	try {
-		const parsed = new URL(url);
+		var parsed = new URL(url);
 		return parsed.hostname.slice(0, 24);
 	} catch {
 		return url.slice(0, 24);
@@ -792,22 +1072,23 @@ function getDisplayTitle(url) {
 
 function normalizeInput(input) {
 	if (!input || !searchEngine) return "";
-	const raw = String(input).trim();
-	if (raw.toLowerCase() === "bypass://settings") return "bypass://settings";
+	var raw = normalizeInternalScheme(String(input).trim());
+	if (isSettingsInternalUrl(raw)) return settingsInternalUrl;
 	if (isPartnersInternalUrl(raw)) return partnersInternalUrl;
 	if (isGamesInternalUrl(raw)) return gamesInternalUrl;
 	if (isAiInternalUrl(raw)) return aiInternalUrl;
-	if (raw.toLowerCase() === "bypass://credits") return "bypass://credits";
+	if (isExtensionInternalUrl(raw) || isExtensionStoreInternalUrl(raw)) return wallpapersInternalUrl;
+	if (isCreditsInternalUrl(raw)) return creditsInternalUrl;
 	return search(raw, searchEngine.value);
 }
 
 async function navigateFromInput(input, pushHistory = true) {
-	const target = normalizeInput(input);
+	var target = normalizeInput(input);
 	if (!target) return;
 	await loadUrl(target, pushHistory);
 }
 
-const adblockHostPatterns = [
+var adblockHostPatterns = [
 	// Ads
 	/(^|\.)doubleclick\.net$/i,
 	/(^|\.)googlesyndication\.com$/i,
@@ -882,7 +1163,7 @@ const adblockHostPatterns = [
 	/(^|\.)scorecardresearch\.com$/i,
 ];
 
-const adblockUrlPatterns = [
+var adblockUrlPatterns = [
 	/\/ads?(\/|\.|\?|$)/i,
 	/\/adserver/i,
 	/advert/i,
@@ -907,10 +1188,10 @@ const adblockUrlPatterns = [
 	/metrics\.mzstatic\.com/i,
 ];
 
-const adblockEnabledStorage = "fb_adblock_enabled";
+var adblockEnabledStorage = "fb_adblock_enabled";
 
 function isAdblockEnabled() {
-	const raw = localStorage.getItem(adblockEnabledStorage);
+	var raw = localStorage.getItem(adblockEnabledStorage);
 	if (raw === null) {
 		localStorage.setItem(adblockEnabledStorage, "true");
 		return true;
@@ -925,7 +1206,7 @@ function setAdblockEnabled(enabled) {
 
 function updateAdblockToggleLabel() {
 	if (!adsToggleBtn) return;
-	const enabled = isAdblockEnabled();
+	var enabled = isAdblockEnabled();
 	adsToggleBtn.textContent = enabled ? "ads: off" : "ads: on";
 	adsToggleBtn.setAttribute("aria-pressed", enabled ? "true" : "false");
 	adsToggleBtn.title = enabled
@@ -944,15 +1225,15 @@ async function ensureGhosteryEngine() {
 
 	ghosteryEnginePromise = (async () => {
 		try {
-			let mod = null;
-			const moduleCandidates = [
+			var mod = null;
+			var moduleCandidates = [
 				// Browser-bundled module (no bare package specifiers).
 				"https://esm.sh/@ghostery/adblocker?bundle",
 				// Legacy local path fallback (works only if pre-bundled in this project).
 				"/vendor/adblocker/index.js",
 			];
-			let lastError = null;
-			for (const candidate of moduleCandidates) {
+			var lastError = null;
+			for (var candidate of moduleCandidates) {
 				try {
 					mod = await import(candidate);
 					if (mod) break;
@@ -963,8 +1244,8 @@ async function ensureGhosteryEngine() {
 			if (!mod) {
 				throw lastError || new Error("Unable to load Ghostery adblocker module.");
 			}
-			const FiltersEngine = mod?.FiltersEngine;
-			const RequestCtor = mod?.Request;
+			var FiltersEngine = mod?.FiltersEngine;
+			var RequestCtor = mod?.Request;
 			if (!FiltersEngine || !RequestCtor) {
 				throw new Error("Ghostery adblocker exports were not found.");
 			}
@@ -983,7 +1264,7 @@ async function ensureGhosteryEngine() {
 }
 
 function normalizeAdblockRequestType(type) {
-	const raw = String(type || "other").trim().toLowerCase();
+	var raw = String(type || "other").trim().toLowerCase();
 	if (!raw) return "other";
 	if (raw === "document" || raw === "main_frame" || raw === "navigate") return "main_frame";
 	if (raw === "sub_frame" || raw === "frame" || raw === "iframe") return "sub_frame";
@@ -995,13 +1276,13 @@ function normalizeAdblockRequestType(type) {
 }
 
 function inferFetchRequestType(input, init) {
-	const requestLike = input && typeof input === "object" ? input : null;
-	const destination = String(requestLike?.destination || init?.destination || "")
+	var requestLike = input && typeof input === "object" ? input : null;
+	var destination = String(requestLike?.destination || init?.destination || "")
 		.trim()
 		.toLowerCase();
 	if (destination) return normalizeAdblockRequestType(destination);
 
-	const mode = String(requestLike?.mode || init?.mode || "")
+	var mode = String(requestLike?.mode || init?.mode || "")
 		.trim()
 		.toLowerCase();
 	if (mode === "navigate") return "main_frame";
@@ -1012,9 +1293,9 @@ function inferFetchRequestType(input, init) {
 function shouldBlockWithGhostery(rawUrl, baseHref, requestType = "other", sourceUrl = "") {
 	if (!ghosteryEngine || !ghosteryRequestCtor) return null;
 	try {
-		const absoluteUrl = new URL(String(rawUrl), baseHref || window.location.href).href;
-		const parsed = new URL(absoluteUrl);
-		const protocol = parsed.protocol.toLowerCase();
+		var absoluteUrl = new URL(String(rawUrl), baseHref || window.location.href).href;
+		var parsed = new URL(absoluteUrl);
+		var protocol = parsed.protocol.toLowerCase();
 		if (
 			protocol === "data:" ||
 			protocol === "blob:" ||
@@ -1024,12 +1305,12 @@ function shouldBlockWithGhostery(rawUrl, baseHref, requestType = "other", source
 			return false;
 		}
 
-		const request = ghosteryRequestCtor.fromRawDetails({
+		var request = ghosteryRequestCtor.fromRawDetails({
 			type: normalizeAdblockRequestType(requestType),
 			url: absoluteUrl,
 			sourceUrl: sourceUrl || baseHref || window.location.href,
 		});
-		const result = ghosteryEngine.match(request);
+		var result = ghosteryEngine.match(request);
 		return Boolean(result?.match);
 	} catch {
 		return null;
@@ -1039,44 +1320,104 @@ function shouldBlockWithGhostery(rawUrl, baseHref, requestType = "other", source
 function shouldBlockAdRequest(rawUrl, baseHref, requestType = "other", sourceUrl = "") {
 	if (!rawUrl) return false;
 	try {
-		const parsed = new URL(String(rawUrl), baseHref || window.location.href);
-		const protocol = parsed.protocol.toLowerCase();
+		var parsed = new URL(String(rawUrl), baseHref || window.location.href);
+		var protocol = parsed.protocol.toLowerCase();
 		if (protocol === "data:" || protocol === "blob:" || protocol === "about:") return false;
 
-		const ghosteryDecision = shouldBlockWithGhostery(parsed.href, baseHref, requestType, sourceUrl);
+		var ghosteryDecision = shouldBlockWithGhostery(parsed.href, baseHref, requestType, sourceUrl);
 		if (ghosteryDecision === true) return true;
 
-		const host = parsed.hostname.toLowerCase();
+		var host = parsed.hostname.toLowerCase();
 		if (adblockHostPatterns.some((pattern) => pattern.test(host))) return true;
-		const target = `${host}${parsed.pathname}${parsed.search}`.toLowerCase();
+		var target = `${host}${parsed.pathname}${parsed.search}`.toLowerCase();
 		return adblockUrlPatterns.some((pattern) => pattern.test(target));
 	} catch {
 		return false;
 	}
 }
 
+function toScramjetProxyUrl(rawUrl) {
+	var base = String(window.location.origin || "").replace(/\/+$/, "");
+	var target = String(rawUrl || "").trim();
+	if (!base || !target) return "";
+	return `${base}/scramjet/${encodeURIComponent(target)}`;
+}
+
+function fromScramjetProxyUrl(rawUrl) {
+	var target = String(rawUrl || "").trim();
+	if (!target) return "";
+	try {
+		var parsed = new URL(target, window.location.href);
+		var marker = "/scramjet/";
+		if (!parsed.pathname.startsWith(marker)) return target;
+		var encoded = parsed.pathname.slice(marker.length);
+		if (!encoded) return "";
+		return decodeURIComponent(encoded);
+	} catch {
+		return target;
+	}
+}
+
+function syncTabUrlFromFrame(tabId, frameElement) {
+	var tab = tabs.find((entry) => entry.id === tabId);
+	if (!tab) return;
+	var frameHref = "";
+	try {
+		frameHref = String(frameElement?.contentWindow?.location?.href || "").trim();
+	} catch {
+		return;
+	}
+	if (!frameHref || frameHref === "about:blank") return;
+	var nextUrl = fromScramjetProxyUrl(frameHref);
+	if (!nextUrl) return;
+	var prevUrl = String(tab.url || "").trim();
+	var changed = prevUrl !== nextUrl;
+	var isProgrammaticNav = suppressNextFrameNavSyncByTab.has(tabId);
+	if (isProgrammaticNav) suppressNextFrameNavSyncByTab.delete(tabId);
+	if (!changed) return;
+
+	if (!isProgrammaticNav && prevUrl) {
+		tab.backStack.push(prevUrl);
+		tab.forwardStack = [];
+	}
+	tab.url = nextUrl;
+	try {
+		var frameTitle = String(frameElement?.contentWindow?.document?.title || "").trim();
+		tab.title = frameTitle || getDisplayTitle(nextUrl);
+	} catch {
+		tab.title = getDisplayTitle(nextUrl);
+	}
+	if (tabId === activeTabId) {
+		addressInput.value = nextUrl;
+		homeSearchInput.value = nextUrl;
+	}
+	renderTabs();
+	updateNavButtons();
+	addHistory(nextUrl);
+}
+
 function injectAdblockIntoFrame(frameElement) {
-	const frameWindow = frameElement?.contentWindow;
+	var frameWindow = frameElement?.contentWindow;
 	if (!frameWindow) return;
 	if (frameWindow.__fbAdblockInstalled) return;
 	frameWindow.__fbAdblockInstalled = true;
 	void ensureGhosteryEngine();
 
-	const shouldBlock = (target, requestType = "other", sourceUrl = "") =>
+	var shouldBlock = (target, requestType = "other", sourceUrl = "") =>
 		isAdblockEnabled() &&
 		shouldBlockAdRequest(target, frameWindow.location?.href, requestType, sourceUrl);
-	const responseCtor = frameWindow.Response || Response;
+	var responseCtor = frameWindow.Response || Response;
 
 	if (typeof frameWindow.fetch === "function") {
-		const originalFetch = frameWindow.fetch.bind(frameWindow);
+		var originalFetch = frameWindow.fetch.bind(frameWindow);
 		frameWindow.fetch = (input, init) => {
-			const target = typeof input === "string" ? input : input?.url;
-			const sourceUrl = typeof input === "object" ? input?.referrer || "" : "";
+			var target = typeof input === "string" ? input : input?.url;
+			var sourceUrl = typeof input === "object" ? input?.referrer || "" : "";
 			if (shouldBlock(target, inferFetchRequestType(input, init), sourceUrl)) {
 				return Promise.resolve(
 					new responseCtor("", {
 						status: 204,
-						statusText: "Blocked by FilterBrowser adblock",
+						statusText: "Blocked by Frosted adblock",
 					})
 				);
 			}
@@ -1084,11 +1425,11 @@ function injectAdblockIntoFrame(frameElement) {
 		};
 	}
 
-	const xhrProto = frameWindow.XMLHttpRequest?.prototype;
+	var xhrProto = frameWindow.XMLHttpRequest?.prototype;
 	if (xhrProto && !xhrProto.__fbAdblockPatched) {
 		xhrProto.__fbAdblockPatched = true;
-		const originalOpen = xhrProto.open;
-		const originalSend = xhrProto.send;
+		var originalOpen = xhrProto.open;
+		var originalSend = xhrProto.send;
 		xhrProto.open = function (method, url, ...args) {
 			this.__fbAdblockTarget = url;
 			return originalOpen.call(this, method, url, ...args);
@@ -1106,7 +1447,7 @@ function injectAdblockIntoFrame(frameElement) {
 	}
 
 	if (typeof frameWindow.navigator?.sendBeacon === "function") {
-		const originalSendBeacon = frameWindow.navigator.sendBeacon.bind(frameWindow.navigator);
+		var originalSendBeacon = frameWindow.navigator.sendBeacon.bind(frameWindow.navigator);
 		frameWindow.navigator.sendBeacon = (url, data) => {
 			if (shouldBlock(url, "ping", frameWindow.location?.href)) return false;
 			return originalSendBeacon(url, data);
@@ -1114,10 +1455,10 @@ function injectAdblockIntoFrame(frameElement) {
 	}
 
 	if (typeof frameWindow.WebSocket === "function") {
-		const OriginalWebSocket = frameWindow.WebSocket;
-		frameWindow.WebSocket = function FilterBrowserAdblockWebSocket(url, protocols) {
+		var OriginalWebSocket = frameWindow.WebSocket;
+		frameWindow.WebSocket = function FrostedAdblockWebSocket(url, protocols) {
 			if (shouldBlock(url, "websocket", frameWindow.location?.href)) {
-				throw new Error("Blocked by FilterBrowser adblock");
+				throw new Error("Blocked by Frosted adblock");
 			}
 			return protocols === undefined
 				? new OriginalWebSocket(url)
@@ -1129,7 +1470,7 @@ function injectAdblockIntoFrame(frameElement) {
 
 async function loadUrl(url, pushHistory = true) {
 	resetError();
-	const tab = getActiveTab();
+	var tab = getActiveTab();
 	if (!tab) return;
 
 	if (pushHistory && tab.url) {
@@ -1144,7 +1485,7 @@ async function loadUrl(url, pushHistory = true) {
 	renderTabs();
 	updateNavButtons();
 
-	if (url === "bypass://settings") {
+	if (isSettingsInternalUrl(url)) {
 		showSettingsPage();
 		return;
 	}
@@ -1160,7 +1501,11 @@ async function loadUrl(url, pushHistory = true) {
 		showAiPage();
 		return;
 	}
-	if (url === "bypass://credits") {
+	if (isExtensionInternalUrl(url) || isExtensionStoreInternalUrl(url)) {
+		showExtensionStorePage();
+		return;
+	}
+	if (isCreditsInternalUrl(url)) {
 		showCreditsPage();
 		return;
 	}
@@ -1169,9 +1514,12 @@ async function loadUrl(url, pushHistory = true) {
 
 	try {
 		await ensureTransport();
-		const frame = ensureTabFrame(tab.id);
+		var frame = ensureTabFrame(tab.id);
 		showFrameForTab(tab.id);
-		frame.go(url);
+		var proxiedUrl = toScramjetProxyUrl(url);
+		if (!proxiedUrl) throw new Error("Invalid Scramjet target URL.");
+		suppressNextFrameNavSyncByTab.add(tab.id);
+		frame.element.src = proxiedUrl;
 		hideBlank();
 		addHistory(url);
 	} catch (err) {
@@ -1182,10 +1530,10 @@ async function loadUrl(url, pushHistory = true) {
 }
 
 function ensureTabFrame(tabId) {
-	const existing = tabFrames.get(tabId);
+	var existing = tabFrames.get(tabId);
 	if (existing) return existing;
 
-	const created = scramjet.createFrame();
+	var created = scramjet.createFrame();
 	created.frame.className = "proxy-frame";
 	created.frame.style.display = "none";
 	created.frame.style.width = "100%";
@@ -1194,12 +1542,14 @@ function ensureTabFrame(tabId) {
 	created.frame.style.position = "absolute";
 	created.frame.style.inset = "0";
 	created.frame.addEventListener("load", () => {
+		syncTabUrlFromFrame(tabId, created.frame);
 		try {
 			if (shouldInjectAdblockForTab(tabId)) {
 				injectAdblockIntoFrame(created.frame);
 			}
 		} catch {
 		}
+		attachQuickContextMenuToFrame(created.frame);
 		void runQueuedGameClickScriptForTab(tabId, created.frame);
 		void maybeRecoverRawHtmlCatalogGame(tabId, created.frame);
 	});
@@ -1208,13 +1558,110 @@ function ensureTabFrame(tabId) {
 	return tabFrames.get(tabId);
 }
 
+function ensureQuickContextMenu() {
+	if (quickContextMenuEl) return quickContextMenuEl;
+	var menu = document.createElement("div");
+	menu.className = "quick-context-menu";
+	menu.id = "quickContextMenu";
+	menu.innerHTML = `
+		<button type="button" class="quick-context-item" data-action="wallpapers">
+			<i class="fa-solid fa-image"></i> Open Wallpapers
+		</button>
+		<button type="button" class="quick-context-item" data-action="eruda">
+			&lt;/&gt; Inject Eruda
+		</button>
+	`;
+	menu.addEventListener("click", (event) => {
+		var item = event.target?.closest?.(".quick-context-item");
+		if (!item) return;
+		var action = String(item.dataset.action || "").trim();
+		hideQuickContextMenu();
+		if (action === "wallpapers") {
+			navigateFromInput(wallpapersInternalUrl);
+			return;
+		}
+		if (action === "eruda") {
+			injectErudaIntoActiveTab();
+		}
+	});
+	document.body.appendChild(menu);
+	quickContextMenuEl = menu;
+	return menu;
+}
+
+function showQuickContextMenu(clientX, clientY) {
+	var menu = ensureQuickContextMenu();
+	menu.classList.add("open");
+	menu.style.visibility = "hidden";
+	menu.style.left = "0px";
+	menu.style.top = "0px";
+	var viewportW = window.innerWidth || document.documentElement.clientWidth || 0;
+	var viewportH = window.innerHeight || document.documentElement.clientHeight || 0;
+	var rect = menu.getBoundingClientRect();
+	var x = Math.max(8, Math.min(clientX, viewportW - rect.width - 8));
+	var y = Math.max(8, Math.min(clientY, viewportH - rect.height - 8));
+	menu.style.left = `${Math.round(x)}px`;
+	menu.style.top = `${Math.round(y)}px`;
+	menu.style.visibility = "visible";
+}
+
+function hideQuickContextMenu() {
+	if (!quickContextMenuEl) return;
+	quickContextMenuEl.classList.remove("open");
+}
+
+function bindQuickContextMenu() {
+	document.addEventListener("contextmenu", (event) => {
+		var target = event.target;
+		var insideInternal = Boolean(target?.closest?.(".internal-page.active"));
+		var insideBrowserStage = Boolean(browserStage && target && browserStage.contains(target));
+		if (!insideInternal && !insideBrowserStage) return;
+		event.preventDefault();
+		showQuickContextMenu(event.clientX, event.clientY);
+	});
+	document.addEventListener("click", () => {
+		hideQuickContextMenu();
+	});
+	window.addEventListener("keydown", (event) => {
+		if (event.key === "Escape") hideQuickContextMenu();
+	});
+	window.addEventListener("blur", () => {
+		hideQuickContextMenu();
+	});
+}
+
+function attachQuickContextMenuToFrame(frameElement) {
+	if (!frameElement) return;
+	if (!frameElement.__fbQuickMenuFrameBound) {
+		frameElement.__fbQuickMenuFrameBound = true;
+		frameElement.addEventListener("contextmenu", (event) => {
+			event.preventDefault();
+			showQuickContextMenu(event.clientX, event.clientY);
+		});
+	}
+	try {
+		var targetDoc = frameElement.contentDocument;
+		if (!targetDoc || targetDoc.__fbQuickMenuBound) return;
+		targetDoc.__fbQuickMenuBound = true;
+		targetDoc.addEventListener("contextmenu", (event) => {
+			event.preventDefault();
+			var rect = frameElement.getBoundingClientRect();
+			var x = rect.left + event.clientX;
+			var y = rect.top + event.clientY;
+			showQuickContextMenu(x, y);
+		});
+		targetDoc.addEventListener("click", () => hideQuickContextMenu());
+	} catch {
+	}
+}
+
 function shouldInjectAdblockForTab(tabId) {
-	const tab = tabs.find((entry) => entry.id === tabId);
+	var tab = tabs.find((entry) => entry.id === tabId);
 	if (!tab) return true;
-	const currentUrl = String(tab.url || "").trim();
+	var currentUrl = String(tab.url || "").trim();
 	if (!currentUrl) return true;
 	if (isCatalogGameUrl(currentUrl)) return false;
-	const catalogBlobUrl = String(gameBlobUrlsByTab.get(tabId) || "").trim();
+	var catalogBlobUrl = String(gameBlobUrlsByTab.get(tabId) || "").trim();
 	if (catalogBlobUrl && currentUrl === catalogBlobUrl) return false;
 	return true;
 }
@@ -1228,29 +1675,29 @@ function showFrameForTab(tabId) {
 }
 
 function goBack() {
-	const tab = getActiveTab();
+	var tab = getActiveTab();
 	if (!tab || !tab.backStack.length) return;
-	const prev = tab.backStack.pop();
+	var prev = tab.backStack.pop();
 	if (tab.url) tab.forwardStack.push(tab.url);
 	loadUrl(prev, false);
 }
 
 function goForward() {
-	const tab = getActiveTab();
+	var tab = getActiveTab();
 	if (!tab || !tab.forwardStack.length) return;
-	const next = tab.forwardStack.pop();
+	var next = tab.forwardStack.pop();
 	if (tab.url) tab.backStack.push(tab.url);
 	loadUrl(next, false);
 }
 
 function reloadActive() {
-	const tab = getActiveTab();
+	var tab = getActiveTab();
 	if (!tab || !tab.url) return;
 	loadUrl(tab.url, false);
 }
 
 function goHome() {
-	const tab = getActiveTab();
+	var tab = getActiveTab();
 	if (!tab) return;
 	tab.url = "";
 	tab.title = "New Tab";
@@ -1283,8 +1730,10 @@ function showSettingsPage() {
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.remove("active");
+	if (extensionPage) extensionPage.classList.remove("active");
+	if (extensionStorePage) extensionStorePage.classList.remove("active");
 	if (settingsPage) settingsPage.classList.add("active");
-	addressInput.value = "bypass://settings";
+	addressInput.value = settingsInternalUrl;
 	setParticlesVisible(isMatrixThemeActive());
 }
 
@@ -1297,6 +1746,8 @@ function showPartnersPage() {
 	if (creditsPage) creditsPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.remove("active");
+	if (extensionPage) extensionPage.classList.remove("active");
+	if (extensionStorePage) extensionStorePage.classList.remove("active");
 	if (partnersPage) partnersPage.classList.add("active");
 	addressInput.value = partnersInternalUrl;
 	setParticlesVisible(isMatrixThemeActive());
@@ -1312,6 +1763,8 @@ function showGamesPage() {
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.add("active");
 	if (aiPage) aiPage.classList.remove("active");
+	if (extensionPage) extensionPage.classList.remove("active");
+	if (extensionStorePage) extensionStorePage.classList.remove("active");
 	addressInput.value = gamesInternalUrl;
 	setParticlesVisible(isMatrixThemeActive());
 }
@@ -1326,7 +1779,26 @@ function showAiPage() {
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.add("active");
+	if (extensionPage) extensionPage.classList.remove("active");
+	if (extensionStorePage) extensionStorePage.classList.remove("active");
 	addressInput.value = aiInternalUrl;
+	setParticlesVisible(isMatrixThemeActive());
+}
+
+function showExtensionStorePage() {
+	blankState.style.display = "none";
+	tabFrames.forEach((item) => {
+		item.element.style.display = "none";
+	});
+	if (settingsPage) settingsPage.classList.remove("active");
+	if (creditsPage) creditsPage.classList.remove("active");
+	if (partnersPage) partnersPage.classList.remove("active");
+	if (gamesPage) gamesPage.classList.remove("active");
+	if (aiPage) aiPage.classList.remove("active");
+	if (extensionPage) extensionPage.classList.remove("active");
+	if (extensionStorePage) extensionStorePage.classList.add("active");
+	addressInput.value = wallpapersInternalUrl;
+	renderWallpaperStoreGrid();
 	setParticlesVisible(isMatrixThemeActive());
 }
 
@@ -1339,8 +1811,10 @@ function showCreditsPage() {
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.remove("active");
+	if (extensionPage) extensionPage.classList.remove("active");
+	if (extensionStorePage) extensionStorePage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.add("active");
-	addressInput.value = "bypass://credits";
+	addressInput.value = creditsInternalUrl;
 	setParticlesVisible(isMatrixThemeActive());
 }
 
@@ -1350,10 +1824,12 @@ function hideInternalPages() {
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.remove("active");
+	if (extensionPage) extensionPage.classList.remove("active");
+	if (extensionStorePage) extensionStorePage.classList.remove("active");
 }
 
 function updateNavButtons() {
-	const tab = getActiveTab();
+	var tab = getActiveTab();
 	if (!tab) return;
 	backBtn.disabled = tab.backStack.length === 0;
 	forwardBtn.disabled = tab.forwardStack.length === 0;
@@ -1361,30 +1837,30 @@ function updateNavButtons() {
 
 function isTypingTarget(target) {
 	if (!target) return false;
-	const tag = (target.tagName || "").toLowerCase();
+	var tag = (target.tagName || "").toLowerCase();
 	return tag === "input" || tag === "textarea" || tag === "select" || target.isContentEditable;
 }
 
 async function ensureTransport() {
 	if (transportReady) return;
 	await registerSW();
-	const wispUrl =
+	var wispUrl =
 		(location.protocol === "https:" ? "wss" : "ws") + "://" + location.host + "/wisp/";
 	await connection.setTransport("/libcurl/index.mjs", [{ websocket: wispUrl }]);
 	transportReady = true;
 }
 
-const historyKey = "fb_history";
+var historyKey = "fb_history";
 
 function addHistory(url) {
-	const items = readHistory();
+	var items = readHistory();
 	items.unshift({ url, at: new Date().toLocaleString() });
 	localStorage.setItem(historyKey, JSON.stringify(items.slice(0, 100)));
 }
 
 function readHistory() {
 	try {
-		const parsed = JSON.parse(localStorage.getItem(historyKey) || "[]");
+		var parsed = JSON.parse(localStorage.getItem(historyKey) || "[]");
 		return Array.isArray(parsed) ? parsed : [];
 	} catch {
 		return [];
@@ -1393,10 +1869,10 @@ function readHistory() {
 
 function renderHistory() {
 	if (!historyContainer) return;
-	const items = readHistory();
+	var items = readHistory();
 	historyContainer.innerHTML = "";
 	if (!items.length) {
-		const empty = document.createElement("div");
+		var empty = document.createElement("div");
 		empty.className = "history-item";
 		empty.textContent = "No history yet.";
 		historyContainer.appendChild(empty);
@@ -1404,7 +1880,7 @@ function renderHistory() {
 	}
 
 	items.forEach((entry) => {
-		const row = document.createElement("div");
+		var row = document.createElement("div");
 		row.className = "history-item";
 		row.textContent = `${entry.at} - ${entry.url}`;
 		row.addEventListener("click", () => {
@@ -1416,12 +1892,12 @@ function renderHistory() {
 
 function renderGames() {
 	if (!gamesGrid) return;
-	const source = Array.isArray(gamesCatalog) ? gamesCatalog : [];
-	const query = String(gamesSearchInput?.value || "").trim().toLowerCase();
-	const filtered = query
+	var source = Array.isArray(gamesCatalog) ? gamesCatalog : [];
+	var query = String(gamesSearchInput?.value || "").trim().toLowerCase();
+	var filtered = query
 		? source.filter((game) => {
-				const title = String(game.title || "").toLowerCase();
-				const desc = String(game.desc || "").toLowerCase();
+				var title = String(game.title || "").toLowerCase();
+				var desc = String(game.desc || "").toLowerCase();
 				return title.includes(query) || desc.includes(query);
 			})
 		: source;
@@ -1432,31 +1908,31 @@ function renderGames() {
 	}
 	gamesGrid.innerHTML = "";
 	if (!filtered.length) {
-		const empty = document.createElement("div");
+		var empty = document.createElement("div");
 		empty.className = "settings-hint";
 		empty.textContent = query ? "No games match your search." : "No games configured yet.";
 		gamesGrid.appendChild(empty);
 		return;
 	}
 	filtered.forEach((game) => {
-		const card = document.createElement("button");
+		var card = document.createElement("button");
 		card.type = "button";
 		card.className = "game-card";
 
-		const thumb = document.createElement("img");
+		var thumb = document.createElement("img");
 		thumb.className = "game-thumb";
 		thumb.alt = game.title || "Game";
 		thumb.src = game.image || "";
 		thumb.loading = "lazy";
 
-		const body = document.createElement("div");
+		var body = document.createElement("div");
 		body.className = "game-body";
 
-		const title = document.createElement("div");
+		var title = document.createElement("div");
 		title.className = "game-title";
 		title.textContent = game.title || "Untitled";
 
-		const desc = document.createElement("div");
+		var desc = document.createElement("div");
 		desc.className = "game-desc";
 		desc.textContent = game.desc || "";
 
@@ -1466,7 +1942,7 @@ function renderGames() {
 		card.appendChild(body);
 
 		card.addEventListener("click", async () => {
-			const target = resolveGameUrl(game.url);
+			var target = resolveGameUrl(game.url);
 			if (!target) return;
 			queueGameClickScriptForActiveTab(game.clickScript);
 			await openGameFromCatalog(target, { useBlob: game.useBlob });
@@ -1477,8 +1953,8 @@ function renderGames() {
 
 async function loadGamesCatalog() {
 	try {
-		const response = await fetch("/games.json", { cache: "no-store" });
-		const raw = await response.json().catch(() => []);
+		var response = await fetch("/games.json", { cache: "no-store" });
+		var raw = await response.json().catch(() => []);
 		if (!response.ok || !Array.isArray(raw)) {
 			gamesCatalog = [];
 			renderGames();
@@ -1501,15 +1977,15 @@ async function loadGamesCatalog() {
 }
 
 function queueGameClickScriptForActiveTab(scriptPath) {
-	const tab = getActiveTab();
+	var tab = getActiveTab();
 	if (!tab) return;
-	const rawPath = String(scriptPath || "").trim();
+	var rawPath = String(scriptPath || "").trim();
 	if (!rawPath) return;
 	pendingGameClickScriptsByTab.set(tab.id, rawPath);
 }
 
 async function runQueuedGameClickScriptForTab(tabId, frameElement) {
-	const queuedScriptPath = String(pendingGameClickScriptsByTab.get(tabId) || "").trim();
+	var queuedScriptPath = String(pendingGameClickScriptsByTab.get(tabId) || "").trim();
 	if (!queuedScriptPath) return;
 	pendingGameClickScriptsByTab.delete(tabId);
 	await new Promise((resolve) => setTimeout(resolve, gameClickScriptDelayMs));
@@ -1517,29 +1993,29 @@ async function runQueuedGameClickScriptForTab(tabId, frameElement) {
 }
 
 async function runGameClickScriptInFrame(scriptPath, frameElement) {
-	const rawPath = String(scriptPath || "").trim();
+	var rawPath = String(scriptPath || "").trim();
 	if (!rawPath) return;
-	const normalizedPath = rawPath.startsWith("/")
+	var normalizedPath = rawPath.startsWith("/")
 		? rawPath
 		: `/${rawPath.replace(/^\.?\//, "")}`;
-	const cacheBustedPath = `${normalizedPath}${normalizedPath.includes("?") ? "&" : "?"}t=${Date.now()}`;
-	const localScriptUrl = new URL(cacheBustedPath, window.location.origin).href;
-	const targetWindow = frameElement?.contentWindow;
-	const scriptSource = await fetchGameClickScriptSource(localScriptUrl);
+	var cacheBustedPath = `${normalizedPath}${normalizedPath.includes("?") ? "&" : "?"}t=${Date.now()}`;
+	var localScriptUrl = new URL(cacheBustedPath, window.location.origin).href;
+	var targetWindow = frameElement?.contentWindow;
+	var scriptSource = await fetchGameClickScriptSource(localScriptUrl);
 	if (!targetWindow) {
 		await runGameClickScriptInShell(localScriptUrl, scriptSource);
 		return;
 	}
 
 	if (scriptSource && looksLikeEncodedBookmarklet(scriptSource)) {
-		const handled = executeBookmarkletLikeSource(targetWindow, scriptSource);
+		var handled = executeBookmarkletLikeSource(targetWindow, scriptSource);
 		if (handled) return;
 	}
 
 	if (scriptSource) {
-		const executedFromSource = await new Promise((resolve) => {
+		var executedFromSource = await new Promise((resolve) => {
 			try {
-				const sourceTag = `\n//# sourceURL=${normalizedPath}`;
+				var sourceTag = `\n//# sourceURL=${normalizedPath}`;
 				targetWindow.eval(`${scriptSource}${sourceTag}`);
 				resolve(true);
 			} catch {
@@ -1549,10 +2025,10 @@ async function runGameClickScriptInFrame(scriptPath, frameElement) {
 		if (executedFromSource) return;
 	}
 
-	const injectedInFrame = await new Promise((resolve) => {
+	var injectedInFrame = await new Promise((resolve) => {
 		try {
-			const targetDocument = targetWindow.document;
-			const script = targetDocument.createElement("script");
+			var targetDocument = targetWindow.document;
+			var script = targetDocument.createElement("script");
 			script.src = localScriptUrl;
 			script.async = true;
 			script.onload = () => resolve(true);
@@ -1568,10 +2044,10 @@ async function runGameClickScriptInFrame(scriptPath, frameElement) {
 }
 
 async function fetchGameClickScriptSource(scriptUrl) {
-	const target = String(scriptUrl || "").trim();
+	var target = String(scriptUrl || "").trim();
 	if (!target) return "";
 	try {
-		const response = await fetch(target, { cache: "no-store" });
+		var response = await fetch(target, { cache: "no-store" });
 		if (!response.ok) return "";
 		return await response.text();
 	} catch {
@@ -1580,19 +2056,19 @@ async function fetchGameClickScriptSource(scriptUrl) {
 }
 
 function looksLikeEncodedBookmarklet(source) {
-	const text = String(source || "").trim();
+	var text = String(source || "").trim();
 	if (!text) return false;
 	if (/^javascript\s*:/i.test(text)) return true;
 	return /^function\s*\(\)\s*%\s*[0-9a-fA-F]\s*[0-9a-fA-F]/.test(text);
 }
 
 function decodeLegacyBookmarkletSource(rawSource) {
-	let text = String(rawSource || "");
+	var text = String(rawSource || "");
 	if (!text) return "";
 	text = text.replace(/%[\t \r\n]*([0-9a-fA-F])[\t \r\n]*([0-9a-fA-F])/g, "%$1$2");
 	text = text.trim().replace(/^javascript:\s*/i, "");
-	for (let i = 0; i < 2; i += 1) {
-		const next = text.replace(/%([0-9a-fA-F]{2})/g, (_, hex) =>
+	for (var i = 0; i < 2; i += 1) {
+		var next = text.replace(/%([0-9a-fA-F]{2})/g, (_, hex) =>
 			String.fromCharCode(parseInt(hex, 16))
 		);
 		if (next === text) break;
@@ -1613,7 +2089,7 @@ function decodeLegacyBookmarkletSource(rawSource) {
 		.replace(/\+\s+\+/g, "++")
 		.replace(/-\s+-/g, "--");
 
-	const trimmed = text.trim();
+	var trimmed = text.trim();
 	if (/^function\s*\(/.test(trimmed)) {
 		return `(${trimmed})()`;
 	}
@@ -1623,7 +2099,7 @@ function decodeLegacyBookmarkletSource(rawSource) {
 function executeBookmarkletLikeSource(targetWindow, rawSource) {
 	if (!targetWindow) return false;
 	try {
-		const decoded = decodeLegacyBookmarkletSource(rawSource);
+		var decoded = decodeLegacyBookmarkletSource(rawSource);
 		if (!decoded) return false;
 		targetWindow.eval(decoded);
 		return true;
@@ -1633,10 +2109,10 @@ function executeBookmarkletLikeSource(targetWindow, rawSource) {
 }
 
 function runGameClickScriptInShell(scriptUrl, scriptSource = "") {
-	const sourceText = String(scriptSource || "").trim();
+	var sourceText = String(scriptSource || "").trim();
 	if (sourceText && looksLikeEncodedBookmarklet(sourceText)) {
 		try {
-			const decoded = decodeLegacyBookmarkletSource(sourceText);
+			var decoded = decodeLegacyBookmarkletSource(sourceText);
 			if (decoded) {
 				try {
 					window.eval(decoded);
@@ -1648,7 +2124,7 @@ function runGameClickScriptInShell(scriptUrl, scriptSource = "") {
 		}
 	}
 	return new Promise((resolve) => {
-		const script = document.createElement("script");
+		var script = document.createElement("script");
 		script.src = String(scriptUrl || "");
 		script.async = true;
 		script.onload = () => resolve();
@@ -1657,26 +2133,64 @@ function runGameClickScriptInShell(scriptUrl, scriptSource = "") {
 	});
 }
 
+function normalizeInternalScheme(value) {
+	var raw = String(value || "").trim();
+	if (!raw) return "";
+	return raw.replace(/^bypass:\/\//i, "frosted://");
+}
+
+function getInternalRoute(value) {
+	var normalized = normalizeInternalScheme(value).toLowerCase();
+	if (!normalized.startsWith("frosted://")) return normalized;
+	var withoutHash = normalized.split("#")[0];
+	var withoutQuery = withoutHash.split("?")[0];
+	return withoutQuery.replace(/\/+$/, "");
+}
+
+function isSettingsInternalUrl(url) {
+	var normalized = getInternalRoute(url);
+	return normalized === settingsInternalUrl;
+}
+
+function isCreditsInternalUrl(url) {
+	var normalized = getInternalRoute(url);
+	return normalized === creditsInternalUrl;
+}
+
 function isGamesInternalUrl(url) {
-	const normalized = String(url || "").trim().toLowerCase();
-	return normalized === "bypass://games" || normalized === "bypass://games";
+	var normalized = getInternalRoute(url);
+	return normalized === gamesInternalUrl;
 }
 
 function isPartnersInternalUrl(url) {
-	const normalized = String(url || "").trim().toLowerCase();
-	return normalized === "bypass://partners";
+	var normalized = getInternalRoute(url);
+	return normalized === partnersInternalUrl;
 }
 
 function isAiInternalUrl(url) {
-	const normalized = String(url || "").trim().toLowerCase();
-	return normalized === "bypass://ai" || normalized === "bypass://ai";
+	var normalized = getInternalRoute(url);
+	return normalized === aiInternalUrl;
+}
+
+function isExtensionInternalUrl(url) {
+	var normalized = getInternalRoute(url);
+	return normalized === "frosted://extension";
+}
+
+function isExtensionStoreInternalUrl(url) {
+	var normalized = getInternalRoute(url);
+	return (
+		normalized === wallpapersInternalUrl ||
+		normalized === "frosted://extensionstore" ||
+		normalized === "frosted://webstore"
+	);
 }
 
 async function openGameFromCatalog(url, options = {}) {
-	const tab = getActiveTab();
+	var tab = getActiveTab();
 	if (!tab) return;
-	const useBlob = Boolean(options?.useBlob);
-	let finalUrl = url;
+	var useBlob = Boolean(options?.useBlob);
+	var finalUrl = url;
 	rawHtmlFallbackTriedUrlByTab.delete(tab.id);
 	if (useBlob) {
 		try {
@@ -1686,7 +2200,7 @@ async function openGameFromCatalog(url, options = {}) {
 		}
 	}
 
-	const previousBlob = gameBlobUrlsByTab.get(tab.id);
+	var previousBlob = gameBlobUrlsByTab.get(tab.id);
 	if (previousBlob && previousBlob !== finalUrl) {
 		URL.revokeObjectURL(previousBlob);
 		gameBlobUrlsByTab.delete(tab.id);
@@ -1698,7 +2212,7 @@ async function openGameFromCatalog(url, options = {}) {
 }
 
 function isCatalogGameUrl(url) {
-	const target = String(url || "").trim();
+	var target = String(url || "").trim();
 	if (!target) return false;
 	return gamesCatalog.some((entry) => resolveGameUrl(entry?.url) === target);
 }
@@ -1706,17 +2220,17 @@ function isCatalogGameUrl(url) {
 function looksLikeRawHtmlSourceDocument(doc) {
 	try {
 		if (!doc || !doc.body) return false;
-		const contentType = String(doc.contentType || "").toLowerCase();
-		const bodyText = String(doc.body.textContent || "").trim();
+		var contentType = String(doc.contentType || "").toLowerCase();
+		var bodyText = String(doc.body.textContent || "").trim();
 		if (!bodyText) return false;
 
-		const startsLikeHtmlSource = /^\s*(?:<!doctype|<html|<head|<body|<script|<meta|<title|<link|<style)\b/i.test(
+		var startsLikeHtmlSource = /^\s*(?:<!doctype|<html|<head|<body|<script|<meta|<title|<link|<style)\b/i.test(
 			bodyText
 		);
-		const hasManyTags = (bodyText.match(/</g) || []).length > 20;
-		const closesHtmlLikeMarkup = /<\/(?:html|head|body|script|style)>/i.test(bodyText);
-		const noRenderedChildren = doc.body.children.length === 0;
-		const plainTextType =
+		var hasManyTags = (bodyText.match(/</g) || []).length > 20;
+		var closesHtmlLikeMarkup = /<\/(?:html|head|body|script|style)>/i.test(bodyText);
+		var noRenderedChildren = doc.body.children.length === 0;
+		var plainTextType =
 			contentType.includes("text/plain") || contentType.includes("application/octet-stream");
 
 		return (plainTextType || noRenderedChildren) && (startsLikeHtmlSource || (hasManyTags && closesHtmlLikeMarkup));
@@ -1726,11 +2240,11 @@ function looksLikeRawHtmlSourceDocument(doc) {
 }
 
 function ensureHtmlHasBase(rawHtml, pageUrl) {
-	const source = String(rawHtml || "");
+	var source = String(rawHtml || "");
 	if (!source) return source;
-	const base = String(pageUrl || "").replace(/[^/]*([?#].*)?$/, "");
+	var base = String(pageUrl || "").replace(/[^/]*([?#].*)?$/, "");
 	if (!base) return source;
-	const hasBase = /<base\s[^>]*href=/i.test(source);
+	var hasBase = /<base\s[^>]*href=/i.test(source);
 	if (hasBase) return source;
 	return source.replace(/<head([^>]*)>/i, `<head$1><base href="${base}">`);
 }
@@ -1738,9 +2252,9 @@ function ensureHtmlHasBase(rawHtml, pageUrl) {
 function recoverRawHtmlByDocumentWrite(targetDocument, currentUrl) {
 	try {
 		if (!targetDocument?.body) return false;
-		const rawHtml = String(targetDocument.body.textContent || "");
+		var rawHtml = String(targetDocument.body.textContent || "");
 		if (!rawHtml.trim()) return false;
-		const patchedHtml = ensureHtmlHasBase(rawHtml, currentUrl);
+		var patchedHtml = ensureHtmlHasBase(rawHtml, currentUrl);
 		targetDocument.open();
 		targetDocument.write(patchedHtml);
 		targetDocument.close();
@@ -1752,24 +2266,24 @@ function recoverRawHtmlByDocumentWrite(targetDocument, currentUrl) {
 
 async function maybeRecoverRawHtmlCatalogGame(tabId, frameElement) {
 	if (tabId !== activeTabId) return;
-	const tab = tabs.find((entry) => entry.id === tabId);
+	var tab = tabs.find((entry) => entry.id === tabId);
 	if (!tab) return;
 
-	const currentUrl = String(tab.url || "").trim();
+	var currentUrl = String(tab.url || "").trim();
 	if (!/^https?:\/\//i.test(currentUrl)) return;
 	if (!/\.html?(?:[?#]|$)/i.test(currentUrl)) return;
 	if (!isCatalogGameUrl(currentUrl)) return;
 	if (rawHtmlFallbackTriedUrlByTab.get(tabId) === currentUrl) return;
 
-	const targetWindow = frameElement?.contentWindow;
-	const targetDocument = targetWindow?.document;
+	var targetWindow = frameElement?.contentWindow;
+	var targetDocument = targetWindow?.document;
 	if (!targetDocument || !looksLikeRawHtmlSourceDocument(targetDocument)) return;
 
 	rawHtmlFallbackTriedUrlByTab.set(tabId, currentUrl);
-	const recoveredInPlace = recoverRawHtmlByDocumentWrite(targetDocument, currentUrl);
+	var recoveredInPlace = recoverRawHtmlByDocumentWrite(targetDocument, currentUrl);
 	if (recoveredInPlace) return;
 
-	let blobUrl = currentUrl;
+	var blobUrl = currentUrl;
 	try {
 		blobUrl = await materializeGameBlobUrl(currentUrl);
 	} catch {
@@ -1777,7 +2291,7 @@ async function maybeRecoverRawHtmlCatalogGame(tabId, frameElement) {
 	}
 	if (!String(blobUrl).startsWith("blob:")) return;
 
-	const previousBlob = gameBlobUrlsByTab.get(tabId);
+	var previousBlob = gameBlobUrlsByTab.get(tabId);
 	if (previousBlob && previousBlob !== blobUrl) {
 		URL.revokeObjectURL(previousBlob);
 	}
@@ -1786,55 +2300,55 @@ async function maybeRecoverRawHtmlCatalogGame(tabId, frameElement) {
 }
 
 function resolveGameUrl(url) {
-	const raw = String(url || "").trim();
+	var raw = String(url || "").trim();
 	if (!raw) return "";
-	const jsDelivrGh = raw.match(/^https:\/\/cdn\.jsdelivr\.net\/gh\/([^/]+)\/([^@/]+)@([^/]+)\/(.+)$/i);
+	var jsDelivrGh = raw.match(/^https:\/\/cdn\.jsdelivr\.net\/gh\/([^/]+)\/([^@/]+)@([^/]+)\/(.+)$/i);
 	if (jsDelivrGh) {
-		const [, owner, repo, branch, path] = jsDelivrGh;
+		var [, owner, repo, branch, path] = jsDelivrGh;
 		return `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${branch}/${path}`;
 	}
-	const rawcdn = raw.match(/^https:\/\/rawcdn\.githack\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)$/i);
+	var rawcdn = raw.match(/^https:\/\/rawcdn\.githack\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)$/i);
 	if (rawcdn) {
-		const [, owner, repo, branch, path] = rawcdn;
+		var [, owner, repo, branch, path] = rawcdn;
 		return `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${branch}/${path}`;
 	}
-	const rawgithack = raw.match(/^https:\/\/raw\.githack\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)$/i);
+	var rawgithack = raw.match(/^https:\/\/raw\.githack\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)$/i);
 	if (rawgithack) {
-		const [, owner, repo, branch, path] = rawgithack;
+		var [, owner, repo, branch, path] = rawgithack;
 		return `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${branch}/${path}`;
 	}
-	const githackGh = raw.match(/^https:\/\/(?:rawcdn\.)?githack\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)$/i);
+	var githackGh = raw.match(/^https:\/\/(?:rawcdn\.)?githack\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)$/i);
 	if (githackGh) {
-		const [, owner, repo, branch, path] = githackGh;
+		var [, owner, repo, branch, path] = githackGh;
 		return `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${branch}/${path}`;
 	}
 	return raw;
 }
 
 async function materializeGameBlobUrl(url) {
-	const target = String(url || "").trim();
+	var target = String(url || "").trim();
 	if (!target) return target;
 	if (!/^https?:\/\//i.test(target)) return target;
-	const looksHtml = /\.html?(?:[?#]|$)/i.test(target);
+	var looksHtml = /\.html?(?:[?#]|$)/i.test(target);
 	if (!looksHtml) return target;
 
-	const response = await fetch(target, { method: "GET", cache: "no-store" });
+	var response = await fetch(target, { method: "GET", cache: "no-store" });
 	if (!response.ok) return target;
-	const body = await response.text();
+	var body = await response.text();
 	if (!body) return target;
 
-	const base = response.url.replace(/[^/]*([?#].*)?$/, "");
-	const hasBase = /<base\s[^>]*href=/i.test(body);
-	const htmlWithBase = hasBase
+	var base = response.url.replace(/[^/]*([?#].*)?$/, "");
+	var hasBase = /<base\s[^>]*href=/i.test(body);
+	var htmlWithBase = hasBase
 		? body
 		: body.replace(/<head([^>]*)>/i, `<head$1><base href="${base}">`);
 
-	const blob = new Blob([htmlWithBase || body], { type: "text/html;charset=utf-8" });
+	var blob = new Blob([htmlWithBase || body], { type: "text/html;charset=utf-8" });
 	return URL.createObjectURL(blob);
 }
 
 async function solveAiPrompt() {
-	const input = String((aiPromptInput && aiPromptInput.value) || "").trim();
+	var input = String((aiPromptInput && aiPromptInput.value) || "").trim();
 	if (!input) {
 		if (aiResult) aiResult.textContent = "Enter a prompt first.";
 		return;
@@ -1846,14 +2360,14 @@ async function solveAiPrompt() {
 	aiUiThread.push({ role: "assistant", content: "Thinking...", typing: true });
 	renderAiThread();
 	try {
-		const aiText = await fetchAiResponse(input, () => {});
+		var aiText = await fetchAiResponse(input, () => {});
 		await animateAiTyping(aiText);
 	} catch (error) {
-		const message =
+		var message =
 			`AI request failed.\n` +
 			`Reason: ${error.message || error}\n` +
 			`Tip: endpoint may be temporarily down or blocked by your network.`;
-		const idx = findLastAssistantMessageIndex();
+		var idx = findLastAssistantMessageIndex();
 		if (idx !== -1) {
 			aiUiThread[idx].content = message;
 			aiUiThread[idx].typing = false;
@@ -1872,16 +2386,16 @@ function animateAiTyping(text) {
 			resolve();
 			return;
 		}
-		const runId = ++aiTypingRunId;
-		const fullText = String(text || "");
-		const targetIndex = findLastAssistantMessageIndex();
+		var runId = ++aiTypingRunId;
+		var fullText = String(text || "");
+		var targetIndex = findLastAssistantMessageIndex();
 		if (targetIndex === -1) {
 			resolve();
 			return;
 		}
 		aiUiThread[targetIndex].content = "";
 		aiUiThread[targetIndex].typing = true;
-		let index = 0;
+		var index = 0;
 
 		function step() {
 			if (runId !== aiTypingRunId) {
@@ -1895,8 +2409,8 @@ function animateAiTyping(text) {
 				resolve();
 				return;
 			}
-			const remaining = fullText.length - index;
-			const chunkSize = remaining > 160 ? 4 : remaining > 80 ? 3 : remaining > 30 ? 2 : 1;
+			var remaining = fullText.length - index;
+			var chunkSize = remaining > 160 ? 4 : remaining > 80 ? 3 : remaining > 30 ? 2 : 1;
 			index = Math.min(fullText.length, index + chunkSize);
 			aiUiThread[targetIndex].content = fullText.slice(0, index);
 			renderAiThread();
@@ -1908,7 +2422,7 @@ function animateAiTyping(text) {
 }
 
 function findLastAssistantMessageIndex() {
-	for (let i = aiUiThread.length - 1; i >= 0; i -= 1) {
+	for (var i = aiUiThread.length - 1; i >= 0; i -= 1) {
 		if (aiUiThread[i]?.role === "assistant") return i;
 	}
 	return -1;
@@ -1930,13 +2444,13 @@ function renderAiThread() {
 		return;
 	}
 	aiResult.innerHTML = "";
-	const thread = document.createElement("div");
+	var thread = document.createElement("div");
 	thread.className = "ai-thread";
 	aiUiThread.forEach((message) => {
-		const row = document.createElement("div");
+		var row = document.createElement("div");
 		row.className = `ai-msg ai-msg-${message.role === "assistant" ? "assistant" : "user"}`;
 
-		const prefix = document.createElement("div");
+		var prefix = document.createElement("div");
 		prefix.className = "ai-msg-prefix";
 		if (message.role === "assistant") {
 			prefix.innerHTML =
@@ -1948,7 +2462,7 @@ function renderAiThread() {
 				'<span class="ai-response-prefix-text">:</span>';
 		}
 
-		const body = document.createElement("div");
+		var body = document.createElement("div");
 		body.className = "ai-msg-content";
 		if (message.role === "assistant" && !message.typing) {
 			renderAiMessageContent(body, message.content);
@@ -1966,11 +2480,11 @@ function renderAiThread() {
 
 function renderAiMessageContent(container, text) {
 	if (!container) return;
-	const source = String(text || "");
-	const parts = [];
-	const regex = /```([a-zA-Z0-9_+\-]*)\n?([\s\S]*?)```/g;
-	let lastIndex = 0;
-	let match;
+	var source = String(text || "");
+	var parts = [];
+	var regex = /```([a-zA-Z0-9_+\-]*)\n?([\s\S]*?)```/g;
+	var lastIndex = 0;
+	var match;
 
 	while ((match = regex.exec(source)) !== null) {
 		if (match.index > lastIndex) {
@@ -1993,31 +2507,31 @@ function renderAiMessageContent(container, text) {
 		return;
 	}
 	container.innerHTML = "";
-	const fragment = document.createDocumentFragment();
-	for (const part of parts) {
+	var fragment = document.createDocumentFragment();
+	for (var part of parts) {
 		if (part.type === "text") {
-			const block = document.createElement("div");
+			var block = document.createElement("div");
 			block.className = "ai-text-block";
 			block.innerHTML = escapeHtml(part.content).replace(/\n/g, "<br>");
 			fragment.appendChild(block);
 			continue;
 		}
 
-		const wrapper = document.createElement("div");
+		var wrapper = document.createElement("div");
 		wrapper.className = "ai-code-block";
 
-		const header = document.createElement("div");
+		var header = document.createElement("div");
 		header.className = "ai-code-header";
 
-		const lang = document.createElement("span");
+		var lang = document.createElement("span");
 		lang.className = "ai-code-lang";
 		lang.textContent = part.language || "text";
 		header.appendChild(lang);
 
-		const actions = document.createElement("div");
+		var actions = document.createElement("div");
 		actions.className = "ai-code-actions";
 
-		const copyBtn = document.createElement("button");
+		var copyBtn = document.createElement("button");
 		copyBtn.type = "button";
 		copyBtn.className = "ai-code-btn";
 		copyBtn.textContent = "Copy";
@@ -2040,8 +2554,8 @@ function renderAiMessageContent(container, text) {
 		header.appendChild(actions);
 		wrapper.appendChild(header);
 
-		const pre = document.createElement("pre");
-		const code = document.createElement("code");
+		var pre = document.createElement("pre");
+		var code = document.createElement("code");
 		code.textContent = part.content;
 		pre.appendChild(code);
 		wrapper.appendChild(pre);
@@ -2065,11 +2579,11 @@ function getGroqModelForMode(mode) {
 }
 
 async function fetchAiResponseFromGroq(prompt, onChunk) {
-	const apiUrl = String(window.GROQ_API_URL || "").trim();
-	const apiKey = String(window.GROQ_API_KEY || "").trim();
-	const mode = (aiModelSelect && aiModelSelect.value) || "auto";
-	const model = getGroqModelForMode(mode);
-	const systemPrompt = String(window.GROQ_SYSTEM_PROMPT || "").trim();
+	var apiUrl = String(window.GROQ_API_URL || "").trim();
+	var apiKey = String(window.GROQ_API_KEY || "").trim();
+	var mode = (aiModelSelect && aiModelSelect.value) || "auto";
+	var model = getGroqModelForMode(mode);
+	var systemPrompt = String(window.GROQ_SYSTEM_PROMPT || "").trim();
 	if (!apiUrl) {
 		throw new Error("Missing GROQ_API_URL.");
 	}
@@ -2077,13 +2591,13 @@ async function fetchAiResponseFromGroq(prompt, onChunk) {
 		throw new Error("Missing GROQ_API_KEY.");
 	}
 
-	const history = [
+	var history = [
 		...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
 		...aiChatHistory,
 		{ role: "user", content: prompt },
 	];
 
-	const response = await fetch(apiUrl, {
+	var response = await fetch(apiUrl, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
@@ -2097,13 +2611,13 @@ async function fetchAiResponseFromGroq(prompt, onChunk) {
 		}),
 	});
 
-	const payload = await response.json().catch(() => ({}));
+	var payload = await response.json().catch(() => ({}));
 	if (!response.ok) {
-		const detail = payload?.error?.message || `Groq error (${response.status})`;
+		var detail = payload?.error?.message || `Groq error (${response.status})`;
 		throw new Error(detail);
 	}
 
-	const text = extractAiText(payload);
+	var text = extractAiText(payload);
 	if (!text) {
 		throw new Error("AI response was empty.");
 	}
@@ -2118,9 +2632,9 @@ async function fetchAiResponseFromGroq(prompt, onChunk) {
 }
 
 function extractAiText(payload) {
-	const direct = String(payload?.text || "").trim();
+	var direct = String(payload?.text || "").trim();
 	if (direct) return direct;
-	const rawContent = payload?.choices?.[0]?.message?.content;
+	var rawContent = payload?.choices?.[0]?.message?.content;
 	if (typeof rawContent === "string") return rawContent.trim();
 	if (Array.isArray(rawContent)) {
 		return rawContent
@@ -2133,27 +2647,27 @@ function extractAiText(payload) {
 
 function loadAiMode() {
 	if (!aiModelSelect) return;
-	const saved = String(localStorage.getItem(aiModeKey) || "auto").toLowerCase();
-	const allowed = new Set(["auto", "fast", "smart"]);
+	var saved = String(localStorage.getItem(aiModeKey) || "auto").toLowerCase();
+	var allowed = new Set(["auto", "fast", "smart"]);
 	aiModelSelect.value = allowed.has(saved) ? saved : "auto";
 }
 
-const cloakEnabledStorage = "fb_cloak_enabled";
-const cloakTitleStorage = "fb_cloak_title";
-const cloakFaviconStorage = "fb_cloak_favicon";
-const defaultCloakTitle = "IXL | Math, Language Arts, Science, Social Studies, and Spanish";
-const defaultCloakFaviconHref = "ixl.ico";
-const cloakPresets = {
+var cloakEnabledStorage = "fb_cloak_enabled";
+var cloakTitleStorage = "fb_cloak_title";
+var cloakFaviconStorage = "fb_cloak_favicon";
+var defaultCloakTitle = "IXL | Math, Language Arts, Science, Social Studies, and Spanish";
+var defaultCloakFaviconHref = "ixl.ico";
+var cloakPresets = {
 	ixl: { title: "IXL | Math, Language Arts, Science, Social Studies, and Spanish", favicon: "ixl.ico" },
 	google: { title: "Google", favicon: "https://www.google.com/favicon.ico" },
 	docs: { title: "Google Docs", favicon: "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico" },
 	drive: { title: "My Drive - Google Drive", favicon: "https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png" },
 };
-const visibleAppTitle = "FilterBrowser";
-const visibleFaviconHref = "favicon.ico";
+var visibleAppTitle = "Frosted";
+var visibleFaviconHref = defaultAppIconHref;
 
 function isCloakEnabled() {
-	const raw = localStorage.getItem(cloakEnabledStorage);
+	var raw = localStorage.getItem(cloakEnabledStorage);
 	if (raw === null) {
 		localStorage.setItem(cloakEnabledStorage, "true");
 		return true;
@@ -2162,7 +2676,7 @@ function isCloakEnabled() {
 }
 
 function loadCloakSettings() {
-	const enabled = isCloakEnabled();
+	var enabled = isCloakEnabled();
 	if (cloakEnabledToggle) {
 		cloakEnabledToggle.checked = enabled;
 	}
@@ -2177,11 +2691,11 @@ function loadCloakSettings() {
 }
 
 function setDocumentFavicon(href) {
-	const targetHref = String(href || "").trim();
+	var targetHref = String(href || "").trim();
 	if (!targetHref) return;
-	const rels = ["icon", "shortcut icon", "apple-touch-icon"];
+	var rels = ["icon", "shortcut icon", "apple-touch-icon"];
 	rels.forEach((relValue) => {
-		let link = document.querySelector(`link[rel='${relValue}']`);
+		var link = document.querySelector(`link[rel='${relValue}']`);
 		if (!link) {
 			link = document.createElement("link");
 			link.setAttribute("rel", relValue);
@@ -2195,9 +2709,9 @@ function setDocumentFavicon(href) {
 }
 
 function applyCloakVisualState(isHidden) {
-	const useCloak = isCloakEnabled() && isHidden;
-	const title = useCloak ? getCloakTitle() : visibleAppTitle;
-	const favicon = useCloak ? getCloakFaviconHref() : visibleFaviconHref;
+	var useCloak = isCloakEnabled() && isHidden;
+	var title = useCloak ? getCloakTitle() : visibleAppTitle;
+	var favicon = useCloak ? getCloakFaviconHref() : visibleFaviconHref;
 	document.title = title;
 	setDocumentFavicon(favicon);
 	broadcastCloakStateToParent({
@@ -2210,12 +2724,12 @@ function applyCloakVisualState(isHidden) {
 }
 
 function getCloakTitle() {
-	const value = String(localStorage.getItem(cloakTitleStorage) || "").trim();
+	var value = String(localStorage.getItem(cloakTitleStorage) || "").trim();
 	return value || defaultCloakTitle;
 }
 
 function getCloakFaviconHref() {
-	const value = normalizeCloakFaviconValue(localStorage.getItem(cloakFaviconStorage));
+	var value = normalizeCloakFaviconValue(localStorage.getItem(cloakFaviconStorage));
 	if (value !== String(localStorage.getItem(cloakFaviconStorage) || "").trim()) {
 		localStorage.setItem(cloakFaviconStorage, value);
 	}
@@ -2223,7 +2737,7 @@ function getCloakFaviconHref() {
 }
 
 function saveCloakTitle() {
-	const title = String(cloakTitleInput?.value || "").trim() || defaultCloakTitle;
+	var title = String(cloakTitleInput?.value || "").trim() || defaultCloakTitle;
 	localStorage.setItem(cloakTitleStorage, title);
 	if (cloakTitleInput) cloakTitleInput.value = title;
 	syncCloakPresetSelection();
@@ -2232,7 +2746,7 @@ function saveCloakTitle() {
 }
 
 function saveCloakFavicon() {
-	const icon = normalizeCloakFaviconValue(cloakFaviconInput?.value) || defaultCloakFaviconHref;
+	var icon = normalizeCloakFaviconValue(cloakFaviconInput?.value) || defaultCloakFaviconHref;
 	localStorage.setItem(cloakFaviconStorage, icon);
 	if (cloakFaviconInput) cloakFaviconInput.value = icon;
 	syncCloakPresetSelection();
@@ -2241,7 +2755,7 @@ function saveCloakFavicon() {
 }
 
 function normalizeCloakFaviconValue(raw) {
-	const value = String(raw || "").trim();
+	var value = String(raw || "").trim();
 	if (!value) return "";
 	if (/^https?:\/\/(www\.)?ixl\.com\/favicon\.ico$/i.test(value)) return "ixl.ico";
 	if (/^https?:\/\/(www\.)?ixl\.com\/ixl-favicon\.png$/i.test(value)) return "ixl.ico";
@@ -2254,7 +2768,7 @@ function setCloakStatus(message) {
 }
 
 function applyCloakPreset(key) {
-	const preset = cloakPresets[key];
+	var preset = cloakPresets[key];
 	if (!preset) return;
 	localStorage.setItem(cloakTitleStorage, preset.title);
 	localStorage.setItem(cloakFaviconStorage, preset.favicon);
@@ -2267,21 +2781,21 @@ function applyCloakPreset(key) {
 
 function syncCloakPresetSelection() {
 	if (!cloakPresetSelect) return;
-	const title = getCloakTitle();
-	const favicon = getCloakFaviconHref();
-	const match = Object.keys(cloakPresets).find((key) => {
-		const preset = cloakPresets[key];
+	var title = getCloakTitle();
+	var favicon = getCloakFaviconHref();
+	var match = Object.keys(cloakPresets).find((key) => {
+		var preset = cloakPresets[key];
 		return preset.title === title && preset.favicon === favicon;
 	});
 	cloakPresetSelect.value = match || "custom";
 }
 
 function hexToRgba(hex, alpha) {
-	const value = hex.replace("#", "");
+	var value = hex.replace("#", "");
 	if (value.length !== 6) return `rgba(255, 255, 255, ${alpha})`;
-	const r = parseInt(value.slice(0, 2), 16);
-	const g = parseInt(value.slice(2, 4), 16);
-	const b = parseInt(value.slice(4, 6), 16);
+	var r = parseInt(value.slice(0, 2), 16);
+	var g = parseInt(value.slice(2, 4), 16);
+	var b = parseInt(value.slice(4, 6), 16);
 	return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
@@ -2313,11 +2827,450 @@ function applyTheme(
 	updateParticleColorFromTheme();
 }
 
-const wallpaperKey = "fb_wallpaper";
-const wallpaperRevisionKey = "fb_wallpaper_rev";
-const wallpapers = {
+var extensionWallpaperStorageKey = "fb_extension_wallpapers";
+var wallpaperExtensionEnabledStorageKey = "fb_wallpaper_extension_enabled";
+var wallpaperStoreCatalog = [];
+var installedExtensionWallpapers = {};
+var wallpaperStoreView = "store";
+var wallpaperStoreSort = "name";
+var wallpaperStoreQuery = "";
+var wallpaperStoreSelectedKey = "";
+var winterIslandDefaultStoreKey = "store-winter-island";
+
+function sanitizeWallpaperStoreKey(raw, fallback = "wallpaper") {
+	var base = String(raw || "").trim().toLowerCase();
+	var compact = base.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+	return compact || fallback;
+}
+
+function getWallpaperRegistry() {
+	return { ...wallpapers, ...installedExtensionWallpapers };
+}
+
+function normalizeStoreWallpaperTheme(theme) {
+	var source = typeof theme === "object" && theme ? theme : {};
+	return {
+		color1: String(source.color1 || "#93b8ff"),
+		color2: String(source.color2 || "#8dd8ff"),
+		nav1: String(source.nav1 || source.color1 || "#2a4471"),
+		nav2: String(source.nav2 || source.color2 || "#16223a"),
+		bg1: String(source.bg1 || "#081427"),
+		bg2: String(source.bg2 || "#0f2743"),
+	};
+}
+
+function normalizeStoreWallpaperEntry(rawEntry, index = 0) {
+	var item = typeof rawEntry === "object" && rawEntry ? rawEntry : {};
+	var keySeed = item.key || item.id || item.slug || item.label || `wallpaper-${index + 1}`;
+	var key = sanitizeWallpaperStoreKey(keySeed, `wallpaper-${index + 1}`);
+	key = key.replace(/^(store-)+/, "store-");
+	if (!key.startsWith("store-")) key = `store-${key}`;
+	var label = String(item.label || item.name || item.title || `Wallpaper ${index + 1}`).trim();
+	var file = String(item.file || item.url || "").trim();
+	var typeRaw = String(item.type || "video").trim().toLowerCase();
+	var categoryRaw = String(item.category || "animated-wallpapers").trim().toLowerCase();
+	var type = typeRaw === "image" ? "image" : "video";
+	var category = categoryRaw || "animated-wallpapers";
+	if (!label || !file) return null;
+	return {
+		key,
+		label,
+		file,
+		type,
+		category,
+		theme: normalizeStoreWallpaperTheme(item.theme),
+	};
+}
+
+function readInstalledExtensionWallpapers() {
+	try {
+		var parsed = JSON.parse(localStorage.getItem(extensionWallpaperStorageKey) || "{}");
+		if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+		var normalized = {};
+		Object.entries(parsed).forEach(([key, wallpaper]) => {
+			var cleanKey = sanitizeWallpaperStoreKey(key, "");
+			if (!cleanKey) return;
+			var entry = normalizeStoreWallpaperEntry({ key: cleanKey, ...wallpaper });
+			if (!entry) return;
+			normalized[entry.key] = {
+				label: entry.label,
+				category: entry.category,
+				type: entry.type,
+				file: entry.file,
+				theme: entry.theme,
+			};
+		});
+		return normalized;
+	} catch {
+		return {};
+	}
+}
+
+function saveInstalledExtensionWallpapers() {
+	localStorage.setItem(extensionWallpaperStorageKey, JSON.stringify(installedExtensionWallpapers));
+}
+
+function loadInstalledExtensionWallpapers() {
+	installedExtensionWallpapers = readInstalledExtensionWallpapers();
+	updateExtensionInstallCount();
+	loadWallpaperExtensionToggle();
+}
+
+function updateExtensionInstallCount() {
+	if (!frostedWallpapersInstalledCount) return;
+	var total = Object.keys(installedExtensionWallpapers).length;
+	frostedWallpapersInstalledCount.textContent = `Wallpapers installed: ${total}`;
+}
+
+function isWallpaperExtensionEnabled() {
+	return true;
+}
+
+function setWallpaperExtensionEnabled(enabled) {
+	updateWallpaperExtensionStatusUi();
+	renderWallpaperStoreGrid();
+}
+
+function loadWallpaperExtensionToggle() {
+	updateWallpaperExtensionStatusUi();
+}
+
+function updateWallpaperExtensionStatusUi() {
+	if (wallpaperExtensionEnabledToggle) wallpaperExtensionEnabledToggle.checked = true;
+	if (wallpaperExtensionStatus) wallpaperExtensionStatus.textContent = "Status: On";
+}
+
+function isStoreWallpaperInstalled(key) {
+	var normalized = String(key || "").trim();
+	return Boolean(normalized && installedExtensionWallpapers[normalized]);
+}
+
+function getWallpaperStoreEntryByKey(key) {
+	var target = String(key || "").trim();
+	if (!target) return null;
+	return wallpaperStoreCatalog.find((entry) => entry.key === target) || null;
+}
+
+function getSelectedWallpaperStoreEntry() {
+	return getWallpaperStoreEntryByKey(wallpaperStoreSelectedKey);
+}
+
+function getFilteredWallpaperStoreEntries() {
+	var base =
+		wallpaperStoreView === "installed"
+			? wallpaperStoreCatalog.filter((entry) => isStoreWallpaperInstalled(entry.key))
+			: wallpaperStoreCatalog.slice();
+	var filtered = wallpaperStoreQuery
+		? base.filter((entry) => {
+				var name = String(entry.label || "").toLowerCase();
+				var file = String(entry.file || "").toLowerCase();
+				var category = String(entry.category || "").toLowerCase();
+				return (
+					name.includes(wallpaperStoreQuery) ||
+					file.includes(wallpaperStoreQuery) ||
+					category.includes(wallpaperStoreQuery)
+				);
+			})
+		: base;
+	filtered.sort((a, b) => {
+		if (wallpaperStoreSort === "type") {
+			return String(a.type || "").localeCompare(String(b.type || "")) || a.label.localeCompare(b.label);
+		}
+		if (wallpaperStoreSort === "category") {
+			return (
+				String(a.category || "").localeCompare(String(b.category || "")) ||
+				a.label.localeCompare(b.label)
+			);
+		}
+		return a.label.localeCompare(b.label);
+	});
+	return filtered;
+}
+
+function setWallpaperStoreView(nextView) {
+	var view = String(nextView || "store").toLowerCase();
+	wallpaperStoreView = view === "installed" ? "installed" : "store";
+	renderWallpaperStoreGrid();
+}
+
+function updateWallpaperStoreTabUi() {
+	if (wallpaperStoreTabInstalled) {
+		wallpaperStoreTabInstalled.classList.toggle("active", wallpaperStoreView === "installed");
+	}
+	if (wallpaperStoreTabDiscover) {
+		wallpaperStoreTabDiscover.classList.toggle("active", false);
+	}
+	if (wallpaperStoreTabStore) {
+		wallpaperStoreTabStore.classList.toggle("active", wallpaperStoreView === "store");
+	}
+}
+
+function setWallpaperStoreSelection(entryKey) {
+	wallpaperStoreSelectedKey = String(entryKey || "").trim();
+	renderWallpaperStoreGrid();
+}
+
+function renderWallpaperStorePreview(entry) {
+	if (!wallpaperStorePreviewTitle || !wallpaperStorePreviewMeta || !wallpaperStorePreviewMedia) return;
+	wallpaperStorePreviewMedia.innerHTML = "";
+	if (!entry) {
+		wallpaperStorePreviewTitle.textContent = "Select a wallpaper";
+		wallpaperStorePreviewMeta.textContent = "No wallpaper selected.";
+		var empty = document.createElement("div");
+		empty.className = "wallpaper-preview-empty";
+		empty.textContent = "Pick a card to preview details.";
+		wallpaperStorePreviewMedia.appendChild(empty);
+		if (wallpaperStoreInstallBtn) {
+			wallpaperStoreInstallBtn.disabled = true;
+			wallpaperStoreInstallBtn.style.display = "inline-flex";
+		}
+		if (wallpaperStoreUninstallBtn) {
+			wallpaperStoreUninstallBtn.disabled = true;
+			wallpaperStoreUninstallBtn.style.display = "none";
+		}
+		if (wallpaperStoreApplyBtn) {
+			wallpaperStoreApplyBtn.style.display = wallpaperStoreView === "installed" ? "inline-flex" : "none";
+			wallpaperStoreApplyBtn.disabled = true;
+		}
+		return;
+	}
+
+	var installed = isStoreWallpaperInstalled(entry.key);
+	wallpaperStorePreviewTitle.textContent = entry.label;
+	wallpaperStorePreviewMeta.textContent = `${
+		entry.type === "video" ? "Animated" : "Static"
+	} • ${installed ? "Installed" : "Not installed"}`;
+
+	if (entry.type === "video") {
+		var previewVideo = document.createElement("video");
+		previewVideo.src = entry.file;
+		previewVideo.muted = true;
+		previewVideo.autoplay = true;
+		previewVideo.loop = true;
+		previewVideo.playsInline = true;
+		wallpaperStorePreviewMedia.appendChild(previewVideo);
+	} else {
+		var previewImg = document.createElement("img");
+		previewImg.src = entry.file;
+		previewImg.alt = entry.label;
+		wallpaperStorePreviewMedia.appendChild(previewImg);
+	}
+
+	if (wallpaperStoreInstallBtn) {
+		wallpaperStoreInstallBtn.disabled = installed;
+		wallpaperStoreInstallBtn.textContent = installed ? "Installed" : "Install";
+		wallpaperStoreInstallBtn.style.display = "inline-flex";
+	}
+	if (wallpaperStoreUninstallBtn) {
+		wallpaperStoreUninstallBtn.disabled = !installed;
+		wallpaperStoreUninstallBtn.style.display = installed ? "inline-flex" : "none";
+	}
+	if (wallpaperStoreApplyBtn) {
+		wallpaperStoreApplyBtn.style.display = wallpaperStoreView === "installed" ? "inline-flex" : "none";
+		wallpaperStoreApplyBtn.disabled = !installed || wallpaperStoreView !== "installed";
+	}
+}
+function installWallpaperFromStore(entry) {
+	if (!entry?.key) return;
+	if (!isWallpaperExtensionEnabled()) return;
+	installedExtensionWallpapers[entry.key] = {
+		label: entry.label,
+		category: entry.category,
+		type: entry.type,
+		file: entry.file,
+		theme: entry.theme,
+	};
+	saveInstalledExtensionWallpapers();
+	updateExtensionInstallCount();
+	populateWallpaperOptions();
+	renderWallpaperStoreGrid();
+}
+
+function uninstallWallpaperFromStore(entry) {
+	if (!entry?.key) return;
+	if (!isWallpaperExtensionEnabled()) return;
+	delete installedExtensionWallpapers[entry.key];
+	saveInstalledExtensionWallpapers();
+	updateExtensionInstallCount();
+	populateWallpaperOptions();
+	if (normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "") === entry.key) {
+		applyWallpaper("skynight");
+	}
+	renderWallpaperStoreGrid();
+}
+
+function getWinterIslandStoreEntry() {
+	return (
+		wallpaperStoreCatalog.find((entry) => entry.key === winterIslandDefaultStoreKey) ||
+		wallpaperStoreCatalog.find(
+			(entry) =>
+				String(entry.label || "").trim().toLowerCase() === "winter island" ||
+				String(entry.file || "").trim().toLowerCase().endsWith("/wallpapers/animated/winter.mp4") ||
+				String(entry.file || "").trim().toLowerCase() === "wallpapers/animated/winter.mp4"
+		) ||
+		null
+	);
+}
+
+function ensureWinterIslandInstalledAndDefault() {
+	var entry = getWinterIslandStoreEntry();
+	if (!entry) return;
+	if (!isStoreWallpaperInstalled(entry.key)) {
+		installedExtensionWallpapers[entry.key] = {
+			label: entry.label,
+			category: entry.category,
+			type: entry.type,
+			file: entry.file,
+			theme: entry.theme,
+		};
+		saveInstalledExtensionWallpapers();
+		updateExtensionInstallCount();
+	}
+	wallpaperStoreSelectedKey = entry.key;
+	populateWallpaperOptions();
+	var savedRaw = localStorage.getItem(wallpaperKey);
+	var saved = normalizeWallpaperKey(savedRaw || "");
+	var shouldApplyDefault = !savedRaw || saved === "skynight";
+	if (shouldApplyDefault) {
+		applyWallpaper(entry.key);
+	}
+}
+
+async function loadWallpaperStoreCatalog() {
+	if (wallpaperStoreStatus) {
+		wallpaperStoreStatus.textContent = "Loading wallpaper store...";
+	}
+	try {
+		var response = await fetch("/wallpaperstore.json", { cache: "no-store" });
+		var raw = await response.json().catch(() => []);
+		if (!response.ok || !Array.isArray(raw)) {
+			wallpaperStoreCatalog = [];
+			if (wallpaperStoreStatus) {
+				wallpaperStoreStatus.textContent =
+					"No store file found. Add /public/wallpaperstore.json to publish wallpapers.";
+			}
+			renderWallpaperStoreGrid();
+			return;
+		}
+		wallpaperStoreCatalog = raw
+			.map((entry, index) => normalizeStoreWallpaperEntry(entry, index))
+			.filter(Boolean);
+		if (!wallpaperStoreSelectedKey && wallpaperStoreCatalog.length) {
+			wallpaperStoreSelectedKey = wallpaperStoreCatalog[0].key;
+		}
+		ensureWinterIslandInstalledAndDefault();
+		if (wallpaperStoreStatus) {
+			wallpaperStoreStatus.textContent = `Loaded ${wallpaperStoreCatalog.length} wallpaper${
+				wallpaperStoreCatalog.length === 1 ? "" : "s"
+			}.`;
+		}
+		renderWallpaperStoreGrid();
+	} catch {
+		wallpaperStoreCatalog = [];
+		if (wallpaperStoreStatus) {
+			wallpaperStoreStatus.textContent =
+				"Could not read wallpaperstore.json. Add the file to /public and reload.";
+		}
+		renderWallpaperStoreGrid();
+	}
+}
+
+function renderWallpaperStoreGrid() {
+	if (!wallpaperStoreGrid) return;
+	updateWallpaperStoreTabUi();
+	wallpaperStoreGrid.innerHTML = "";
+	var rows = getFilteredWallpaperStoreEntries();
+	if (wallpaperStoreStatus) {
+		wallpaperStoreStatus.textContent = rows.length
+			? `${rows.length} wallpaper${rows.length === 1 ? "" : "s"} shown.`
+			: "No wallpapers match this filter.";
+	}
+	if (!rows.length) {
+		renderWallpaperStorePreview(null);
+		return;
+	}
+
+	var selectedEntry = getWallpaperStoreEntryByKey(wallpaperStoreSelectedKey) || rows[0];
+	wallpaperStoreSelectedKey = selectedEntry.key;
+
+	rows.forEach((entry) => {
+		var card = document.createElement("article");
+		card.className = "store-wallpaper-card";
+		if (entry.key === wallpaperStoreSelectedKey) {
+			card.classList.add("active");
+		}
+		card.addEventListener("click", () => {
+			setWallpaperStoreSelection(entry.key);
+		});
+
+		var thumbWrap = document.createElement("div");
+		thumbWrap.className = "store-wallpaper-thumb";
+		if (entry.type === "video") {
+			var thumbVideo = document.createElement("video");
+			thumbVideo.src = entry.file;
+			thumbVideo.muted = true;
+			thumbVideo.loop = true;
+			thumbVideo.autoplay = true;
+			thumbVideo.playsInline = true;
+			thumbWrap.appendChild(thumbVideo);
+		} else {
+			var thumbImg = document.createElement("img");
+			thumbImg.src = entry.file;
+			thumbImg.alt = entry.label;
+			thumbWrap.appendChild(thumbImg);
+		}
+
+		var title = document.createElement("h3");
+		title.textContent = entry.label;
+
+		var meta = document.createElement("div");
+		meta.className = "settings-hint";
+		meta.textContent = `${entry.type === "video" ? "Animated" : "Static"}`;
+
+		var actions = document.createElement("div");
+		actions.className = "settings-row wallpaper-store-actions";
+
+		var installBtn = document.createElement("button");
+		installBtn.type = "button";
+		installBtn.className = "settings-btn wallpaper-store-btn";
+		var installed = isStoreWallpaperInstalled(entry.key);
+		installBtn.textContent = installed ? "Installed" : "Install";
+		installBtn.disabled = installed;
+		installBtn.addEventListener("click", (event) => {
+			event.stopPropagation();
+			installWallpaperFromStore(entry);
+		});
+		actions.appendChild(installBtn);
+
+		if (wallpaperStoreView === "installed" && installed) {
+			var uninstallBtn = document.createElement("button");
+			uninstallBtn.type = "button";
+			uninstallBtn.className = "settings-btn wallpaper-store-btn";
+			uninstallBtn.textContent = "Uninstall";
+			uninstallBtn.addEventListener("click", (event) => {
+				event.stopPropagation();
+				uninstallWallpaperFromStore(entry);
+			});
+			actions.appendChild(uninstallBtn);
+		}
+
+		card.appendChild(thumbWrap);
+		card.appendChild(title);
+		card.appendChild(meta);
+		card.appendChild(actions);
+		wallpaperStoreGrid.appendChild(card);
+	});
+
+	renderWallpaperStorePreview(getWallpaperStoreEntryByKey(wallpaperStoreSelectedKey));
+}
+var wallpaperKey = "fb_wallpaper";
+var wallpaperRevisionKey = "fb_wallpaper_rev";
+var wallpaperVideoElementId = "wallpaperVideo";
+var wallpapers = {
 	onyx: {
 		label: "Onyx",
+		category: "wallpapers",
+		type: "image",
 		file: "wallpapers/onyx.jpg",
 		theme: {
 			color1: "#000001",
@@ -2330,6 +3283,8 @@ const wallpapers = {
 	},
 	skynight: {
 		label: "Sky Night",
+		category: "wallpapers",
+		type: "image",
 		file: "wallpapers/skynight.jpg",
 		theme: {
 			color1: "#8ac3d6",
@@ -2342,6 +3297,8 @@ const wallpapers = {
 	},
 	eveningmountains: {
 		label: "Evening Mountains",
+		category: "wallpapers",
+		type: "image",
 		file: "wallpapers/evening-mountains.jpg",
 		theme: {
 			color1: "#c49564",
@@ -2354,6 +3311,8 @@ const wallpapers = {
 	},
 	twilightridge: {
 		label: "Twilight Ridge",
+		category: "wallpapers",
+		type: "image",
 		file: "wallpapers/twilight-ridge.png",
 		theme: {
 			color1: "#a7b7ff",
@@ -2364,8 +3323,26 @@ const wallpapers = {
 			bg2: "#1e2a4f",
 		},
 	},
+	winter: {
+		label: "Winter (Animated)",
+		category: "animated-wallpapers",
+		type: "video",
+		file: "wallpapers/animated/winter.mp4",
+		theme: {
+			color1: "#bad9ff",
+			color2: "#d9f2ff",
+			nav1: "#1f3d66",
+			nav2: "#17304f",
+			bg1: "#09192a",
+			bg2: "#10253f",
+		},
+	},
 };
-const defaultWallpaperTheme = {
+var wallpaperCategoryLabels = {
+	wallpapers: "Wallpapers",
+	"animated-wallpapers": "Animated Wallpapers",
+};
+var defaultWallpaperTheme = {
 	color1: "#93b8ff",
 	color2: "#8dd8ff",
 	nav1: "#2a4471",
@@ -2375,15 +3352,17 @@ const defaultWallpaperTheme = {
 };
 
 function normalizeWallpaperKey(value) {
-	const key = String(value || "").trim().toLowerCase();
-	if (wallpapers[key]) return key;
-	const compact = key.replace(/[^a-z0-9]/g, "");
-	return wallpapers[compact] ? compact : "skynight";
+	var key = String(value || "").trim().toLowerCase();
+	var registry = getWallpaperRegistry();
+	if (registry[key]) return key;
+	var compact = key.replace(/[^a-z0-9]/g, "");
+	return registry[compact] ? compact : "skynight";
 }
 
 function getWallpaperFile(key) {
-	const normalized = normalizeWallpaperKey(key);
-	const file = wallpapers[normalized].file;
+	var normalized = normalizeWallpaperKey(key);
+	var registry = getWallpaperRegistry();
+	var file = registry[normalized]?.file || wallpapers.skynight.file;
 	try {
 		return new URL(file, window.location.href).toString();
 	} catch {
@@ -2391,9 +3370,16 @@ function getWallpaperFile(key) {
 	}
 }
 
+function getWallpaperType(key) {
+	var normalized = normalizeWallpaperKey(key);
+	var registry = getWallpaperRegistry();
+	return registry[normalized]?.type === "video" ? "video" : "image";
+}
+
 function getWallpaperTheme(key) {
-	const normalized = normalizeWallpaperKey(key);
-	const theme = wallpapers[normalized]?.theme;
+	var normalized = normalizeWallpaperKey(key);
+	var registry = getWallpaperRegistry();
+	var theme = registry[normalized]?.theme;
 	if (!theme) return defaultWallpaperTheme;
 	return {
 		color1: theme.color1 || defaultWallpaperTheme.color1,
@@ -2406,31 +3392,80 @@ function getWallpaperTheme(key) {
 }
 
 function getWallpaperRevision() {
-	const raw = Number.parseInt(localStorage.getItem(wallpaperRevisionKey) || "0", 10);
+	var raw = Number.parseInt(localStorage.getItem(wallpaperRevisionKey) || "0", 10);
 	return Number.isFinite(raw) ? raw : 0;
 }
 
 function bumpWallpaperRevision() {
-	const next = getWallpaperRevision() + 1;
+	var next = getWallpaperRevision() + 1;
 	localStorage.setItem(wallpaperRevisionKey, String(next));
 	return next;
 }
 
-function buildWallpaperCssValue(key, revision = getWallpaperRevision()) {
-	const wallpaperFile = getWallpaperFile(key);
+function buildWallpaperAssetUrl(key, revision = getWallpaperRevision()) {
+	var wallpaperFile = getWallpaperFile(key);
 	try {
-		const url = new URL(wallpaperFile, window.location.href);
+		var url = new URL(wallpaperFile, window.location.href);
 		url.searchParams.set("v", String(revision));
-		return `url("${url.toString()}")`;
+		return url.toString();
 	} catch {
-		const separator = String(wallpaperFile).includes("?") ? "&" : "?";
-		return `url("${wallpaperFile}${separator}v=${revision}")`;
+		var separator = String(wallpaperFile).includes("?") ? "&" : "?";
+		return `${wallpaperFile}${separator}v=${revision}`;
 	}
 }
 
+function buildWallpaperCssValue(key, revision = getWallpaperRevision()) {
+	return `url("${buildWallpaperAssetUrl(key, revision)}")`;
+}
+
+function ensureWallpaperVideoElement() {
+	var videoEl = document.getElementById(wallpaperVideoElementId);
+	if (videoEl) return videoEl;
+	videoEl = document.createElement("video");
+	videoEl.id = wallpaperVideoElementId;
+	videoEl.className = "wallpaper-video";
+	videoEl.muted = true;
+	videoEl.defaultMuted = true;
+	videoEl.loop = true;
+	videoEl.autoplay = true;
+	videoEl.playsInline = true;
+	videoEl.setAttribute("aria-hidden", "true");
+	videoEl.setAttribute("tabindex", "-1");
+	var firstChild = document.body.firstChild;
+	if (firstChild) document.body.insertBefore(videoEl, firstChild);
+	else document.body.appendChild(videoEl);
+	return videoEl;
+}
+
+function showWallpaperVideo(videoUrl) {
+	var videoEl = ensureWallpaperVideoElement();
+	if (!videoUrl) return;
+	if (videoEl.dataset.src !== videoUrl) {
+		videoEl.src = videoUrl;
+		videoEl.dataset.src = videoUrl;
+		videoEl.load();
+	}
+	document.body.classList.add("has-video-wallpaper");
+	videoEl.classList.add("is-active");
+	var playResult = videoEl.play();
+	if (playResult && typeof playResult.catch === "function") {
+		playResult.catch(() => {});
+	}
+}
+
+function hideWallpaperVideo() {
+	var videoEl = document.getElementById(wallpaperVideoElementId);
+	document.body.classList.remove("has-video-wallpaper");
+	if (!videoEl) return;
+	videoEl.classList.remove("is-active");
+	videoEl.pause();
+	videoEl.removeAttribute("src");
+	videoEl.dataset.src = "";
+	videoEl.load();
+}
+
 function renderWallpaperBackground(wallpaperCssUrl) {
-	const value = String(wallpaperCssUrl || "").trim();
-	if (!value) return;
+	var value = String(wallpaperCssUrl || "").trim() || "none";
 	document.documentElement.style.setProperty("--wallpaper-image", value);
 	document.body.style.backgroundImage =
 		`linear-gradient(180deg, rgba(5, 13, 26, 0.36), rgba(9, 20, 36, 0.58)), ${value}, ` +
@@ -2438,10 +3473,17 @@ function renderWallpaperBackground(wallpaperCssUrl) {
 }
 
 function applyWallpaper(key) {
-	const normalized = normalizeWallpaperKey(key);
-	const revision = bumpWallpaperRevision();
-	const theme = getWallpaperTheme(normalized);
-	renderWallpaperBackground(buildWallpaperCssValue(normalized, revision));
+	var normalized = normalizeWallpaperKey(key);
+	var revision = bumpWallpaperRevision();
+	var theme = getWallpaperTheme(normalized);
+	var wallpaperType = getWallpaperType(normalized);
+	if (wallpaperType === "video") {
+		showWallpaperVideo(buildWallpaperAssetUrl(normalized, revision));
+		renderWallpaperBackground("");
+	} else {
+		hideWallpaperVideo();
+		renderWallpaperBackground(buildWallpaperCssValue(normalized, revision));
+	}
 	document.body.dataset.wallpaper = normalized;
 	if (wallpaperSelect) wallpaperSelect.value = normalized;
 	localStorage.setItem(wallpaperKey, normalized);
@@ -2451,57 +3493,97 @@ function applyWallpaper(key) {
 function populateWallpaperOptions() {
 	if (!wallpaperSelect) return;
 	wallpaperSelect.innerHTML = "";
-	Object.entries(wallpapers).forEach(([key, wallpaper]) => {
-		const option = document.createElement("option");
+	var categoryGroups = new Map();
+	Object.entries(getWallpaperRegistry()).forEach(([key, wallpaper]) => {
+		var categoryKey =
+			typeof wallpaper.category === "string" && wallpaper.category
+				? wallpaper.category
+				: "wallpapers";
+		if (!categoryGroups.has(categoryKey)) {
+			var group = document.createElement("optgroup");
+			group.label = wallpaperCategoryLabels[categoryKey] || "Wallpapers";
+			categoryGroups.set(categoryKey, group);
+		}
+		var option = document.createElement("option");
 		option.value = key;
 		option.textContent = wallpaper.label;
-		wallpaperSelect.appendChild(option);
+		categoryGroups.get(categoryKey).appendChild(option);
+	});
+	var orderedCategories = ["wallpapers", "animated-wallpapers"];
+	orderedCategories.forEach((category) => {
+		var group = categoryGroups.get(category);
+		if (group && group.children.length) wallpaperSelect.appendChild(group);
+		categoryGroups.delete(category);
+	});
+	categoryGroups.forEach((group) => {
+		if (group.children.length) wallpaperSelect.appendChild(group);
 	});
 }
 
 function loadWallpaper() {
-	const saved = normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "skynight");
+	var saved = normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "skynight");
 	applyWallpaper(saved);
 }
 
 function bootstrapWallpaperFromStorage() {
-	const saved = normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "skynight");
-	const theme = getWallpaperTheme(saved);
-	renderWallpaperBackground(buildWallpaperCssValue(saved));
+	var saved = normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "skynight");
+	var theme = getWallpaperTheme(saved);
+	if (getWallpaperType(saved) === "video") {
+		showWallpaperVideo(buildWallpaperAssetUrl(saved));
+		renderWallpaperBackground("");
+	} else {
+		hideWallpaperVideo();
+		renderWallpaperBackground(buildWallpaperCssValue(saved));
+	}
 	document.body.dataset.wallpaper = saved;
 	applyTheme(theme.color1, theme.color2, theme.bg1, theme.bg2, theme.nav1, theme.nav2);
 }
 
-const panicKeyStorage = "fb_panic_key";
-const panicUrlStorage = "fb_panic_url";
-const panicDefaultKey = "`";
-const panicDefaultUrl = "https://google.com";
-const openModeStorage = "fb_open_mode";
-let isListeningForKey = false;
-let ignoreNextPanicPress = false;
+var panicKeyStorage = "fb_panic_key";
+var panicUrlStorage = "fb_panic_url";
+var panicDefaultKey = "`";
+var panicDefaultUrl = "https://google.com";
+var openModeStorage = "fb_open_mode";
+var isListeningForKey = false;
+var ignoreNextPanicPress = false;
 
 function getPanicKey() {
-	const raw = localStorage.getItem(panicKeyStorage);
+	var raw = localStorage.getItem(panicKeyStorage);
 	return raw && raw.length ? raw : panicDefaultKey;
 }
 
-function getPanicKeyDisplayValue() {
-	const key = getPanicKey();
+function getPanicKeyDisplayValue(inputKey) {
+	var key = inputKey || getPanicKey();
+	var codeLabels = {
+		Minus: "-",
+		Equal: "=",
+		Backquote: "`",
+		BracketLeft: "[",
+		BracketRight: "]",
+		Backslash: "\\",
+		Semicolon: ";",
+		Quote: "'",
+		Comma: ",",
+		Period: ".",
+		Slash: "/",
+		Space: "Space",
+	};
+	if (codeLabels[key]) return codeLabels[key];
 	if (/^Key[A-Z]$/.test(key)) return key.slice(3);
 	if (/^Digit[0-9]$/.test(key)) return key.slice(5);
 	return key;
 }
 
 function normalizePanicKey(value) {
-	const key = String(value || "").trim();
+	var key = String(value || "").trim();
 	if (!key) return "";
 	return key.length === 1 ? key.toLowerCase() : key;
 }
 
 function panicKeyMatches(event) {
-	const configured = getPanicKey();
-	const normalizedConfigured = normalizePanicKey(configured);
-	const normalizedEventKey = normalizePanicKey(event.key);
+	var configured = getPanicKey();
+	var normalizedConfigured = normalizePanicKey(configured);
+	var normalizedEventKey = normalizePanicKey(event.key);
 	if (normalizedConfigured && normalizedEventKey === normalizedConfigured) {
 		return true;
 	}
@@ -2512,7 +3594,7 @@ function panicKeyMatches(event) {
 }
 
 function getPanicUrl() {
-	const raw = (localStorage.getItem(panicUrlStorage) || "").trim();
+	var raw = (localStorage.getItem(panicUrlStorage) || "").trim();
 	return raw || panicDefaultUrl;
 }
 
@@ -2523,42 +3605,44 @@ function loadPanicSettings() {
 }
 
 function loadOpenModeSettings() {
-	const raw = String(localStorage.getItem(openModeStorage) || "aboutblank").toLowerCase();
-	const allowed = new Set(["aboutblank", "blob"]);
-	const selected = allowed.has(raw) ? raw : "aboutblank";
+	var raw = String(localStorage.getItem(openModeStorage) || "aboutblank").toLowerCase();
+	var allowed = new Set(["aboutblank", "blob"]);
+	var selected = allowed.has(raw) ? raw : "aboutblank";
 	updateOpenModeUI(selected);
 	if (raw !== selected) {
 		localStorage.setItem(openModeStorage, selected);
 	}
 	if (openModeStatus) {
-		openModeStatus.textContent =
-			selected === "blob" ? "Open mode set to blob:." : "Open mode set to about:blank.";
+		openModeStatus.textContent = `Open mode set to ${
+			selected === "blob" ? "blob:." : "about:blank."
+		}`;
 	}
 }
 
 function setOpenMode(mode, shouldLaunch = false) {
-	const selected = mode === "blob" ? "blob" : "aboutblank";
+	var selected = mode === "blob" ? mode : "aboutblank";
 	localStorage.setItem(openModeStorage, selected);
 	updateOpenModeUI(selected);
 	if (openModeStatus) {
-		openModeStatus.textContent =
-			selected === "blob" ? "Open mode set to blob:." : "Open mode set to about:blank.";
+		openModeStatus.textContent = `Open mode set to ${
+			selected === "blob" ? "blob:." : "about:blank."
+		}`;
 	}
 	if (shouldLaunch) {
 		openCurrentPageInMode(selected);
 	}
 }
 
-function buildWrapperHtml(appUrl) {
-	const safeSrc = escapeHtml(appUrl);
-	const wrapperConfig = {
+function buildWrapperHtml(appUrl, mode = "aboutblank") {
+	var safeSrc = escapeHtml(appUrl);
+	var wrapperConfig = {
 		cloakEnabled: isCloakEnabled(),
 		cloakTitle: getCloakTitle(),
 		cloakFavicon: getCloakFaviconHref(),
 		visibleTitle: visibleAppTitle,
 		visibleFavicon: visibleFaviconHref,
 	};
-	const configJson = JSON.stringify(wrapperConfig).replace(/</g, "\\u003c");
+	var configJson = JSON.stringify(wrapperConfig).replace(/</g, "\\u003c");
 	return (
 		`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(visibleAppTitle)}</title>` +
 		`<style>html,body,iframe{margin:0;padding:0;width:100%;height:100%;border:0;overflow:hidden;background:#000;}</style>` +
@@ -2568,7 +3652,7 @@ function buildWrapperHtml(appUrl) {
 		(function(){
 			var cfg = ${configJson};
 			function setFavicon(href){
-				let link=document.querySelector("link[rel~='icon']");
+				var link=document.querySelector("link[rel~='icon']");
 				if(!link){link=document.createElement('link');link.setAttribute('rel','icon');document.head.appendChild(link);}
 				link.setAttribute('href', href);
 			}
@@ -2597,7 +3681,6 @@ function buildWrapperHtml(appUrl) {
 		<\/script></body></html>`
 	);
 }
-
 function updateOpenModeUI(selected) {
 	if (openModeAboutBtn) {
 		openModeAboutBtn.classList.toggle("active", selected === "aboutblank");
@@ -2605,47 +3688,53 @@ function updateOpenModeUI(selected) {
 	if (openModeBlobBtn) {
 		openModeBlobBtn.classList.toggle("active", selected === "blob");
 	}
+
 }
 
 function openCurrentPageInMode(mode) {
-	const appUrl = window.location.href;
-	const wrapperHtml = buildWrapperHtml(appUrl);
-	if (mode === "aboutblank") {
-		const popup = window.open("about:blank", "_blank");
+	var appUrl = window.location.href;
+	var selected = mode === "blob" ? mode : "aboutblank";
+	var wrapperHtml = buildWrapperHtml(appUrl, selected);
+	if (selected === "aboutblank") {
+		var popup = window.open("about:blank", "_blank");
 		if (!popup) {
 			if (openModeStatus) openModeStatus.textContent = "Popup blocked. Allow popups for this site.";
 			return;
 		}
-		popup.document.open();
-		popup.document.write(wrapperHtml);
-		popup.document.close();
-		if (openModeStatus) openModeStatus.textContent = "Opened in about:blank.";
+		try {
+			popup.document.open();
+			popup.document.write(wrapperHtml);
+			popup.document.close();
+			if (openModeStatus) {
+				openModeStatus.textContent =
+					"Opened in about:blank.";
+			}
+		} catch {
+			var fallbackBlob = new Blob([wrapperHtml], { type: "text/html;charset=utf-8" });
+			var fallbackBlobUrl = URL.createObjectURL(fallbackBlob);
+			try {
+				popup.location.replace(fallbackBlobUrl);
+			} catch {
+				window.location.href = fallbackBlobUrl;
+			}
+			setTimeout(() => {
+				URL.revokeObjectURL(fallbackBlobUrl);
+			}, 600_000);
+			if (openModeStatus) {
+				openModeStatus.textContent = "Popup restricted; opened in blob fallback.";
+			}
+		}
 		return;
 	}
 
-	const blob = new Blob([wrapperHtml], { type: "text/html;charset=utf-8" });
-	const blobUrl = URL.createObjectURL(blob);
-	const popup = window.open("about:blank", "_blank");
-	if (!popup) {
-		URL.revokeObjectURL(blobUrl);
-		if (openModeStatus) openModeStatus.textContent = "Popup blocked. Allow popups for this site.";
-		return;
-	}
-	try {
-		popup.location.replace(blobUrl);
-	} catch {
-		popup.document.open();
-		popup.document.write(wrapperHtml);
-		popup.document.close();
-	}
-	setTimeout(() => {
-		URL.revokeObjectURL(blobUrl);
-	}, 600_000);
-	if (openModeStatus) openModeStatus.textContent = "Opened in blob:.";
+	var blob = new Blob([wrapperHtml], { type: "text/html;charset=utf-8" });
+	var blobUrl = URL.createObjectURL(blob);
+	if (openModeStatus) openModeStatus.textContent = "Opened in blob: (same tab).";
+	window.location.replace(blobUrl);
 }
 
 function navigateToPanicUrl() {
-	const target = getPanicUrl();
+	var target = getPanicUrl();
 	try {
 		if (window.top && window.top !== window) {
 			window.top.location.href = target;
@@ -2668,7 +3757,7 @@ function listenForPanicKey() {
 		listeningStatus.textContent = "Press any key to set as panic key...";
 	}
 
-	const tempKeyListener = (e) => {
+	var tempKeyListener = (e) => {
 		if (!isListeningForKey) return;
 		e.preventDefault();
 		if (["Control", "Shift", "Alt", "Meta", "Tab", "CapsLock"].includes(e.key)) {
@@ -2678,16 +3767,16 @@ function listenForPanicKey() {
 			return;
 		}
 
-		const physicalCode = String(e.code || "");
-		const isSimplePhysical = /^Key[A-Z]$/.test(physicalCode) || /^Digit[0-9]$/.test(physicalCode);
-		const stored = isSimplePhysical ? physicalCode : e.key;
+		var physicalCode = String(e.code || "").trim();
+		var stored = physicalCode && physicalCode !== "Unidentified" ? physicalCode : e.key;
+		var displayValue = getPanicKeyDisplayValue(stored) || e.key;
 		localStorage.setItem(panicKeyStorage, stored);
-		if (currentPanicKey) currentPanicKey.textContent = e.key;
-		if (panicStatus) panicStatus.textContent = `Panic key saved: ${e.key}`;
+		if (currentPanicKey) currentPanicKey.textContent = displayValue;
+		if (panicStatus) panicStatus.textContent = `Panic key saved: ${displayValue}`;
 		isListeningForKey = false;
 		ignoreNextPanicPress = true;
 		document.removeEventListener("keydown", tempKeyListener);
-		if (listeningStatus) listeningStatus.textContent = `Panic key set to: ${e.key}`;
+		if (listeningStatus) listeningStatus.textContent = `Panic key set to: ${displayValue}`;
 		setTimeout(() => {
 			if (listeningStatus) listeningStatus.textContent = "";
 		}, 2000);
@@ -2697,7 +3786,7 @@ function listenForPanicKey() {
 }
 
 function savePanicUrl() {
-	const url = (panicUrlInput.value || "").trim();
+	var url = (panicUrlInput.value || "").trim();
 	if (!/^https?:\/\//i.test(url)) {
 		if (panicStatus) panicStatus.textContent = "Please enter a valid URL (include http:// or https://)";
 		return;
@@ -2721,19 +3810,19 @@ function showError(title, detail) {
 }
 
 function injectErudaIntoActiveTab() {
-	const tab = getActiveTab();
+	var tab = getActiveTab();
 	if (!tab) return;
-	const frameItem = tabFrames.get(tab.id);
-	const targetWindow = frameItem?.element?.contentWindow;
+	var frameItem = tabFrames.get(tab.id);
+	var targetWindow = frameItem?.element?.contentWindow;
 	if (!targetWindow) return;
 
 	try {
-		const targetDocument = targetWindow.document;
+		var targetDocument = targetWindow.document;
 		if (targetDocument.getElementById("fb-eruda-script")) {
 			targetWindow.eruda?.init?.();
 			return;
 		}
-		const script = targetDocument.createElement("script");
+		var script = targetDocument.createElement("script");
 		script.id = "fb-eruda-script";
 		script.src = "//cdn.jsdelivr.net/npm/eruda";
 		targetDocument.body.appendChild(script);
@@ -2758,3 +3847,4 @@ function resetError() {
 
 bootstrapWallpaperFromStorage();
 init();
+

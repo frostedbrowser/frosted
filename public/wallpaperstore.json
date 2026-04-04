@@ -1,0 +1,122 @@
+[
+	{
+		"id": "winter-island",
+		"label": "Winter Island",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "wallpapers/animated/winter.mp4",
+		"theme": {
+			"color1": "#bad9ff",
+			"color2": "#d9f2ff",
+			"nav1": "#1f3d66",
+			"nav2": "#17304f",
+			"bg1": "#09192a",
+			"bg2": "#10253f"
+		}
+	},
+	{
+		"id": "anime-skylight",
+		"label": "Anime Skylight",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "wallpapers/animated/animeskylight.mp4",
+		"theme": {
+			"color1": "#ffd9f3",
+			"color2": "#d8e8ff",
+			"nav1": "#3c3f74",
+			"nav2": "#2a2c55",
+			"bg1": "#14182f",
+			"bg2": "#1f2444"
+		}
+	},
+	{
+		"id": "minecraft-snow",
+		"label": "Minecraft Snow",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "wallpapers/animated/minecraftsnow.mp4",
+		"theme": {
+			"color1": "#d9f4ff",
+			"color2": "#e9fff7",
+			"nav1": "#2b4c5a",
+			"nav2": "#1f3843",
+			"bg1": "#0f2028",
+			"bg2": "#17313c"
+		}
+	},
+	{
+		"id": "night-blossom",
+		"label": "Night Blossom",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "wallpapers/animated/nightblossom.mp4",
+		"theme": {
+			"color1": "#ffc7dd",
+			"color2": "#b9c2ff",
+			"nav1": "#3b2a5c",
+			"nav2": "#2a1d42",
+			"bg1": "#120c1f",
+			"bg2": "#1c1530"
+		}
+	},
+	{
+		"id": "night-city",
+		"label": "Night City",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "wallpapers/animated/nightcity.mp4",
+		"theme": {
+			"color1": "#7ad4ff",
+			"color2": "#a7b8ff",
+			"nav1": "#1f2d52",
+			"nav2": "#16203a",
+			"bg1": "#0a1224",
+			"bg2": "#101b33"
+		}
+	},
+	{
+		"id": "blossom",
+		"label": "Blossom",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "wallpapers/animated/blossom.mp4",
+		"theme": {
+			"color1": "#ffd2e8",
+			"color2": "#ffe8f4",
+			"nav1": "#7b3f66",
+			"nav2": "#592d4a",
+			"bg1": "#2a1321",
+			"bg2": "#3b1b2e"
+		}
+	},
+	{
+		"id": "faithful",
+		"label": "Faithful",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "wallpapers/animated/faithful.mp4",
+		"theme": {
+			"color1": "#ffd7c2",
+			"color2": "#fff0d6",
+			"nav1": "#5a3d29",
+			"nav2": "#3f2a1d",
+			"bg1": "#22160f",
+			"bg2": "#2e1f15"
+		}
+	},
+	{
+		"id": "forest",
+		"label": "Forest",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "wallpapers/animated/forest.mp4",
+		"theme": {
+			"color1": "#b6e6c3",
+			"color2": "#d9f5df",
+			"nav1": "#24503b",
+			"nav2": "#193a2a",
+			"bg1": "#0f2419",
+			"bg2": "#173626"
+		}
+	}
+]

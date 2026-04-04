@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>FilterBrowser</title>
+		<title>Frosted</title>
 		<!-- Google tag (gtag.js) -->
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-5DPHJM6D6T"></script>
 		<script>
@@ -20,7 +20,15 @@
         <meta property="og:image" content="https://www.ixl.com/dv3/powZqMuTE7du4asFrVyNGxxoqkw/yui3/opengraph/assets/general_us.png">
         <meta name="description" content="IXL is the world's most popular subscription-based learning site for K–12. Used by over 17 million students, IXL provides personalized learning in more than 17,000 topics, covering math, language arts, science, social studies, and Spanish. Interactive questions, awards, and certificates keep kids motivated as they master skills.">
         <meta property="og:description" content="IXL is the world's most popular subscription-based learning site for K–12. Used by over 17 million students, IXL provides personalized learning in more than 17,000 topics, covering math, language arts, science, social studies, and Spanish. Interactive questions, awards, and certificates keep kids motivated as they master skills.">
-		<link rel="icon" href="favicon.ico" />
+		<link rel="icon" href="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/icons/frosted.png" />
+		<meta
+			name="description"
+			content="Frosted is a highly niche proxy used for evading internet censorship or accessing websites in a controlled sandbox using the power of service-workers. Unblock sites today!"
+		/>
+		<meta
+			name="keywords"
+			content="proxy, web proxy, ultraviolet, service workers, unblock websites, unblock chromebook, free web proxy, proxy list, proxy sites, un block chromebook, online proxy, proxy server, proxysite, proxy youtube, bypass securly, bypass iboss, bypass lightspeed filter, holy unblocker, chromebooks, titanium network, unblock youtube, youtube proxy, unblocked youtube, youtube unblocked, frosted, unblocker, invidious, cineby, nowgg, games, ai chatbot, groq, llama 3.1, llama 3.3, ai utilities"
+		/>
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
@@ -39,8 +47,7 @@
 		<script src="search.js" defer></script>
 		<script>
 			window.GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-			// go make your own api key lmao (seriously, it's free)
-			window.GROQ_API_KEY = "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";
+			window.GROQ_API_KEY = localStorage.getItem("fb_groq_api_key") || "";
 			window.GROQ_SYSTEM_PROMPT =
 				"You are a helpful assistant for users of this browser app. Keep answers concise and clear.";
 			window.GROQ_MODEL_AUTO = "llama-3.1-8b-instant";
@@ -77,23 +84,43 @@
 							<button class="toolbar-btn" id="homeBtn" aria-label="Home">
 								<i class="fa-solid fa-house"></i>
 							</button>
-							<button class="toolbar-btn" id="gamesBtn" aria-label="Games">
-								<i class="fa-solid fa-gamepad"></i>
-							</button>
-							<button class="toolbar-btn" id="aiBtn" aria-label="AI Utilities">
-								<img src="/chatgpt-logo.svg" alt="ChatGPT" class="toolbar-btn-logo" />
-							</button>
-							<button class="toolbar-btn code-btn" id="codeBtn" aria-label="Run Console Script">&lt;/&gt;</button>
-							<button class="toolbar-btn ads-toggle-btn" id="adsToggleBtn" type="button" aria-label="Toggle ad blocking">
-								ads: off
-							</button>
-							<button class="toolbar-btn" id="partnershipBtn" type="button" aria-label="Partnerships">
-								<img
-									id="partnershipBtnImg"
-									alt="Partnerships"
-								/>
-								<i id="partnershipBtnFallbackIcon" class="fa-solid fa-handshake" style="display: none;"></i>
-							</button>
+							<div class="action-menu-wrap">
+								<button
+									class="toolbar-btn action-menu-btn"
+									id="actionMenuBtn"
+									type="button"
+									aria-label="Open menu"
+									aria-haspopup="true"
+									aria-expanded="false"
+								>
+									<i class="fa-solid fa-bars"></i>
+								</button>
+								<div class="action-menu" id="actionMenu" role="menu" aria-label="Quick actions">
+									<button class="action-menu-item" id="gamesBtn" type="button" role="menuitem">
+										<i class="fa-solid fa-gamepad"></i> Games
+									</button>
+									<button class="action-menu-item" id="wallpaperAppBtn" type="button" role="menuitem">
+										<i class="fa-solid fa-image"></i> Open Wallpapers
+									</button>
+									<button class="action-menu-item" id="aiBtn" type="button" role="menuitem">
+										<img src="/chatgpt-logo.svg" alt="" class="toolbar-btn-logo" /> AI
+									</button>
+									<button class="action-menu-item eruda-btn" id="erudaBtn" type="button" role="menuitem">
+										&lt;/&gt; eruda
+									</button>
+									<button class="action-menu-item ads-toggle-btn" id="adsToggleBtn" type="button" role="menuitem">
+										ads: off
+									</button>
+									<button class="action-menu-item" id="partnershipBtn" type="button" role="menuitem">
+										<img
+											id="partnershipBtnImg"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/icons/download.png"
+											alt=""
+										/>
+										Partners
+									</button>
+								</div>
+							</div>
 							<button class="toolbar-btn" id="settingsBtn" aria-label="Settings">
 								<i class="fa-solid fa-gear"></i>
 							</button>
@@ -113,7 +140,7 @@
 						<iframe id="browserFrame" title="Browser content"></iframe>
 						<div class="browser-overlay" id="blankState">
 							<div class="home-shell">
-								<div class="home-logo">FilterBrowser</div>
+								<div class="home-logo">Frosted</div>
 								<div class="home-tagline" id="randomTagline">
 									breaking things since day one
 								</div>
@@ -131,19 +158,9 @@
 										<div class="tile-icon"><i class="fa-brands fa-youtube"></i></div>
 										<div class="tile-label">YouTube (Invidious)</div>
 									</button>
-									<button class="home-tile" data-url="https://nowgg.fun/">
-									<div class="tile-icon">
-										<img src="/nowgg.fun.png" alt="" class="tile-icon-img" />
-									</div>
-									<div class="tile-label">Nowgg.fun</div>
-									</button>
-									<button class="home-tile" data-url="https://cineby.gd/">
-										<div class="tile-icon"><i class="fa-movies"></i></div>
-										<div class="tile-label">Cineby (Movies)</div>
-									</button>
 								</div>
 								<div class="home-credits">
-									<a href="bypass://credits" id="creditsLink">Credits</a>
+									<a href="frosted://credits" id="creditsLink">Credits</a>
 								</div>
 							</div>
 						</div>
@@ -166,6 +183,13 @@
 											<button class="settings-btn open-mode-btn" id="openModeBlobBtn" type="button">
 												Open in blob:
 											</button>
+										</div>
+										<div class="settings-row">
+											<label class="settings-label" for="autoBlobToggle">Auto Blob</label>
+											<input id="autoBlobToggle" type="checkbox" />
+										</div>
+										<div class="settings-hint" id="autoBlobStatus">
+											Auto Blob on startup: enabled
 										</div>
 									</div>
 									<div class="settings-section">
@@ -190,6 +214,11 @@
 											/>
 											<button class="settings-btn" id="save-panic-btn" type="button">
 												Save URL
+											</button>
+										</div>
+										<div class="settings-row">
+											<button class="settings-btn" id="panic-now-btn" type="button">
+												Open about:blank
 											</button>
 										</div>
 										<div class="settings-hint" id="panic-status">Panic key is active</div>
@@ -304,6 +333,25 @@
 											<i class="fa-brands fa-discord"></i>
 										</a>
 									</article>
+									<article class="partner-card">
+										<div class="partner-logo-wrap">
+											<img
+												class="partner-logo-img"
+												src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/cine.png"
+												alt="Cine-OS logo"
+												width="56"
+												height="56"
+												loading="lazy"
+												onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';"
+											/>
+											<div class="partner-logo">COS</div>
+										</div>
+										<h3>// Cine-OS</h3>
+										<a class="partner-btn" href="https://discord.gg/cmdkxMgBEm" target="_blank" rel="noopener noreferrer">
+											<i class="fa-brands fa-discord"></i>
+										</a>
+									</article>
+							</div>
 								</div>
 							</div>
 						</div>
@@ -348,6 +396,43 @@
 												placeholder="Type your prompt..."
 											/>
 											<button id="aiSolveBtn" class="settings-btn" type="button">Send</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="extensionStorePage" class="internal-page">
+							<div class="settings-page-shell extension-store-page-shell">
+								<div class="settings-page-header extension-store-page-header">
+									<h2>Wallpapers</h2>
+									<p class="settings-hint extension-store-copy">Browse and apply wallpaper packs.</p>
+								</div>
+								<div class="settings-page-body extension-store-page-body">
+									<div class="wallpaper-store-shell wallpaper-store-shell-v2">
+										<div class="wallpaper-store-stage">
+											<section class="wallpaper-store-rail">
+												<div class="wallpaper-store-tabs">
+													<button class="wallpaper-store-tab" id="wallpaperStoreTabInstalled" type="button">Installed</button>
+													<button class="wallpaper-store-tab" id="wallpaperStoreTabStore" type="button">Store</button>
+												</div>
+												<div class="wallpaper-store-filters">
+													<input id="wallpaperStoreSearchInput" class="settings-input" type="text" placeholder="Search wallpapers..." />
+													<button id="wallpaperStoreExitBtn" class="settings-btn" type="button">Close</button>
+												</div>
+											</section>
+											<section class="wallpaper-store-content">
+												<div class="extension-store-grid" id="wallpaperStoreGrid"></div>
+											</section>
+											<aside class="wallpaper-store-preview" id="wallpaperStorePreview">
+												<div class="wallpaper-preview-media" id="wallpaperStorePreviewMedia"></div>
+												<h3 id="wallpaperStorePreviewTitle">Select a wallpaper</h3>
+												<div class="settings-hint" id="wallpaperStorePreviewMeta">No wallpaper selected.</div>
+												<div class="settings-row wallpaper-store-actions">
+													<button id="wallpaperStoreInstallBtn" class="settings-btn wallpaper-store-btn" type="button">Install</button>
+													<button id="wallpaperStoreUninstallBtn" class="settings-btn wallpaper-store-btn" type="button">Uninstall</button>
+													<button id="wallpaperStoreApplyBtn" class="settings-btn wallpaper-store-btn" type="button">Apply</button>
+												</div>
+											</aside>
 										</div>
 									</div>
 								</div>
