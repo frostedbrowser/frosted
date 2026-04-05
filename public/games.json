@@ -1,10 +1,16 @@
 [
   {
-    "id": -1,
+    "id": -2,
     "name": "[!] Blooket Cheats (JOIN GAME)",
     "cover": "https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/bh.png",
     "url": "https://play.blooket.com/play",
     "defaultClickScript": "/gui.js"
+  },
+  {
+    "id": -1,
+    "name": "[!] Geometry Dash Web",
+    "cover": "https://imgs.search.brave.com/2vQlQla6TCjtxPzhoTTfp8drWJm3losCZZgmKcUW5xU/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9zaGFy/ZWQuZmFzdGx5LnN0/ZWFtc3RhdGljLmNv/bS9zdG9yZV9pdGVt/X2Fzc2V0cy9zdGVh/bS9hcHBzLzMyMjE3/MC9oZWFkZXIuanBn/P3Q9MTc3NTMwMDQw/MA",
+    "url": "https://gdwebmod.pages.dev/"
   },
   {
     "id": 0,
