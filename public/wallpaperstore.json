@@ -118,5 +118,125 @@
 			"bg1": "#0f2419",
 			"bg2": "#173626"
 		}
+	},
+	{
+		"id": "shadow-tree",
+		"label": "Shadow Tree",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "wallpapers/animated/shadowtree.mp4",
+		"theme": {
+			"color1": "#8fa3c7",
+			"color2": "#c4cce0",
+			"nav1": "#2b3550",
+			"nav2": "#1f273d",
+			"bg1": "#111727",
+			"bg2": "#1a2337"
+		}
+	},
+	{
+		"id": "snowy-mountains",
+		"label": "Snowy Mountains",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "wallpapers/animated/snowymoutains.mp4",
+		"theme": {
+			"color1": "#d8ebff",
+			"color2": "#f3fbff",
+			"nav1": "#35506e",
+			"nav2": "#253a50",
+			"bg1": "#0f1e32",
+			"bg2": "#162845"
+		}
+	},
+	{
+		"id": "quiet-night",
+		"label": "Quiet Night",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "wallpapers/animated/quietnight.mp4",
+		"theme": {
+			"color1": "#c3c9ff",
+			"color2": "#e0d8ff",
+			"nav1": "#2f315c",
+			"nav2": "#212343",
+			"bg1": "#131532",
+			"bg2": "#1b1e45"
+		}
+	},
+	{
+		"id": "pink-supra-night",
+		"label": "Pink Supra Night",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "wallpapers/animated/pinksupranight.mp4",
+		"theme": {
+			"color1": "#ffb7d9",
+			"color2": "#ffd2ef",
+			"nav1": "#643458",
+			"nav2": "#47253f",
+			"bg1": "#250f23",
+			"bg2": "#341530"
+		}
+	},
+	{
+		"id": "black-hole",
+		"label": "Black Hole",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "wallpapers/animated/blackhole.mp4",
+		"theme": {
+			"color1": "#a1a8d4",
+			"color2": "#d3c8ff",
+			"nav1": "#26213f",
+			"nav2": "#19152c",
+			"bg1": "#090814",
+			"bg2": "#121024"
+		}
+	},
+	{
+		"id": "snowy-lamp",
+		"label": "Snowy Lamp",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "wallpapers/animated/snowylamp.mp4",
+		"theme": {
+			"color1": "#ffe8bc",
+			"color2": "#fff6db",
+			"nav1": "#5f4a2f",
+			"nav2": "#443521",
+			"bg1": "#231b12",
+			"bg2": "#33271a"
+		}
+	},
+	{
+		"id": "sakura-evening",
+		"label": "Sakura Evening",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "wallpapers/animated/sakuraevening.mp4",
+		"theme": {
+			"color1": "#ffc8df",
+			"color2": "#ffdff0",
+			"nav1": "#6b3e5b",
+			"nav2": "#4d2c42",
+			"bg1": "#2a1524",
+			"bg2": "#3a1e31"
+		}
+	},
+	{
+		"id": "supra",
+		"label": "Supra",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "wallpapers/animated/supra.mp4",
+		"theme": {
+			"color1": "#9ad8ff",
+			"color2": "#c5b6ff",
+			"nav1": "#273f63",
+			"nav2": "#1c2d47",
+			"bg1": "#0d182b",
+			"bg2": "#15243a"
+		}
 	}
 ]
