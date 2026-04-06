@@ -1,4 +1,4 @@
-console.log(String.raw`
+﻿console.log(String.raw`
   ____              _         _    _     _ _
  |  _ \  ___  _ __ | |_   ___| | _(_) __| | |
  | | | |/ _ \| '_ \| __| / __| |/ / |/ _\` | |  _____
@@ -257,6 +257,92 @@ var defaultAppIconHref =
 var reducedMotionQuery = window.matchMedia
 	? window.matchMedia("(prefers-reduced-motion: reduce)")
 	: null;
+var connectionInfo =
+	typeof navigator !== "undefined"
+		? navigator.connection || navigator.mozConnection || navigator.webkitConnection || null
+		: null;
+var isChromebookDevice = /\bCrOS\b/i.test(String(navigator.userAgent || ""));
+var wallpaperVideoFallbackKey = "skynight";
+var lowPerformanceMode = false;
+var wallpaperImagePreloadCache = new Map();
+var wallpaperVideoPreloadCache = new Map();
+var wallpaperPreloadScheduled = 0;
+var maxWallpaperPreloadEntries = 4;
+
+function computeLowPerformanceMode() {
+	return false;
+}
+
+function refreshLowPerformanceMode() {
+	lowPerformanceMode = computeLowPerformanceMode();
+	if (document.body) {
+		document.body.classList.toggle("performance-mode", lowPerformanceMode);
+	}
+	return lowPerformanceMode;
+}
+
+function shouldRenderVideoWallpaper(key) {
+	return getWallpaperType(key) === "video";
+}
+
+function getWallpaperRenderKey(key) {
+	return key;
+}
+
+function trimWallpaperPreloadCache(cache, isVideo = false) {
+	while (cache.size > maxWallpaperPreloadEntries) {
+		var oldestKey = cache.keys().next().value;
+		var oldest = cache.get(oldestKey);
+		cache.delete(oldestKey);
+		if (isVideo && oldest) {
+			try {
+				oldest.pause();
+				oldest.removeAttribute("src");
+				oldest.load();
+			} catch {}
+		}
+	}
+}
+
+function preloadWallpaperAsset(key, revision = getWallpaperRevision()) {
+	var normalized = normalizeWallpaperKey(key);
+	var type = getWallpaperType(normalized);
+	var assetUrl = buildWallpaperAssetUrl(normalized, revision);
+	if (type === "video") {
+		var cachedVideo = wallpaperVideoPreloadCache.get(normalized);
+		if (cachedVideo?.dataset?.src === assetUrl) return;
+		var preloadVideo = document.createElement("video");
+		preloadVideo.preload = "metadata";
+		preloadVideo.muted = true;
+		preloadVideo.playsInline = true;
+		preloadVideo.dataset.src = assetUrl;
+		preloadVideo.src = assetUrl;
+		preloadVideo.load();
+		wallpaperVideoPreloadCache.set(normalized, preloadVideo);
+		trimWallpaperPreloadCache(wallpaperVideoPreloadCache, true);
+		return;
+	}
+	var cachedImage = wallpaperImagePreloadCache.get(normalized);
+	if (cachedImage?.src === assetUrl) return;
+	var preloadImage = new Image();
+	preloadImage.decoding = "async";
+	preloadImage.src = assetUrl;
+	wallpaperImagePreloadCache.set(normalized, preloadImage);
+	trimWallpaperPreloadCache(wallpaperImagePreloadCache, false);
+}
+
+function scheduleChromebookWallpaperPreload(activeKey) {
+	if (!isChromebookDevice) return;
+	if (wallpaperPreloadScheduled) clearTimeout(wallpaperPreloadScheduled);
+	wallpaperPreloadScheduled = setTimeout(() => {
+		wallpaperPreloadScheduled = 0;
+		var normalizedActive = normalizeWallpaperKey(activeKey || localStorage.getItem(wallpaperKey) || "skynight");
+		var registry = getWallpaperRegistry();
+		var animatedKeys = Object.keys(registry).filter((key) => registry[key]?.type === "video");
+		var candidateKeys = [normalizedActive, ...animatedKeys.filter((key) => key !== normalizedActive)].slice(0, 3);
+		candidateKeys.forEach((key) => preloadWallpaperAsset(key));
+	}, 180);
+}
 
 var taglines = [
 	"probably works as expected",
@@ -322,6 +408,7 @@ function applyChromeBarConfig(config = chromeBarConfig) {
 }
 
 function init() {
+	refreshLowPerformanceMode();
 	applyChromeBarConfig();
 	updateAdblockToggleLabel();
 	void ensureGhosteryEngine();
@@ -333,6 +420,7 @@ function init() {
 
 	populateWallpaperOptions();
 	loadWallpaper();
+	scheduleChromebookWallpaperPreload(localStorage.getItem(wallpaperKey) || "skynight");
 	initParticles();
 	loadPanicSettings();
 	loadOpenModeSettings();
@@ -408,7 +496,7 @@ var creditsInternalUrl = "frosted://credits";
 var gamesInternalUrl = "frosted://games";
 var aiInternalUrl = "frosted://ai";
 var partnersInternalUrl = "frosted://partners";
-var wallpapersInternalUrl = "frosted://wallpapers";
+var wallpapersInternalUrl = "frosted://desktopwallpapers";
 var aiModeKey = "fb_ai_mode";
 
 function bindEvents() {
@@ -627,7 +715,11 @@ function bindEvents() {
 		applyCloakVisualState(document.hidden || !document.hasFocus());
 	});
 	if (reducedMotionQuery) {
-		reducedMotionQuery.addEventListener("change", restartParticlesAnimation);
+		reducedMotionQuery.addEventListener("change", () => {
+			refreshLowPerformanceMode();
+			restartParticlesAnimation();
+			loadWallpaper();
+		});
 	}
 
 	window.addEventListener(
@@ -650,6 +742,10 @@ function bindEvents() {
 
 function initParticles() {
 	if (!particlesLayer || !browserStage) return;
+	if (lowPerformanceMode) {
+		setParticlesVisible(false);
+		return;
+	}
 	if (particlesLayer.parentElement !== browserStage) {
 		browserStage.appendChild(particlesLayer);
 	} else if (particlesLayer !== browserStage.lastElementChild) {
@@ -755,6 +851,7 @@ function setParticlesVisible(visible) {
 }
 
 function shouldShowParticlesForCurrentView() {
+	if (lowPerformanceMode) return false;
 	var matrixActive = isMatrixThemeActive();
 	var onBlank = blankState?.style.display === "flex";
 	var onInternal =
@@ -2181,6 +2278,8 @@ function isExtensionStoreInternalUrl(url) {
 	var normalized = getInternalRoute(url);
 	return (
 		normalized === wallpapersInternalUrl ||
+		normalized === "frosted://wallpapers" ||
+		normalized === "frosted://wallpaper" ||
 		normalized === "frosted://extensionstore" ||
 		normalized === "frosted://webstore"
 	);
@@ -3045,14 +3144,21 @@ function renderWallpaperStorePreview(entry) {
 		var previewVideo = document.createElement("video");
 		previewVideo.src = entry.file;
 		previewVideo.muted = true;
+		previewVideo.defaultMuted = true;
 		previewVideo.autoplay = true;
 		previewVideo.loop = true;
+		previewVideo.preload = "metadata";
+		previewVideo.controls = true;
 		previewVideo.playsInline = true;
 		wallpaperStorePreviewMedia.appendChild(previewVideo);
+		var previewPlay = previewVideo.play();
+		if (previewPlay && typeof previewPlay.catch === "function") previewPlay.catch(() => {});
 	} else {
 		var previewImg = document.createElement("img");
 		previewImg.src = entry.file;
 		previewImg.alt = entry.label;
+		previewImg.loading = "lazy";
+		previewImg.decoding = "async";
 		wallpaperStorePreviewMedia.appendChild(previewImg);
 	}
 
@@ -3201,22 +3307,46 @@ function renderWallpaperStoreGrid() {
 		}
 		card.addEventListener("click", () => {
 			setWallpaperStoreSelection(entry.key);
+			if (
+				wallpaperStoreView === "installed" &&
+				isWallpaperExtensionEnabled() &&
+				isStoreWallpaperInstalled(entry.key)
+			) {
+				applyWallpaper(entry.key);
+			}
 		});
 
 		var thumbWrap = document.createElement("div");
 		thumbWrap.className = "store-wallpaper-thumb";
 		if (entry.type === "video") {
 			var thumbVideo = document.createElement("video");
-			thumbVideo.src = entry.file;
+			thumbVideo.dataset.src = entry.file;
 			thumbVideo.muted = true;
+			thumbVideo.defaultMuted = true;
 			thumbVideo.loop = true;
-			thumbVideo.autoplay = true;
+			thumbVideo.autoplay = false;
 			thumbVideo.playsInline = true;
+			thumbVideo.preload = "none";
+			thumbVideo.disablePictureInPicture = true;
+			var warmVideoThumb = () => {
+				if (!thumbVideo.src) thumbVideo.src = thumbVideo.dataset.src || "";
+			};
+			card.addEventListener("mouseenter", () => {
+				warmVideoThumb();
+				var playPromise = thumbVideo.play();
+				if (playPromise && typeof playPromise.catch === "function") playPromise.catch(() => {});
+			});
+			card.addEventListener("mouseleave", () => {
+				thumbVideo.pause();
+				thumbVideo.currentTime = 0;
+			});
 			thumbWrap.appendChild(thumbVideo);
 		} else {
 			var thumbImg = document.createElement("img");
 			thumbImg.src = entry.file;
 			thumbImg.alt = entry.label;
+			thumbImg.loading = "lazy";
+			thumbImg.decoding = "async";
 			thumbWrap.appendChild(thumbImg);
 		}
 
@@ -3428,6 +3558,7 @@ function ensureWallpaperVideoElement() {
 	videoEl.defaultMuted = true;
 	videoEl.loop = true;
 	videoEl.autoplay = true;
+	videoEl.preload = isChromebookDevice ? "auto" : "metadata";
 	videoEl.playsInline = true;
 	videoEl.setAttribute("aria-hidden", "true");
 	videoEl.setAttribute("tabindex", "-1");
@@ -3476,17 +3607,19 @@ function applyWallpaper(key) {
 	var normalized = normalizeWallpaperKey(key);
 	var revision = bumpWallpaperRevision();
 	var theme = getWallpaperTheme(normalized);
-	var wallpaperType = getWallpaperType(normalized);
-	if (wallpaperType === "video") {
+	preloadWallpaperAsset(normalized, revision);
+	var wallpaperRenderKey = getWallpaperRenderKey(normalized);
+	if (shouldRenderVideoWallpaper(normalized)) {
 		showWallpaperVideo(buildWallpaperAssetUrl(normalized, revision));
 		renderWallpaperBackground("");
 	} else {
 		hideWallpaperVideo();
-		renderWallpaperBackground(buildWallpaperCssValue(normalized, revision));
+		renderWallpaperBackground(buildWallpaperCssValue(wallpaperRenderKey, revision));
 	}
 	document.body.dataset.wallpaper = normalized;
 	if (wallpaperSelect) wallpaperSelect.value = normalized;
 	localStorage.setItem(wallpaperKey, normalized);
+	scheduleChromebookWallpaperPreload(normalized);
 	applyTheme(theme.color1, theme.color2, theme.bg1, theme.bg2, theme.nav1, theme.nav2);
 }
 
@@ -3526,17 +3659,31 @@ function loadWallpaper() {
 }
 
 function bootstrapWallpaperFromStorage() {
+	refreshLowPerformanceMode();
 	var saved = normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "skynight");
 	var theme = getWallpaperTheme(saved);
-	if (getWallpaperType(saved) === "video") {
+	if (shouldRenderVideoWallpaper(saved)) {
 		showWallpaperVideo(buildWallpaperAssetUrl(saved));
 		renderWallpaperBackground("");
 	} else {
 		hideWallpaperVideo();
-		renderWallpaperBackground(buildWallpaperCssValue(saved));
+		renderWallpaperBackground(buildWallpaperCssValue(getWallpaperRenderKey(saved)));
 	}
 	document.body.dataset.wallpaper = saved;
 	applyTheme(theme.color1, theme.color2, theme.bg1, theme.bg2, theme.nav1, theme.nav2);
+}
+
+function syncWallpaperVideoVisibility() {
+	var videoEl = document.getElementById(wallpaperVideoElementId);
+	if (!videoEl || !videoEl.classList.contains("is-active")) return;
+	if (document.hidden || !document.hasFocus()) {
+		videoEl.pause();
+		return;
+	}
+	var playResult = videoEl.play();
+	if (playResult && typeof playResult.catch === "function") {
+		playResult.catch(() => {});
+	}
 }
 
 var panicKeyStorage = "fb_panic_key";
@@ -3847,4 +3994,7 @@ function resetError() {
 
 bootstrapWallpaperFromStorage();
 init();
+document.addEventListener("visibilitychange", syncWallpaperVideoVisibility);
+window.addEventListener("blur", syncWallpaperVideoVisibility);
+window.addEventListener("focus", syncWallpaperVideoVisibility);
 
