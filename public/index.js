@@ -13,7 +13,7 @@
 "use strict";
 var qs = (sel) => document.querySelector(sel);
 var qsa = (sel) => Array.from(document.querySelectorAll(sel));
-
+// variables for global functions
 var shellRefs = {
 	tabsEl: qs("#tabs"),
 	tabCounter: qs("#tabCounter"),
@@ -43,7 +43,7 @@ var shellRefs = {
 	historyContainer: qs("#historyContainer"),
 	particlesLayer: qs("#particles-js"),
 };
-
+// page vars
 var pageRefs = {
 	settingsPage: qs("#settingsPage"),
 	creditsPage: qs("#creditsPage"),
@@ -78,7 +78,7 @@ var pageRefs = {
 	creditsLink: qs("#creditsLink"),
 	wallpaperSelect: qs("#wallpaperSelect"),
 };
-
+// panic vars
 var panicRefs = {
 	currentPanicKey: qs("#current-panic-key"),
 	changePanicKeyBtn: qs("#change-panic-key-btn"),
@@ -93,7 +93,7 @@ var panicRefs = {
 	autoBlobToggle: qs("#autoBlobToggle"),
 	autoBlobStatus: qs("#autoBlobStatus"),
 };
-
+// cloak vars
 var cloakRefs = {
 	cloakEnabledToggle: qs("#cloakEnabledToggle"),
 	cloakTitleInput: qs("#cloak-title"),
@@ -104,7 +104,7 @@ var cloakRefs = {
 	cloakStatus: qs("#cloak-status"),
 	faviconLink: document.querySelector("link[rel~='icon']"),
 };
-
+// other variables
 var errorRefs = {
 	errorPanel: qs("#error-panel"),
 	errorTitle: qs("#sj-error"),
@@ -253,7 +253,7 @@ var quickContextMenuEl = null;
 var defaultAppIconHref =
 	"https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/icons/frosted.png";
 
-// Device/accessibility state.
+	// tried to make the wallpaper load better for lowend devices / chromebooks
 var reducedMotionQuery = window.matchMedia
 	? window.matchMedia("(prefers-reduced-motion: reduce)")
 	: null;
@@ -343,7 +343,7 @@ function scheduleChromebookWallpaperPreload(activeKey) {
 		candidateKeys.forEach((key) => preloadWallpaperAsset(key));
 	}, 180);
 }
-
+// taglines made by ai because im too lazy :v:
 var taglines = [
 	"probably works as expected",
 	"still loading... please wait",
@@ -374,6 +374,11 @@ var taglines = [
 	"crafted with questionable decisions",
 	"hotfixes are just updates with attitude",
 	"today's forecast: 70% chance of shipping",
+	"i mean its alright like",
+	"pretty good day huh, not bad at all",
+	"idk about you but i think frosted is good",
+	"i like this feature, alot",
+	"very very unstable build"
 ];
 
 var chromeBarConfig = {
@@ -410,8 +415,8 @@ function applyChromeBarConfig(config = chromeBarConfig) {
 function init() {
 	refreshLowPerformanceMode();
 	applyChromeBarConfig();
-	updateAdblockToggleLabel();
-	void ensureGhosteryEngine();
+	renderAdblockToggle();
+	void ensureGhostery();
 	loadInstalledExtensionWallpapers();
 
 	if (randomTagline) {
@@ -496,7 +501,7 @@ var creditsInternalUrl = "frosted://credits";
 var gamesInternalUrl = "frosted://games";
 var aiInternalUrl = "frosted://ai";
 var partnersInternalUrl = "frosted://partners";
-var wallpapersInternalUrl = "frosted://desktopwallpapers";
+var wallpapersInternalUrl = "frosted://wallpapers";
 var aiModeKey = "fb_ai_mode";
 
 function bindEvents() {
@@ -560,7 +565,7 @@ function bindEvents() {
 		erudaBtn.addEventListener("click", injectErudaIntoActiveTab);
 	}
 	if (adsToggleBtn) {
-		adsToggleBtn.addEventListener("click", toggleAdblock);
+		adsToggleBtn.addEventListener("click", toggleAds);
 	}
 	settingsBtn.addEventListener("click", () => navigateFromInput(settingsInternalUrl));
 	if (creditsLink) {
@@ -1058,8 +1063,8 @@ function setActiveTab(id, keepView) {
 		showAiPage();
 	} else if (isPartnersInternalUrl(tab.url)) {
 		showPartnersPage();
-	} else if (isExtensionInternalUrl(tab.url) || isExtensionStoreInternalUrl(tab.url)) {
-		showExtensionStorePage();
+	} else if (isWallpaperInternalUrl(tab.url) || isWallpaperStoreInternalUrl(tab.url)) {
+		showWallpaperStorePage();
 	} else if (isCreditsInternalUrl(tab.url)) {
 		showCreditsPage();
 	} else {
@@ -1127,8 +1132,8 @@ function getTabFaviconCandidates(url) {
 		isSettingsInternalUrl(url) ||
 		isCreditsInternalUrl(url) ||
 		isPartnersInternalUrl(url) ||
-		isExtensionInternalUrl(url) ||
-		isExtensionStoreInternalUrl(url)
+		isWallpaperInternalUrl(url) ||
+		isWallpaperStoreInternalUrl(url)
 	)
 		return [defaultAppIconHref];
 	if (isGamesInternalUrl(url)) return [defaultAppIconHref];
@@ -1157,7 +1162,7 @@ function getDisplayTitle(url) {
 	if (isPartnersInternalUrl(url)) return "Partners";
 	if (isGamesInternalUrl(url)) return "Games";
 	if (isAiInternalUrl(url)) return "AI";
-	if (isExtensionInternalUrl(url) || isExtensionStoreInternalUrl(url)) return "Wallpapers";
+	if (isWallpaperInternalUrl(url) || isWallpaperStoreInternalUrl(url)) return "Wallpapers";
 	if (isCreditsInternalUrl(url)) return "Credits";
 	try {
 		var parsed = new URL(url);
@@ -1174,7 +1179,7 @@ function normalizeInput(input) {
 	if (isPartnersInternalUrl(raw)) return partnersInternalUrl;
 	if (isGamesInternalUrl(raw)) return gamesInternalUrl;
 	if (isAiInternalUrl(raw)) return aiInternalUrl;
-	if (isExtensionInternalUrl(raw) || isExtensionStoreInternalUrl(raw)) return wallpapersInternalUrl;
+	if (isWallpaperInternalUrl(raw) || isWallpaperStoreInternalUrl(raw)) return wallpapersInternalUrl;
 	if (isCreditsInternalUrl(raw)) return creditsInternalUrl;
 	return search(raw, searchEngine.value);
 }
@@ -1185,7 +1190,7 @@ async function navigateFromInput(input, pushHistory = true) {
 	await loadUrl(target, pushHistory);
 }
 
-var adblockHostPatterns = [
+var adHosts = [
 	// Ads
 	/(^|\.)doubleclick\.net$/i,
 	/(^|\.)googlesyndication\.com$/i,
@@ -1233,6 +1238,7 @@ var adblockHostPatterns = [
 	// Mix
 	/(^|\.)yahoo\.com$/i,
 	/(^|\.)yimg\.com$/i,
+	/(^|\.)yahooinc\.com$/i,
 	/(^|\.)yandex\./i,
 
 	// OEM ad / telemetry ecosystems
@@ -1251,6 +1257,17 @@ var adblockHostPatterns = [
 	/(^|\.)supportmetrics\.apple\.com$/i,
 	/(^|\.)metrics\.icloud\.com$/i,
 	/(^|\.)metrics\.mzstatic\.com$/i,
+	/(^|\.)api-adservices\.apple\.com$/i,
+	/(^|\.)adtech\.yahooinc\.com$/i,
+	/(^|\.)auction\.unityads\.unity3d\.com$/i,
+	/(^|\.)webview\.unityads\.unity3d\.com$/i,
+	/(^|\.)config\.unityads\.unity3d\.com$/i,
+	/(^|\.)adserver\.unityads\.unity3d\.com$/i,
+	/(^|\.)iot-eu-logser\.realme\.com$/i,
+	/(^|\.)iot-logser\.realme\.com$/i,
+	/(^|\.)bdapi-ads\.realmemobile\.com$/i,
+	/(^|\.)bdapi-in-ads\.realmemobile\.com$/i,
+	/(^|\.)adsfs\.oppomobile\.com$/i,
 
 	// Existing broad ad/tracker nets
 	/(^|\.)taboola\.com$/i,
@@ -1260,7 +1277,7 @@ var adblockHostPatterns = [
 	/(^|\.)scorecardresearch\.com$/i,
 ];
 
-var adblockUrlPatterns = [
+var adUrls = [
 	/\/ads?(\/|\.|\?|$)/i,
 	/\/adserver/i,
 	/advert/i,
@@ -1283,27 +1300,191 @@ var adblockUrlPatterns = [
 	/supportmetrics\.apple\.com/i,
 	/metrics\.icloud\.com/i,
 	/metrics\.mzstatic\.com/i,
+	/(?:^|\/)ads?\.js(?:$|[?#;$&])/i,
+	/(?:^|\/)pageads?\.js(?:$|[?#;$&])/i,
+	/(?:^|\/)adservice\.js(?:$|[?#;$&])/i,
+	/\/widget\/ads(?:[./]|$|[?#;$&])/i,
+	/\/(?:assets?|scripts?|widgets?)\/(?:ads?|pageads?)(?:[./]|$|[?#;$&])/i,
+	/adbox/i,
+	/textads/i,
+];
+var hardBlockedAdKeywords = [
+	"adblock.turtlecute.org/js/pagead.js",
+	"adblock.turtlecute.org/js/widget/ads.js",
+	"https%3a%2f%2fadblock.turtlecute.org%2fjs%2fpagead.js",
+	"https%3a%2f%2fadblock.turtlecute.org%2fjs%2fwidget%2fads.js",
 ];
 
-var adblockEnabledStorage = "fb_adblock_enabled";
+function matchesHardBlockedAdKeyword(rawUrl) {
+	var source = String(rawUrl || "").trim();
+	if (!source) return false;
+	var variants = [source.toLowerCase()];
+	try {
+		var once = decodeURIComponent(source);
+		variants.push(String(once || "").toLowerCase());
+		try {
+			var twice = decodeURIComponent(once);
+			variants.push(String(twice || "").toLowerCase());
+		} catch {}
+	} catch {}
+	return variants.some((value) => hardBlockedAdKeywords.some((keyword) => value.includes(keyword)));
+}
 
-function isAdblockEnabled() {
-	var raw = localStorage.getItem(adblockEnabledStorage);
+var adblockAllowHostPatterns = [];
+
+function isAdblockAllowlistedHost(hostname) {
+	var host = String(hostname || "").trim().toLowerCase();
+	if (!host) return false;
+	return adblockAllowHostPatterns.some((pattern) => pattern.test(host));
+}
+
+function isAdblockAllowlistedUrl(rawUrl, fallbackBase = "") {
+	var target = String(rawUrl || "").trim();
+	if (!target) return false;
+	try {
+		var resolved = resolveAdblockTargetUrl(target, fallbackBase || window.location.href);
+		var parsed = new URL(resolved, fallbackBase || window.location.href);
+		return isAdblockAllowlistedHost(parsed.hostname);
+	} catch {
+		return false;
+	}
+}
+
+var adCssSelectors = [
+	".adbox.banner_ads.adsbox",
+	".adbox",
+	".banner_ads",
+	".adsbox",
+	".textads",
+	"[id^='google_ads']",
+	".unity-ads",
+	"#unity-ads",
+	"iframe[src*='doubleclick']",
+	"iframe[src*='googlesyndication']",
+	"iframe[src*='unityads']",
+];
+
+function injectAdCss(targetDoc) {
+	if (!targetDoc || targetDoc.__fbAdCssInjected) return;
+	targetDoc.__fbAdCssInjected = true;
+	try {
+		var style = targetDoc.createElement("style");
+		style.id = "fb-adblock-cosmetic";
+		style.textContent = `${adCssSelectors.join(", ")} { display: none !important; visibility: hidden !important; }`;
+		(targetDoc.head || targetDoc.documentElement).appendChild(style);
+	} catch {
+	}
+}
+
+function removeAdNodes(targetDoc) {
+	if (!targetDoc) return;
+	try {
+		var sweep = (root) => {
+			if (!root || !root.querySelectorAll) return;
+			var scriptNodes = root.querySelectorAll("script[src]");
+			scriptNodes.forEach((scriptEl) => {
+				var src = String(scriptEl.getAttribute("src") || "").trim();
+				if (!src) return;
+				if (shouldBlockReq(src, targetDoc.location?.href || window.location.href, "script")) {
+					scriptEl.removeAttribute("src");
+					scriptEl.type = "application/x-blocked-script";
+					scriptEl.remove();
+				}
+			});
+			var frameNodes = root.querySelectorAll("iframe[src]");
+			frameNodes.forEach((frameEl) => {
+				var src = String(frameEl.getAttribute("src") || "").trim();
+				if (!src) return;
+				if (shouldBlockReq(src, targetDoc.location?.href || window.location.href, "sub_frame")) {
+					frameEl.removeAttribute("src");
+					frameEl.remove();
+				}
+			});
+		};
+
+		sweep(targetDoc);
+
+		if (!targetDoc.__fbAdblockObserverBound) {
+			targetDoc.__fbAdblockObserverBound = true;
+			var observer = new MutationObserver((mutations) => {
+				for (var mutation of mutations) {
+					if (mutation.type === "attributes") {
+						var el = mutation.target;
+						if (!el || el.nodeType !== 1) continue;
+						var tag = String(el.tagName || "").toLowerCase();
+						if (tag !== "script" && tag !== "iframe") continue;
+						var attr = tag === "script" ? "src" : "src";
+						var value = String(el.getAttribute(attr) || "").trim();
+						if (!value) continue;
+						var reqType = tag === "script" ? "script" : "sub_frame";
+						if (shouldBlockReq(value, targetDoc.location?.href || window.location.href, reqType)) {
+							el.removeAttribute(attr);
+							if (tag === "script") el.type = "application/x-blocked-script";
+							el.remove();
+						}
+						continue;
+					}
+					for (var node of mutation.addedNodes || []) {
+						if (!node || node.nodeType !== 1) continue;
+						var element = node;
+						var tagName = String(element.tagName || "").toLowerCase();
+						if (tagName === "script") {
+							var scriptSrc = String(element.getAttribute("src") || "").trim();
+							if (
+								scriptSrc &&
+								shouldBlockReq(scriptSrc, targetDoc.location?.href || window.location.href, "script")
+							) {
+								element.removeAttribute("src");
+								element.type = "application/x-blocked-script";
+								element.remove();
+								continue;
+							}
+						}
+						if (tagName === "iframe") {
+							var frameSrc = String(element.getAttribute("src") || "").trim();
+							if (
+								frameSrc &&
+								shouldBlockReq(frameSrc, targetDoc.location?.href || window.location.href, "sub_frame")
+							) {
+								element.removeAttribute("src");
+								element.remove();
+								continue;
+							}
+						}
+						sweep(element);
+					}
+				}
+			});
+			observer.observe(targetDoc.documentElement || targetDoc, {
+				subtree: true,
+				childList: true,
+				attributes: true,
+				attributeFilter: ["src"],
+			});
+		}
+	} catch {
+	}
+}
+
+var adblockKey = "fb_adblock_enabled";
+
+function adblockOn() {
+	var raw = localStorage.getItem(adblockKey);
 	if (raw === null) {
-		localStorage.setItem(adblockEnabledStorage, "true");
+		localStorage.setItem(adblockKey, "true");
 		return true;
 	}
 	return String(raw).toLowerCase() === "true";
 }
 
-function setAdblockEnabled(enabled) {
-	localStorage.setItem(adblockEnabledStorage, enabled ? "true" : "false");
-	updateAdblockToggleLabel();
+function setAdblock(enabled) {
+	localStorage.setItem(adblockKey, enabled ? "true" : "false");
+	renderAdblockToggle();
 }
 
-function updateAdblockToggleLabel() {
+function renderAdblockToggle() {
 	if (!adsToggleBtn) return;
-	var enabled = isAdblockEnabled();
+	var enabled = adblockOn();
 	adsToggleBtn.textContent = enabled ? "ads: off" : "ads: on";
 	adsToggleBtn.setAttribute("aria-pressed", enabled ? "true" : "false");
 	adsToggleBtn.title = enabled
@@ -1311,12 +1492,12 @@ function updateAdblockToggleLabel() {
 		: "Ad blocker is disabled (ads are on)";
 }
 
-function toggleAdblock() {
-	setAdblockEnabled(!isAdblockEnabled());
-	if (isAdblockEnabled()) void ensureGhosteryEngine();
+function toggleAds() {
+	setAdblock(!adblockOn());
+	if (adblockOn()) void ensureGhostery();
 }
 
-async function ensureGhosteryEngine() {
+async function ensureGhostery() {
 	if (ghosteryEngine) return ghosteryEngine;
 	if (ghosteryEnginePromise) return ghosteryEnginePromise;
 
@@ -1360,7 +1541,7 @@ async function ensureGhosteryEngine() {
 	return ghosteryEnginePromise;
 }
 
-function normalizeAdblockRequestType(type) {
+function normReqType(type) {
 	var raw = String(type || "other").trim().toLowerCase();
 	if (!raw) return "other";
 	if (raw === "document" || raw === "main_frame" || raw === "navigate") return "main_frame";
@@ -1372,12 +1553,12 @@ function normalizeAdblockRequestType(type) {
 	return raw;
 }
 
-function inferFetchRequestType(input, init) {
+function inferReqType(input, init) {
 	var requestLike = input && typeof input === "object" ? input : null;
 	var destination = String(requestLike?.destination || init?.destination || "")
 		.trim()
 		.toLowerCase();
-	if (destination) return normalizeAdblockRequestType(destination);
+	if (destination) return normReqType(destination);
 
 	var mode = String(requestLike?.mode || init?.mode || "")
 		.trim()
@@ -1387,7 +1568,7 @@ function inferFetchRequestType(input, init) {
 	return "xmlhttprequest";
 }
 
-function shouldBlockWithGhostery(rawUrl, baseHref, requestType = "other", sourceUrl = "") {
+function ghosteryBlocks(rawUrl, baseHref, requestType = "other", sourceUrl = "") {
 	if (!ghosteryEngine || !ghosteryRequestCtor) return null;
 	try {
 		var absoluteUrl = new URL(String(rawUrl), baseHref || window.location.href).href;
@@ -1403,7 +1584,7 @@ function shouldBlockWithGhostery(rawUrl, baseHref, requestType = "other", source
 		}
 
 		var request = ghosteryRequestCtor.fromRawDetails({
-			type: normalizeAdblockRequestType(requestType),
+			type: normReqType(requestType),
 			url: absoluteUrl,
 			sourceUrl: sourceUrl || baseHref || window.location.href,
 		});
@@ -1413,21 +1594,146 @@ function shouldBlockWithGhostery(rawUrl, baseHref, requestType = "other", source
 		return null;
 	}
 }
-
-function shouldBlockAdRequest(rawUrl, baseHref, requestType = "other", sourceUrl = "") {
-	if (!rawUrl) return false;
+//  adblock 
+function resolveAdblockTargetUrl(rawUrl, baseHref = "") {
+	var target = String(rawUrl || "").trim();
+	if (!target) return "";
+	if (/^(?:https?|wss?)%3A/i.test(target)) {
+		try {
+			var decodedDirect = decodeURIComponent(target);
+			if (/^(?:https?|wss?):\/\//i.test(decodedDirect)) {
+				target = decodedDirect;
+			}
+		} catch {
+		}
+	}
 	try {
-		var parsed = new URL(String(rawUrl), baseHref || window.location.href);
+		var absolute = new URL(target, baseHref || window.location.href).href;
+		var decoded = fromScramjetProxyUrl(absolute);
+		if (!decoded || decoded === absolute) {
+			try {
+				var parsedAbsolute = new URL(absolute);
+				var embedded = String(parsedAbsolute.pathname || "").match(/(https?%3A%2F%2F.+)$/i);
+				if (embedded && embedded[1]) {
+					var decodedEmbedded = decodeURIComponent(embedded[1]);
+					if (/^https?:\/\//i.test(decodedEmbedded)) return decodedEmbedded;
+				}
+			} catch {
+			}
+			return absolute;
+		}
+		if (/^(?:https?|wss?)%3A/i.test(decoded)) {
+			try {
+				decoded = decodeURIComponent(decoded);
+			} catch {
+			}
+		}
+		return new URL(decoded, absolute).href;
+	} catch {
+		return target;
+	}
+}
+
+function isScramjetProxyUrl(rawUrl, fallbackBase = "") {
+	try {
+		var parsed = new URL(String(rawUrl || ""), fallbackBase || window.location.href);
+		return parsed.pathname.startsWith("/scramjet/") || /https?%3A%2F%2F/i.test(parsed.pathname);
+	} catch {
+		return false;
+	}
+}
+
+function shouldBlockReq(rawUrl, baseHref, requestType = "other", sourceUrl = "") {
+	if (!rawUrl) return false;
+	if (matchesHardBlockedAdKeyword(rawUrl)) return true;
+	try {
+		var resolvedUrl = resolveAdblockTargetUrl(rawUrl, baseHref || window.location.href);
+		if (matchesHardBlockedAdKeyword(resolvedUrl)) return true;
+		var parsed = new URL(resolvedUrl, baseHref || window.location.href);
+		var isProxyUrl = isScramjetProxyUrl(rawUrl, baseHref || window.location.href);
+		var type = normReqType(requestType);
+		if (isAdblockAllowlistedHost(parsed.hostname) && type === "main_frame" && !isProxyUrl) {
+			return false;
+		}
 		var protocol = parsed.protocol.toLowerCase();
 		if (protocol === "data:" || protocol === "blob:" || protocol === "about:") return false;
+		var appOrigin = new URL(window.location.href).origin;
+		if (parsed.origin === appOrigin && !isProxyUrl) return false;
+		if (type === "main_frame" || type === "sub_frame") {
+			var current = new URL(String(baseHref || window.location.href));
+			if (parsed.origin === current.origin && !isProxyUrl) return false;
+		}
 
-		var ghosteryDecision = shouldBlockWithGhostery(parsed.href, baseHref, requestType, sourceUrl);
+		var ghosteryDecision = ghosteryBlocks(parsed.href, baseHref, type, sourceUrl);
 		if (ghosteryDecision === true) return true;
 
 		var host = parsed.hostname.toLowerCase();
-		if (adblockHostPatterns.some((pattern) => pattern.test(host))) return true;
+		if (adHosts.some((pattern) => pattern.test(host))) return true;
 		var target = `${host}${parsed.pathname}${parsed.search}`.toLowerCase();
-		return adblockUrlPatterns.some((pattern) => pattern.test(target));
+		return adUrls.some((pattern) => pattern.test(target));
+	} catch {
+		return false;
+	}
+}
+
+var redirKeys = new Set([
+	"redirect",
+	"redirect_uri",
+	"redir",
+	"url",
+	"u",
+	"target",
+	"dest",
+	"destination",
+	"next",
+	"out",
+	"to",
+	"goto",
+	"continue",
+	"r",
+	"ref",
+]);
+
+function hasUserAct(targetWindow) {
+	try {
+		return Boolean(targetWindow?.navigator?.userActivation?.isActive);
+	} catch {
+		return false;
+	}
+}
+
+function isXOriginNav(rawUrl, baseHref) {
+	try {
+		var parsed = new URL(String(rawUrl), baseHref || window.location.href);
+		var current = new URL(String(baseHref || window.location.href));
+		return parsed.origin !== current.origin;
+	} catch {
+		return false;
+	}
+}
+
+function shouldBlockNav(rawUrl, baseHref, sourceUrl = "") {
+	if (!rawUrl) return false;
+	if (matchesHardBlockedAdKeyword(rawUrl)) return true;
+	try {
+		var resolvedUrl = resolveAdblockTargetUrl(rawUrl, baseHref || window.location.href);
+		if (matchesHardBlockedAdKeyword(resolvedUrl)) return true;
+		var parsed = new URL(resolvedUrl, baseHref || window.location.href);
+		var protocol = parsed.protocol.toLowerCase();
+		if (protocol === "javascript:" || protocol === "data:" || protocol === "file:") return true;
+		if (shouldBlockReq(parsed.href, baseHref, "main_frame", sourceUrl)) return true;
+		for (var [name, value] of parsed.searchParams.entries()) {
+			var normalizedName = String(name || "").trim().toLowerCase();
+			if (!redirKeys.has(normalizedName)) continue;
+			var nestedTarget = String(value || "").trim();
+			if (!nestedTarget) continue;
+			if (/^https?:\/\//i.test(nestedTarget)) {
+				if (shouldBlockReq(nestedTarget, parsed.href, "main_frame", parsed.href)) return true;
+			}
+		}
+		var fullTarget = `${parsed.hostname}${parsed.pathname}${parsed.search}`.toLowerCase();
+		if (/popunder|clickunder|forced[-_]?redirect/.test(fullTarget)) return true;
+		return false;
 	} catch {
 		return false;
 	}
@@ -1493,24 +1799,27 @@ function syncTabUrlFromFrame(tabId, frameElement) {
 	addHistory(nextUrl);
 }
 
-function injectAdblockIntoFrame(frameElement) {
+function injectAdblock(tabId, frameElement) {
 	var frameWindow = frameElement?.contentWindow;
 	if (!frameWindow) return;
 	if (frameWindow.__fbAdblockInstalled) return;
 	frameWindow.__fbAdblockInstalled = true;
-	void ensureGhosteryEngine();
+	void ensureGhostery();
 
 	var shouldBlock = (target, requestType = "other", sourceUrl = "") =>
-		isAdblockEnabled() &&
-		shouldBlockAdRequest(target, frameWindow.location?.href, requestType, sourceUrl);
+		adblockOn() &&
+		shouldBlockReq(target, frameWindow.location?.href, requestType, sourceUrl);
 	var responseCtor = frameWindow.Response || Response;
+	var targetDoc = frameWindow.document;
+	injectAdCss(targetDoc);
+	removeAdNodes(targetDoc);
 
 	if (typeof frameWindow.fetch === "function") {
 		var originalFetch = frameWindow.fetch.bind(frameWindow);
 		frameWindow.fetch = (input, init) => {
 			var target = typeof input === "string" ? input : input?.url;
 			var sourceUrl = typeof input === "object" ? input?.referrer || "" : "";
-			if (shouldBlock(target, inferFetchRequestType(input, init), sourceUrl)) {
+			if (shouldBlock(target, inferReqType(input, init), sourceUrl)) {
 				return Promise.resolve(
 					new responseCtor("", {
 						status: 204,
@@ -1563,6 +1872,131 @@ function injectAdblockIntoFrame(frameElement) {
 		};
 		frameWindow.WebSocket.prototype = OriginalWebSocket.prototype;
 	}
+
+	if (typeof frameWindow.open === "function") {
+		var originalOpen = frameWindow.open.bind(frameWindow);
+		frameWindow.open = (url, target, features) => {
+			var rawTarget = String(url || "").trim();
+			var baseHref = frameWindow.location?.href || window.location.href;
+			if (!rawTarget) return null;
+			if (shouldBlockNav(rawTarget, baseHref, baseHref)) return null;
+			if (!hasUserAct(frameWindow) && isXOriginNav(rawTarget, baseHref)) {
+				return null;
+			}
+			var targetValue = String(target || "").trim().toLowerCase();
+			if (!targetValue || targetValue === "_self") {
+				try {
+					frameWindow.location.assign(rawTarget);
+				} catch {
+				}
+				return frameWindow;
+			}
+			if (targetValue === "_top" || targetValue === "_parent" || targetValue === "_blank") {
+				try {
+					var resolved = new URL(rawTarget, baseHref).href;
+					loadUrl(resolved);
+				} catch {
+				}
+				return null;
+			}
+			return originalOpen(rawTarget, target, features);
+		};
+	}
+
+	try {
+		var locationProto = Object.getPrototypeOf(frameWindow.location);
+		if (locationProto && !locationProto.__fbNavigationPatched) {
+			locationProto.__fbNavigationPatched = true;
+			var originalAssign = locationProto.assign;
+			var originalReplace = locationProto.replace;
+			if (typeof originalAssign === "function") {
+				locationProto.assign = function (target) {
+					var currentHref = String(this?.href || frameWindow.location?.href || window.location.href);
+					if (shouldBlockNav(target, currentHref, currentHref)) return;
+					if (!hasUserAct(frameWindow) && isXOriginNav(target, currentHref)) {
+						return;
+					}
+					return originalAssign.call(this, target);
+				};
+			}
+			if (typeof originalReplace === "function") {
+				locationProto.replace = function (target) {
+					var currentHref = String(this?.href || frameWindow.location?.href || window.location.href);
+					if (shouldBlockNav(target, currentHref, currentHref)) return;
+					if (!hasUserAct(frameWindow) && isXOriginNav(target, currentHref)) {
+						return;
+					}
+					return originalReplace.call(this, target);
+				};
+			}
+		}
+	} catch {
+	}
+
+	try {
+		if (targetDoc && !targetDoc.__fbNavigationGuardsBound) {
+			targetDoc.__fbNavigationGuardsBound = true;
+			targetDoc.addEventListener(
+				"click",
+				(event) => {
+					var anchor = event.target?.closest?.("a[href]");
+					if (!anchor) return;
+					var href = String(anchor.getAttribute("href") || "").trim();
+					if (!href) return;
+					var baseHref = frameWindow.location?.href || window.location.href;
+					if (shouldBlockNav(href, baseHref, baseHref)) {
+						event.preventDefault();
+						event.stopImmediatePropagation();
+						return;
+					}
+					var linkTarget = String(anchor.getAttribute("target") || "").trim().toLowerCase();
+					if (linkTarget === "_top" || linkTarget === "_parent" || linkTarget === "_blank") {
+						event.preventDefault();
+						try {
+							var resolved = new URL(href, baseHref).href;
+							loadUrl(resolved);
+						} catch {
+						}
+					}
+				},
+				true
+			);
+			targetDoc.addEventListener(
+				"submit",
+				(event) => {
+					var form = event.target;
+					if (!form || form.tagName !== "FORM") return;
+					var method = String(form.getAttribute("method") || "GET").trim().toUpperCase();
+					var action = String(form.getAttribute("action") || frameWindow.location?.href || "").trim();
+					var baseHref = frameWindow.location?.href || window.location.href;
+					if (shouldBlockNav(action, baseHref, baseHref)) {
+						event.preventDefault();
+						event.stopImmediatePropagation();
+						return;
+					}
+					var formTarget = String(form.getAttribute("target") || "").trim().toLowerCase();
+					if (formTarget === "_top" || formTarget === "_parent" || formTarget === "_blank") {
+						event.preventDefault();
+						// ad prevention from cineby.gd
+						if (method !== "GET") return;
+						try {
+							var resolvedAction = new URL(action || baseHref, baseHref).href;
+							var formUrl = new URL(resolvedAction);
+							var formData = new FormData(form);
+							for (var [key, value] of formData.entries()) {
+								formUrl.searchParams.set(key, String(value));
+							}
+							loadUrl(formUrl.href);
+						} catch {
+						}
+					}
+				},
+				true
+			);
+		}
+	} catch {
+	}
+
 }
 
 async function loadUrl(url, pushHistory = true) {
@@ -1598,8 +2032,8 @@ async function loadUrl(url, pushHistory = true) {
 		showAiPage();
 		return;
 	}
-	if (isExtensionInternalUrl(url) || isExtensionStoreInternalUrl(url)) {
-		showExtensionStorePage();
+	if (isWallpaperInternalUrl(url) || isWallpaperStoreInternalUrl(url)) {
+		showWallpaperStorePage();
 		return;
 	}
 	if (isCreditsInternalUrl(url)) {
@@ -1632,6 +2066,10 @@ function ensureTabFrame(tabId) {
 
 	var created = scramjet.createFrame();
 	created.frame.className = "proxy-frame";
+	created.frame.setAttribute(
+		"sandbox",
+		"allow-scripts allow-same-origin allow-forms allow-modals allow-pointer-lock allow-downloads allow-presentation"
+	);
 	created.frame.style.display = "none";
 	created.frame.style.width = "100%";
 	created.frame.style.height = "100%";
@@ -1641,8 +2079,8 @@ function ensureTabFrame(tabId) {
 	created.frame.addEventListener("load", () => {
 		syncTabUrlFromFrame(tabId, created.frame);
 		try {
-			if (shouldInjectAdblockForTab(tabId)) {
-				injectAdblockIntoFrame(created.frame);
+			if (shouldInjectAdblock(tabId)) {
+				injectAdblock(tabId, created.frame);
 			}
 		} catch {
 		}
@@ -1752,7 +2190,7 @@ function attachQuickContextMenuToFrame(frameElement) {
 	}
 }
 
-function shouldInjectAdblockForTab(tabId) {
+function shouldInjectAdblock(tabId) {
 	var tab = tabs.find((entry) => entry.id === tabId);
 	if (!tab) return true;
 	var currentUrl = String(tab.url || "").trim();
@@ -1882,7 +2320,7 @@ function showAiPage() {
 	setParticlesVisible(isMatrixThemeActive());
 }
 
-function showExtensionStorePage() {
+function showWallpaperStorePage() {
 	blankState.style.display = "none";
 	tabFrames.forEach((item) => {
 		item.element.style.display = "none";
@@ -2269,12 +2707,12 @@ function isAiInternalUrl(url) {
 	return normalized === aiInternalUrl;
 }
 
-function isExtensionInternalUrl(url) {
+function isWallpaperInternalUrl(url) {
 	var normalized = getInternalRoute(url);
 	return normalized === "frosted://extension";
 }
 
-function isExtensionStoreInternalUrl(url) {
+function isWallpaperStoreInternalUrl(url) {
 	var normalized = getInternalRoute(url);
 	return (
 		normalized === wallpapersInternalUrl ||
@@ -3138,7 +3576,7 @@ function renderWallpaperStorePreview(entry) {
 	wallpaperStorePreviewTitle.textContent = entry.label;
 	wallpaperStorePreviewMeta.textContent = `${
 		entry.type === "video" ? "Animated" : "Static"
-	} • ${installed ? "Installed" : "Not installed"}`;
+	} � ${installed ? "Installed" : "Not installed"}`;
 
 	if (entry.type === "video") {
 		var previewVideo = document.createElement("video");
@@ -3997,4 +4435,4 @@ init();
 document.addEventListener("visibilitychange", syncWallpaperVideoVisibility);
 window.addEventListener("blur", syncWallpaperVideoVisibility);
 window.addEventListener("focus", syncWallpaperVideoVisibility);
-
+// hi
