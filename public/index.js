@@ -87,8 +87,7 @@ var panicRefs = {
 	panicUrlSaveBtn: qs("#save-panic-btn"),
 	panicNowBtn: qs("#panic-now-btn"),
 	panicStatus: qs("#panic-status"),
-	openModeAboutBtn: qs("#openModeAboutBtn"),
-	openModeBlobBtn: qs("#openModeBlobBtn"),
+	openModeSelect: qs("#openModeSelect"),
 	openModeStatus: qs("#openModeStatus"),
 	autoBlobToggle: qs("#autoBlobToggle"),
 	autoBlobStatus: qs("#autoBlobStatus"),
@@ -184,8 +183,7 @@ var {
 	panicUrlSaveBtn,
 	panicNowBtn,
 	panicStatus,
-	openModeAboutBtn,
-	openModeBlobBtn,
+	openModeSelect,
 	openModeStatus,
 	autoBlobToggle,
 	autoBlobStatus,
@@ -231,6 +229,9 @@ var gameBlobUrlsByTab = new Map();
 var rawHtmlFallbackTriedUrlByTab = new Map();
 var pendingGameClickScriptsByTab = new Map();
 var gameClickScriptDelayMs = 4200;
+var loadingShownAtMs = 0;
+var loadingHideTimerId = 0;
+var loadingMinVisibleMs = 1000;
 
 // Visual/particles state.
 var particleCanvas = null;
@@ -471,8 +472,9 @@ function maybeAutoOpenBlobAfterStartup() {
 		sessionStorage.setItem(autoOpenBlobSessionKey, "1");
 	} catch {
 	}
+	var startupMode = getSelectedOpenMode();
 	setTimeout(() => {
-		openCurrentPageInMode("blob");
+		openCurrentPageInMode(startupMode);
 	}, autoOpenBlobDelayMs);
 }
 
@@ -485,7 +487,9 @@ function isAutoBlobEnabled() {
 
 function updateAutoBlobStatusText() {
 	if (!autoBlobStatus) return;
-	autoBlobStatus.textContent = `Auto Blob on startup: ${
+	autoBlobStatus.textContent = `Auto open on startup (${getOpenModeDisplayValue(
+		getSelectedOpenMode()
+	)}): ${
 		isAutoBlobEnabled() ? "enabled" : "disabled"
 	}`;
 }
@@ -652,14 +656,9 @@ function bindEvents() {
 			setOpenMode("aboutblank", true);
 		});
 	}
-	if (openModeAboutBtn) {
-		openModeAboutBtn.addEventListener("click", () => {
-			setOpenMode("aboutblank", true);
-		});
-	}
-	if (openModeBlobBtn) {
-		openModeBlobBtn.addEventListener("click", () => {
-			setOpenMode("blob", true);
+	if (openModeSelect) {
+		openModeSelect.addEventListener("change", () => {
+			setOpenMode(openModeSelect.value || "aboutblank");
 		});
 	}
 	if (autoBlobToggle) {
@@ -1019,6 +1018,17 @@ function createTab(url) {
 	renderTabs();
 }
 
+function disposeTabFrame(tabId) {
+	var frame = tabFrames.get(tabId);
+	if (!frame || !frame.element) return;
+	try {
+		frame.element.src = "about:blank";
+	} catch {
+	}
+	frame.element.remove();
+	tabFrames.delete(tabId);
+}
+
 function closeTab(id) {
 	var idx = tabs.findIndex((t) => t.id === id);
 	if (idx === -1) return;
@@ -1029,11 +1039,7 @@ function closeTab(id) {
 		gameBlobUrlsByTab.delete(removed.id);
 	}
 	rawHtmlFallbackTriedUrlByTab.delete(removed.id);
-	var frame = tabFrames.get(removed.id);
-	if (frame) {
-		frame.element.remove();
-		tabFrames.delete(removed.id);
-	}
+	disposeTabFrame(removed.id);
 
 	if (!tabs.length) {
 		createTab("");
@@ -2003,6 +2009,8 @@ async function loadUrl(url, pushHistory = true) {
 	resetError();
 	var tab = getActiveTab();
 	if (!tab) return;
+	var previousUrl = String(tab.url || "").trim();
+	var normalizedNextUrl = String(url || "").trim();
 
 	if (pushHistory && tab.url) {
 		tab.backStack.push(tab.url);
@@ -2015,6 +2023,11 @@ async function loadUrl(url, pushHistory = true) {
 	homeSearchInput.value = url;
 	renderTabs();
 	updateNavButtons();
+
+	var changedUrl = Boolean(previousUrl && previousUrl !== normalizedNextUrl);
+	if (changedUrl) {
+		disposeTabFrame(tab.id);
+	}
 
 	if (isSettingsInternalUrl(url)) {
 		showSettingsPage();
@@ -2234,6 +2247,7 @@ function reloadActive() {
 function goHome() {
 	var tab = getActiveTab();
 	if (!tab) return;
+	disposeTabFrame(tab.id);
 	tab.url = "";
 	tab.title = "New Tab";
 	addressInput.value = "";
@@ -2501,7 +2515,7 @@ async function loadGamesCatalog() {
 				desc: String(entry?.desc || entry?.description || entry?.author || "").trim(),
 				url: String(entry?.url || "").trim(),
 				image: String(entry?.image || entry?.cover || "").trim(),
-				clickScript: String(entry?.clickScript || entry?.defaultClickScript || "").trim(),
+				clickScript: String(entry?.clickScript || "").trim(),
 				useBlob: Boolean(entry?.useBlob),
 			}))
 			.filter((entry) => entry.title && entry.url);
@@ -3419,6 +3433,13 @@ function normalizeStoreWallpaperEntry(rawEntry, index = 0) {
 	};
 }
 
+function getWallpaperMediaUrlCandidates(filePath) {
+	var raw = String(filePath || "").trim();
+	if (!raw) return [];
+	if (/^(https?:|blob:|data:|about:|\/)/i.test(raw)) return [raw];
+	return [raw, `/${raw.replace(/^\/+/, "")}`];
+}
+
 function readInstalledExtensionWallpapers() {
 	try {
 		var parsed = JSON.parse(localStorage.getItem(extensionWallpaperStorageKey) || "{}");
@@ -3576,27 +3597,54 @@ function renderWallpaperStorePreview(entry) {
 	wallpaperStorePreviewTitle.textContent = entry.label;
 	wallpaperStorePreviewMeta.textContent = `${
 		entry.type === "video" ? "Animated" : "Static"
-	} � ${installed ? "Installed" : "Not installed"}`;
+	} ? ${installed ? "Installed" : "Not installed"}`;
 
 	if (entry.type === "video") {
 		var previewVideo = document.createElement("video");
-		previewVideo.src = entry.file;
+		var previewCandidates = getWallpaperMediaUrlCandidates(entry.file);
+		var previewSrc = previewCandidates[0] || "";
+		var previewFallbackSrc = previewCandidates[1] || "";
+		previewVideo.src = previewSrc;
 		previewVideo.muted = true;
 		previewVideo.defaultMuted = true;
 		previewVideo.autoplay = true;
 		previewVideo.loop = true;
-		previewVideo.preload = "metadata";
+		previewVideo.preload = "auto";
 		previewVideo.controls = true;
 		previewVideo.playsInline = true;
+		if (previewFallbackSrc && previewFallbackSrc !== previewSrc) {
+			previewVideo.addEventListener(
+				"error",
+				() => {
+					if (previewVideo.dataset.fallbackTried === "1") return;
+					previewVideo.dataset.fallbackTried = "1";
+					previewVideo.src = previewFallbackSrc;
+					previewVideo.load();
+				},
+				{ once: true }
+			);
+		}
 		wallpaperStorePreviewMedia.appendChild(previewVideo);
 		var previewPlay = previewVideo.play();
 		if (previewPlay && typeof previewPlay.catch === "function") previewPlay.catch(() => {});
 	} else {
 		var previewImg = document.createElement("img");
-		previewImg.src = entry.file;
+		var previewImgCandidates = getWallpaperMediaUrlCandidates(entry.file);
+		previewImg.src = previewImgCandidates[0] || "";
 		previewImg.alt = entry.label;
 		previewImg.loading = "lazy";
 		previewImg.decoding = "async";
+		if (previewImgCandidates[1]) {
+			previewImg.addEventListener(
+				"error",
+				() => {
+					if (previewImg.dataset.fallbackTried === "1") return;
+					previewImg.dataset.fallbackTried = "1";
+					previewImg.src = previewImgCandidates[1];
+				},
+				{ once: true }
+			);
+		}
 		wallpaperStorePreviewMedia.appendChild(previewImg);
 	}
 
@@ -3758,14 +3806,24 @@ function renderWallpaperStoreGrid() {
 		thumbWrap.className = "store-wallpaper-thumb";
 		if (entry.type === "video") {
 			var thumbVideo = document.createElement("video");
-			thumbVideo.dataset.src = entry.file;
+			var thumbCandidates = getWallpaperMediaUrlCandidates(entry.file);
+			thumbVideo.dataset.src = thumbCandidates[0] || "";
+			thumbVideo.dataset.fallbackSrc = thumbCandidates[1] || "";
 			thumbVideo.muted = true;
 			thumbVideo.defaultMuted = true;
 			thumbVideo.loop = true;
 			thumbVideo.autoplay = false;
 			thumbVideo.playsInline = true;
-			thumbVideo.preload = "none";
+			thumbVideo.preload = "metadata";
 			thumbVideo.disablePictureInPicture = true;
+			thumbVideo.src = thumbVideo.dataset.src || "";
+			thumbVideo.addEventListener("error", () => {
+				var fallbackSrc = String(thumbVideo.dataset.fallbackSrc || "").trim();
+				if (!fallbackSrc || thumbVideo.dataset.fallbackTried === "1") return;
+				thumbVideo.dataset.fallbackTried = "1";
+				thumbVideo.src = fallbackSrc;
+				thumbVideo.load();
+			});
 			var warmVideoThumb = () => {
 				if (!thumbVideo.src) thumbVideo.src = thumbVideo.dataset.src || "";
 			};
@@ -3781,10 +3839,22 @@ function renderWallpaperStoreGrid() {
 			thumbWrap.appendChild(thumbVideo);
 		} else {
 			var thumbImg = document.createElement("img");
-			thumbImg.src = entry.file;
+			var thumbImgCandidates = getWallpaperMediaUrlCandidates(entry.file);
+			thumbImg.src = thumbImgCandidates[0] || "";
 			thumbImg.alt = entry.label;
 			thumbImg.loading = "lazy";
 			thumbImg.decoding = "async";
+			if (thumbImgCandidates[1]) {
+				thumbImg.addEventListener(
+					"error",
+					() => {
+						if (thumbImg.dataset.fallbackTried === "1") return;
+						thumbImg.dataset.fallbackTried = "1";
+						thumbImg.src = thumbImgCandidates[1];
+					},
+					{ once: true }
+				);
+			}
 			thumbWrap.appendChild(thumbImg);
 		}
 
@@ -4191,31 +4261,41 @@ function loadPanicSettings() {
 
 function loadOpenModeSettings() {
 	var raw = String(localStorage.getItem(openModeStorage) || "aboutblank").toLowerCase();
-	var allowed = new Set(["aboutblank", "blob"]);
-	var selected = allowed.has(raw) ? raw : "aboutblank";
+	var selected = normalizeOpenMode(raw);
 	updateOpenModeUI(selected);
 	if (raw !== selected) {
 		localStorage.setItem(openModeStorage, selected);
 	}
 	if (openModeStatus) {
-		openModeStatus.textContent = `Open mode set to ${
-			selected === "blob" ? "blob:." : "about:blank."
-		}`;
+		openModeStatus.textContent = `Open mode set to ${getOpenModeDisplayValue(selected)}.`;
 	}
 }
 
 function setOpenMode(mode, shouldLaunch = false) {
-	var selected = mode === "blob" ? mode : "aboutblank";
+	var selected = normalizeOpenMode(mode);
 	localStorage.setItem(openModeStorage, selected);
 	updateOpenModeUI(selected);
 	if (openModeStatus) {
-		openModeStatus.textContent = `Open mode set to ${
-			selected === "blob" ? "blob:." : "about:blank."
-		}`;
+		openModeStatus.textContent = `Open mode set to ${getOpenModeDisplayValue(selected)}.`;
 	}
+	updateAutoBlobStatusText();
 	if (shouldLaunch) {
 		openCurrentPageInMode(selected);
 	}
+}
+
+function getSelectedOpenMode() {
+	var raw = String(localStorage.getItem(openModeStorage) || "aboutblank").toLowerCase();
+	return normalizeOpenMode(raw);
+}
+
+function normalizeOpenMode(mode) {
+	var raw = String(mode || "").trim().toLowerCase();
+	return raw === "blob" ? "blob" : "aboutblank";
+}
+
+function getOpenModeDisplayValue(mode) {
+	return normalizeOpenMode(mode) === "blob" ? "blob:" : "about:blank";
 }
 
 function buildWrapperHtml(appUrl, mode = "aboutblank") {
@@ -4267,18 +4347,14 @@ function buildWrapperHtml(appUrl, mode = "aboutblank") {
 	);
 }
 function updateOpenModeUI(selected) {
-	if (openModeAboutBtn) {
-		openModeAboutBtn.classList.toggle("active", selected === "aboutblank");
+	if (openModeSelect) {
+		openModeSelect.value = selected;
 	}
-	if (openModeBlobBtn) {
-		openModeBlobBtn.classList.toggle("active", selected === "blob");
-	}
-
 }
 
 function openCurrentPageInMode(mode) {
 	var appUrl = window.location.href;
-	var selected = mode === "blob" ? mode : "aboutblank";
+	var selected = normalizeOpenMode(mode);
 	var wrapperHtml = buildWrapperHtml(appUrl, selected);
 	if (selected === "aboutblank") {
 		var popup = window.open("about:blank", "_blank");
@@ -4290,10 +4366,15 @@ function openCurrentPageInMode(mode) {
 			popup.document.open();
 			popup.document.write(wrapperHtml);
 			popup.document.close();
+			var handoffResult = finalizePreviousTabAfterHandoff();
 			if (openModeStatus) {
-				openModeStatus.textContent =
-					"Opened in about:blank.";
+				openModeStatus.textContent = handoffResult === "closed"
+					? "Opened in about:blank (new tab) and closed previous tab."
+					: handoffResult === "replaced"
+						? "Opened in about:blank (new tab). Previous tab was replaced to about:blank."
+						: "Opened in about:blank (new tab). Browser blocked closing previous tab.";
 			}
+			return;
 		} catch {
 			var fallbackBlob = new Blob([wrapperHtml], { type: "text/html;charset=utf-8" });
 			var fallbackBlobUrl = URL.createObjectURL(fallbackBlob);
@@ -4308,14 +4389,39 @@ function openCurrentPageInMode(mode) {
 			if (openModeStatus) {
 				openModeStatus.textContent = "Popup restricted; opened in blob fallback.";
 			}
+			return;
 		}
-		return;
 	}
 
 	var blob = new Blob([wrapperHtml], { type: "text/html;charset=utf-8" });
 	var blobUrl = URL.createObjectURL(blob);
-	if (openModeStatus) openModeStatus.textContent = "Opened in blob: (same tab).";
 	window.location.replace(blobUrl);
+	if (openModeStatus) {
+		openModeStatus.textContent = "Opened in blob: (same tab).";
+	}
+	setTimeout(() => {
+		URL.revokeObjectURL(blobUrl);
+	}, 600_000);
+}
+
+function closeCurrentTab() {
+	try {
+		window.open("", "_self");
+		window.close();
+		return Boolean(window.closed);
+	} catch {
+	}
+	return false;
+}
+
+function finalizePreviousTabAfterHandoff() {
+	if (closeCurrentTab()) return "closed";
+	try {
+		window.location.replace("about:blank");
+		return "replaced";
+	} catch {
+	}
+	return "failed";
 }
 
 function navigateToPanicUrl() {
@@ -4385,7 +4491,28 @@ function savePanicUrl() {
 
 function showLoading(show) {
 	if (!loadingBanner) return;
-	loadingBanner.classList.toggle("show", show);
+	if (show) {
+		if (loadingHideTimerId) {
+			clearTimeout(loadingHideTimerId);
+			loadingHideTimerId = 0;
+		}
+		loadingShownAtMs = Date.now();
+		loadingBanner.classList.add("show");
+		return;
+	}
+
+	if (!loadingBanner.classList.contains("show")) return;
+	var elapsed = Date.now() - loadingShownAtMs;
+	var waitMs = Math.max(0, loadingMinVisibleMs - elapsed);
+	if (waitMs === 0) {
+		loadingBanner.classList.remove("show");
+		return;
+	}
+	if (loadingHideTimerId) clearTimeout(loadingHideTimerId);
+	loadingHideTimerId = setTimeout(() => {
+		loadingHideTimerId = 0;
+		loadingBanner.classList.remove("show");
+	}, waitMs);
 }
 
 function showError(title, detail) {
@@ -4436,3 +4563,4 @@ document.addEventListener("visibilitychange", syncWallpaperVideoVisibility);
 window.addEventListener("blur", syncWallpaperVideoVisibility);
 window.addEventListener("focus", syncWallpaperVideoVisibility);
 // hi
+

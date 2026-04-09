@@ -514,21 +514,57 @@ body.has-video-wallpaper .wallpaper-video.is-active {
 
 .loading-banner {
 	position: absolute;
-	top: 0.75rem;
-	left: 50%;
-	transform: translateX(-50%);
-	padding: 0.3rem 0.7rem;
-	border-radius: 999px;
-	font-size: 0.75rem;
+	inset: 0;
+	padding: 0.85rem 1.1rem;
+	font-size: 0.9rem;
+	font-weight: 600;
+	letter-spacing: 0.01em;
 	color: #e5e7eb;
-	background: var(--surface-1);
-	border: 1px solid var(--border);
+	background: transparent;
+	border: none;
 	display: none;
-	z-index: 9;
+	z-index: 40;
+	align-items: center;
+	justify-content: center;
+	gap: 0.6rem;
 }
 
 .loading-banner.show {
+	display: flex;
+}
+
+.loading-banner span {
 	display: inline-flex;
+	align-items: center;
+	padding: 0.35rem 0.72rem;
+	border-radius: 999px;
+	background: rgba(22, 29, 43, 0.52);
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	color: rgba(236, 244, 255, 0.95);
+	backdrop-filter: blur(6px);
+}
+
+.loading-spinner {
+	width: 1.15rem;
+	height: 1.15rem;
+	border-radius: 999px;
+	border: 2px solid rgba(255, 255, 255, 0.22);
+	border-top-color: #ffffff;
+	animation: proxy-loading-spin 0.8s linear infinite;
+	box-shadow:
+		0 0 0 1px rgba(255, 255, 255, 0.12),
+		0 0 12px rgba(255, 255, 255, 0.45),
+		0 0 24px rgba(110, 200, 255, 0.32);
+	filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.45));
+}
+
+@keyframes proxy-loading-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 .browser-overlay {
@@ -799,7 +835,7 @@ body.matrix-theme-active #aiPage {
 		linear-gradient(145deg, rgba(7, 17, 31, 0.88), rgba(6, 13, 24, 0.8)),
 		radial-gradient(circle at 0% 0%, rgba(127, 184, 255, 0.14), transparent 40%);
 	padding: 1.15rem;
-	min-height: 700px;
+	min-height: 1275px;
 	overflow: hidden;
 	box-shadow:
 		0 18px 44px rgba(0, 0, 0, 0.4),
@@ -813,7 +849,7 @@ body.matrix-theme-active #aiPage {
 	gap: 1rem;
 	align-items: stretch;
 	min-width: 0;
-	min-height: 600px;
+	min-height: 1145px;
 }
 
 .wallpaper-store-rail {
@@ -831,7 +867,7 @@ body.matrix-theme-active #aiPage {
 .wallpaper-store-content {
 	grid-area: content;
 	min-height: 0;
-	height: 620px;
+	height: 1145px;
 	border-radius: 1rem;
 	border: 1px solid rgba(190, 222, 255, 0.16);
 	background: rgba(5, 11, 20, 0.52);
@@ -888,7 +924,8 @@ body.matrix-theme-active #aiPage {
 
 .store-wallpaper-thumb {
 	width: 100%;
-	aspect-ratio: 16 / 9;
+	aspect-ratio: 16 / 10;
+	min-height: 118px;
 	border-radius: 0.7rem;
 	overflow: hidden;
 	border: 1px solid rgba(201, 228, 255, 0.22);
@@ -1032,7 +1069,8 @@ body.matrix-theme-active #aiPage {
 
 .wallpaper-preview-media {
 	width: 100%;
-	aspect-ratio: 16 / 10;
+	aspect-ratio: 16 / 9;
+	min-height: 360px;
 	border-radius: 0.9rem;
 	border: 1px solid rgba(255, 255, 255, 0.12);
 	background: radial-gradient(circle at top, rgba(52, 93, 164, 0.5), rgba(8, 14, 28, 0.92));
@@ -1513,8 +1551,12 @@ body.has-video-wallpaper .home-search input::placeholder {
 	gap: 0.6rem;
 }
 
+.open-mode-row {
+	flex-wrap: wrap;
+}
+
 .open-mode-row .open-mode-btn {
-	flex: 1 1 220px;
+	flex: 1 1 180px;
 }
 
 .open-mode-btn.active {
