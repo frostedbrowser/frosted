@@ -136,7 +136,10 @@
 			<div class="browser-shell">
 				<div class="browser-main">
 					<div class="browser-stage">
-						<div class="loading-banner" id="loadingBanner">Loading...</div>
+						<div class="loading-banner" id="loadingBanner" role="status" aria-live="polite">
+							<div class="loading-spinner" aria-hidden="true"></div>
+							<span>Loading page</span>
+						</div>
 						<iframe id="browserFrame" title="Browser content"></iframe>
 						<div class="browser-overlay" id="blankState">
 							<div class="home-shell">
@@ -179,21 +182,22 @@
 										<select class="settings-select" id="wallpaperSelect"></select>
 									</div>
 									<div class="settings-section">
-										<label class="settings-label">Open in ...</label>
-										<div class="settings-row open-mode-row">
-											<button class="settings-btn open-mode-btn" id="openModeAboutBtn" type="button">
-												Open in about:blank
-											</button>
-											<button class="settings-btn open-mode-btn" id="openModeBlobBtn" type="button">
-												Open in blob:
-											</button>
+										<label class="settings-label" for="openModeSelect">Open in ...</label>
+										<div class="settings-row">
+											<select class="settings-select" id="openModeSelect">
+												<option value="aboutblank">about:blank</option>
+												<option value="blob">blob:</option>
+											</select>
+										</div>
+										<div class="settings-hint" id="openModeStatus">
+											Open mode set to about:blank.
 										</div>
 										<div class="settings-row">
-											<label class="settings-label" for="autoBlobToggle">Auto Blob</label>
+											<label class="settings-label" for="autoBlobToggle">Auto Open On Startup</label>
 											<input id="autoBlobToggle" type="checkbox" />
 										</div>
 										<div class="settings-hint" id="autoBlobStatus">
-											Auto Blob on startup: enabled
+											Auto open on startup (about:blank): disabled
 										</div>
 									</div>
 									<div class="settings-section">
