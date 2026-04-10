@@ -4,7 +4,7 @@
 		"label": "Winter Island",
 		"type": "video",
 		"category": "animated-wallpapers",
-		"file": "wallpapers/animated/winter.mp4",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/winter.mp4",
 		"theme": {
 			"color1": "#bad9ff",
 			"color2": "#d9f2ff",
@@ -19,7 +19,7 @@
 		"label": "Anime Skylight",
 		"type": "video",
 		"category": "animated-wallpapers",
-		"file": "wallpapers/animated/animeskylight.mp4",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/animeskylight.mp4",
 		"theme": {
 			"color1": "#ffd9f3",
 			"color2": "#d8e8ff",
@@ -34,7 +34,7 @@
 		"label": "Minecraft Snow",
 		"type": "video",
 		"category": "animated-wallpapers",
-		"file": "wallpapers/animated/minecraftsnow.mp4",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/minecraftsnow.mp4",
 		"theme": {
 			"color1": "#d9f4ff",
 			"color2": "#e9fff7",
@@ -49,7 +49,7 @@
 		"label": "Night Blossom",
 		"type": "video",
 		"category": "animated-wallpapers",
-		"file": "wallpapers/animated/nightblossom.mp4",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/nightblossom.mp4",
 		"theme": {
 			"color1": "#ffc7dd",
 			"color2": "#b9c2ff",
@@ -64,7 +64,7 @@
 		"label": "Night City",
 		"type": "video",
 		"category": "animated-wallpapers",
-		"file": "wallpapers/animated/nightcity.mp4",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/nightcity.mp4",
 		"theme": {
 			"color1": "#7ad4ff",
 			"color2": "#a7b8ff",
@@ -79,7 +79,7 @@
 		"label": "Blossom",
 		"type": "video",
 		"category": "animated-wallpapers",
-		"file": "wallpapers/animated/blossom.mp4",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/blossom.mp4",
 		"theme": {
 			"color1": "#ffd2e8",
 			"color2": "#ffe8f4",
@@ -94,7 +94,7 @@
 		"label": "Faithful",
 		"type": "video",
 		"category": "animated-wallpapers",
-		"file": "wallpapers/animated/faithful.mp4",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/faithful.mp4",
 		"theme": {
 			"color1": "#ffd7c2",
 			"color2": "#fff0d6",
@@ -109,7 +109,7 @@
 		"label": "Forest",
 		"type": "video",
 		"category": "animated-wallpapers",
-		"file": "wallpapers/animated/forest.mp4",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/forest.mp4",
 		"theme": {
 			"color1": "#b6e6c3",
 			"color2": "#d9f5df",
@@ -124,7 +124,7 @@
 		"label": "Shadow Tree",
 		"type": "video",
 		"category": "animated-wallpapers",
-		"file": "wallpapers/animated/shadowtree.mp4",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/shadowtree.mp4",
 		"theme": {
 			"color1": "#8fa3c7",
 			"color2": "#c4cce0",
@@ -139,7 +139,7 @@
 		"label": "Snowy Mountains",
 		"type": "video",
 		"category": "animated-wallpapers",
-		"file": "wallpapers/animated/snowymoutains.mp4",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/snowymoutains.mp4",
 		"theme": {
 			"color1": "#d8ebff",
 			"color2": "#f3fbff",
@@ -154,7 +154,7 @@
 		"label": "Quiet Night",
 		"type": "video",
 		"category": "animated-wallpapers",
-		"file": "wallpapers/animated/quietnight.mp4",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/quietnight.mp4",
 		"theme": {
 			"color1": "#c3c9ff",
 			"color2": "#e0d8ff",
@@ -169,7 +169,7 @@
 		"label": "Pink Supra Night",
 		"type": "video",
 		"category": "animated-wallpapers",
-		"file": "wallpapers/animated/pinksupranight.mp4",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/pinksupranight.mp4",
 		"theme": {
 			"color1": "#ffb7d9",
 			"color2": "#ffd2ef",
@@ -184,7 +184,7 @@
 		"label": "Black Hole",
 		"type": "video",
 		"category": "animated-wallpapers",
-		"file": "wallpapers/animated/blackhole.mp4",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/blackhole.mp4",
 		"theme": {
 			"color1": "#a1a8d4",
 			"color2": "#d3c8ff",
@@ -199,7 +199,7 @@
 		"label": "Snowy Lamp",
 		"type": "video",
 		"category": "animated-wallpapers",
-		"file": "wallpapers/animated/snowylamp.mp4",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/snowylamp.mp4",
 		"theme": {
 			"color1": "#ffe8bc",
 			"color2": "#fff6db",
@@ -214,7 +214,7 @@
 		"label": "Sakura Evening",
 		"type": "video",
 		"category": "animated-wallpapers",
-		"file": "wallpapers/animated/sakuraevening.mp4",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/sakuraevening.mp4",
 		"theme": {
 			"color1": "#ffc8df",
 			"color2": "#ffdff0",
@@ -229,7 +229,7 @@
 		"label": "Supra",
 		"type": "video",
 		"category": "animated-wallpapers",
-		"file": "wallpapers/animated/supra.mp4",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/supra.mp4",
 		"theme": {
 			"color1": "#9ad8ff",
 			"color2": "#c5b6ff",

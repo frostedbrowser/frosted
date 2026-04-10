@@ -3965,7 +3965,7 @@ var wallpapers = {
 		label: "Winter (Animated)",
 		category: "animated-wallpapers",
 		type: "video",
-		file: "wallpapers/animated/winter.mp4",
+		file: "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/winter.mp4",
 		theme: {
 			color1: "#bad9ff",
 			color2: "#d9f2ff",
@@ -4563,4 +4563,3 @@ document.addEventListener("visibilitychange", syncWallpaperVideoVisibility);
 window.addEventListener("blur", syncWallpaperVideoVisibility);
 window.addEventListener("focus", syncWallpaperVideoVisibility);
 // hi
-
