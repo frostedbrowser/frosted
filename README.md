@@ -1,5 +1,5 @@
-# FilterBrowser
-filterbrowser is a proxy from scramjet (the sucessor to uv) that is basically a browser but worse
+# Frosted
+Frosted is a proxy from scramjet (the sucessor to uv) that is basically a browser but worse
 
 # Main Features
 - Open in Blob
@@ -24,4 +24,4 @@ A: Only for errors / debugging.
 -
 Q: How does the Cloak Feature work?
 A: The Cloak works by leaving the tab and sets the icon and title of the website to IXL or a different 1. 
-(History Cloak works by loading the favicon and title first then applying filterbrowser title and favicon)
+(History Cloak works by loading the favicon and title first then applying Frosted title and favicon)

@@ -61,7 +61,7 @@ function shouldBypassScramjet(request) {
 
 async function handleRequest(event) {
 	if (isHardBlockedAdRequest(event.request)) {
-		return new Response("Blocked by Frosted adblock", {
+		return new Response("Blocked by Frosted adblock💖", {
 			status: 403,
 			statusText: "Blocked by Frosted adblock",
 			headers: {

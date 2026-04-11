@@ -29,6 +29,7 @@ var shellRefs = {
 	homeBtn: qs("#homeBtn"),
 	wallpaperAppBtn: qs("#wallpaperAppBtn"),
 	gamesBtn: qs("#gamesBtn"),
+	accountsBtn: qs("#accountsBtn"),
 	aiBtn: qs("#aiBtn"),
 	erudaBtn: qs("#erudaBtn"),
 	adsToggleBtn: qs("#adsToggleBtn"),
@@ -46,6 +47,7 @@ var shellRefs = {
 // page vars
 var pageRefs = {
 	settingsPage: qs("#settingsPage"),
+	accountsPage: qs("#accountsPage"),
 	creditsPage: qs("#creditsPage"),
 	partnersPage: qs("#partnersPage"),
 	gamesPage: qs("#gamesPage"),
@@ -55,6 +57,7 @@ var pageRefs = {
 	gamesGrid: qs("#gamesGrid"),
 	gamesCount: qs("#gamesCount"),
 	gamesSearchInput: qs("#gamesSearchInput"),
+	gamesSyncBtn: qs("#gamesSyncBtn"),
 	aiPromptInput: qs("#aiPromptInput"),
 	aiSolveBtn: qs("#aiSolveBtn"),
 	aiResult: qs("#aiResult"),
@@ -77,6 +80,16 @@ var pageRefs = {
 	wallpaperStoreApplyBtn: qs("#wallpaperStoreApplyBtn"),
 	creditsLink: qs("#creditsLink"),
 	wallpaperSelect: qs("#wallpaperSelect"),
+	accountUsernameInput: qs("#accountUsernameInput"),
+	accountPasswordInput: qs("#accountPasswordInput"),
+	accountSignupBtn: qs("#accountSignupBtn"),
+	accountLoginBtn: qs("#accountLoginBtn"),
+	accountLogoutBtn: qs("#accountLogoutBtn"),
+	accountSyncPushBtn: qs("#accountSyncPushBtn"),
+	accountSyncPullBtn: qs("#accountSyncPullBtn"),
+	accountSyncBtn: qs("#accountSyncBtn"),
+	accountUserStatus: qs("#accountUserStatus"),
+	accountSyncStatus: qs("#accountSyncStatus"),
 };
 // panic vars
 var panicRefs = {
@@ -125,6 +138,7 @@ var {
 	homeBtn,
 	wallpaperAppBtn,
 	gamesBtn,
+	accountsBtn,
 	aiBtn,
 	erudaBtn,
 	adsToggleBtn,
@@ -142,6 +156,7 @@ var {
 
 var {
 	settingsPage,
+	accountsPage,
 	creditsPage,
 	partnersPage,
 	gamesPage,
@@ -151,6 +166,7 @@ var {
 	gamesGrid,
 	gamesCount,
 	gamesSearchInput,
+	gamesSyncBtn,
 	aiPromptInput,
 	aiSolveBtn,
 	aiResult,
@@ -173,6 +189,16 @@ var {
 	wallpaperStoreApplyBtn,
 	creditsLink,
 	wallpaperSelect,
+	accountUsernameInput,
+	accountPasswordInput,
+	accountSignupBtn,
+	accountLoginBtn,
+	accountLogoutBtn,
+	accountSyncPushBtn,
+	accountSyncPullBtn,
+	accountSyncBtn,
+	accountUserStatus,
+	accountSyncStatus,
 } = pageRefs;
 
 var {
@@ -214,7 +240,6 @@ scramjet.init();
 
 var connection = new BareMux.BareMuxConnection("/baremux/worker.js");
 
-// App state and caches.
 var tabs = [];
 var activeTabId = null;
 var nextTabId = 1;
@@ -233,7 +258,7 @@ var loadingShownAtMs = 0;
 var loadingHideTimerId = 0;
 var loadingMinVisibleMs = 1000;
 
-// Visual/particles state.
+// Visual/particles vars.
 var particleCanvas = null;
 var particleCtx = null;
 var particleDots = [];
@@ -432,6 +457,8 @@ function init() {
 	loadOpenModeSettings();
 	loadAutoBlobSettings();
 	loadCloakSettings();
+	restoreAccountStateFromStorage();
+	void initAccountUi();
 	applyCloakVisualState(document.hidden || !document.hasFocus());
 	runStartupBrandSequence();
 	loadAiMode();
@@ -501,12 +528,21 @@ function loadAutoBlobSettings() {
 }
 
 var settingsInternalUrl = "frosted://settings";
+var accountsInternalUrl = "frosted://accounts";
 var creditsInternalUrl = "frosted://credits";
 var gamesInternalUrl = "frosted://games";
 var aiInternalUrl = "frosted://ai";
 var partnersInternalUrl = "frosted://partners";
 var wallpapersInternalUrl = "frosted://wallpapers";
 var aiModeKey = "fb_ai_mode";
+var accountTokenStorageKey = "fb_account_token";
+var accountUserStorageKey = "fb_account_user";
+var gameDataStorageKey = "fb_game_data_store";
+var gameDataSchemaVersion = 1;
+var accountState = {
+	token: "",
+	user: null,
+};
 
 function bindEvents() {
 	newTabBtn.addEventListener("click", () => createTab(""));
@@ -557,6 +593,9 @@ function bindEvents() {
 	homeBtn.addEventListener("click", goHome);
 
 	gamesBtn.addEventListener("click", () => navigateFromInput(gamesInternalUrl));
+	if (accountsBtn) {
+		accountsBtn.addEventListener("click", () => navigateFromInput(accountsInternalUrl));
+	}
 	if (wallpaperAppBtn) {
 		wallpaperAppBtn.addEventListener("click", () => navigateFromInput(wallpapersInternalUrl));
 		wallpaperAppBtn.addEventListener("contextmenu", (event) => {
@@ -687,6 +726,48 @@ function bindEvents() {
 	if (gamesSearchInput) {
 		gamesSearchInput.addEventListener("input", () => {
 			renderGames();
+		});
+	}
+	if (gamesSyncBtn) {
+		gamesSyncBtn.addEventListener("click", () => {
+			void syncGameDataWithServer();
+		});
+	}
+	if (accountSignupBtn) {
+		accountSignupBtn.addEventListener("click", () => {
+			void handleAccountSignup();
+		});
+	}
+	if (accountLoginBtn) {
+		accountLoginBtn.addEventListener("click", () => {
+			void handleAccountLogin();
+		});
+	}
+	if (accountLogoutBtn) {
+		accountLogoutBtn.addEventListener("click", () => {
+			void handleAccountLogout();
+		});
+	}
+	if (accountSyncPushBtn) {
+		accountSyncPushBtn.addEventListener("click", () => {
+			void uploadGameDataToServer();
+		});
+	}
+	if (accountSyncPullBtn) {
+		accountSyncPullBtn.addEventListener("click", () => {
+			void downloadGameDataFromServer();
+		});
+	}
+	if (accountSyncBtn) {
+		accountSyncBtn.addEventListener("click", () => {
+			void syncGameDataWithServer();
+		});
+	}
+	if (accountPasswordInput) {
+		accountPasswordInput.addEventListener("keydown", (event) => {
+			if (event.key !== "Enter") return;
+			event.preventDefault();
+			void handleAccountLogin();
 		});
 	}
 	if (cloakEnabledToggle) {
@@ -860,6 +941,7 @@ function shouldShowParticlesForCurrentView() {
 	var onBlank = blankState?.style.display === "flex";
 	var onInternal =
 		settingsPage?.classList.contains("active") ||
+		accountsPage?.classList.contains("active") ||
 		gamesPage?.classList.contains("active") ||
 		aiPage?.classList.contains("active") ||
 		partnersPage?.classList.contains("active") ||
@@ -1063,6 +1145,8 @@ function setActiveTab(id, keepView) {
 		showBlank();
 	} else if (isSettingsInternalUrl(tab.url)) {
 		showSettingsPage();
+	} else if (isAccountsInternalUrl(tab.url)) {
+		showAccountsPage();
 	} else if (isGamesInternalUrl(tab.url)) {
 		showGamesPage();
 	} else if (isAiInternalUrl(tab.url)) {
@@ -1136,6 +1220,7 @@ function getTabFaviconCandidates(url) {
 	if (!url) return [defaultAppIconHref];
 	if (
 		isSettingsInternalUrl(url) ||
+		isAccountsInternalUrl(url) ||
 		isCreditsInternalUrl(url) ||
 		isPartnersInternalUrl(url) ||
 		isWallpaperInternalUrl(url) ||
@@ -1165,6 +1250,7 @@ function getActiveTab() {
 function getDisplayTitle(url) {
 	if (!url) return "New Tab";
 	if (isSettingsInternalUrl(url)) return "Settings";
+	if (isAccountsInternalUrl(url)) return "Accounts";
 	if (isPartnersInternalUrl(url)) return "Partners";
 	if (isGamesInternalUrl(url)) return "Games";
 	if (isAiInternalUrl(url)) return "AI";
@@ -1182,6 +1268,7 @@ function normalizeInput(input) {
 	if (!input || !searchEngine) return "";
 	var raw = normalizeInternalScheme(String(input).trim());
 	if (isSettingsInternalUrl(raw)) return settingsInternalUrl;
+	if (isAccountsInternalUrl(raw)) return accountsInternalUrl;
 	if (isPartnersInternalUrl(raw)) return partnersInternalUrl;
 	if (isGamesInternalUrl(raw)) return gamesInternalUrl;
 	if (isAiInternalUrl(raw)) return aiInternalUrl;
@@ -1197,7 +1284,7 @@ async function navigateFromInput(input, pushHistory = true) {
 }
 
 var adHosts = [
-	// Ads
+	// 98% of ads blocked on adblock.turtlecute.org
 	/(^|\.)doubleclick\.net$/i,
 	/(^|\.)googlesyndication\.com$/i,
 	/(^|\.)googleadservices\.com$/i,
@@ -1206,8 +1293,6 @@ var adHosts = [
 	/(^|\.)contextweb\.com$/i,
 	/(^|\.)fastclick\.net$/i,
 	/(^|\.)amazon-adsystem\.com$/i,
-
-	// Analytics
 	/(^|\.)googletagmanager\.com$/i,
 	/(^|\.)google-analytics\.com$/i,
 	/(^|\.)analytics\.google\.com$/i,
@@ -1217,12 +1302,8 @@ var adHosts = [
 	/(^|\.)freshmarketer\.com$/i,
 	/(^|\.)luckyorange\.com$/i,
 	/(^|\.)stats\.wp\.com$/i,
-
-	// Error trackers
 	/(^|\.)bugsnag\.com$/i,
 	/(^|\.)sentry\.io$/i,
-
-	// Social trackers
 	/(^|\.)facebook\.com$/i,
 	/(^|\.)fbcdn\.net$/i,
 	/(^|\.)twitter\.com$/i,
@@ -1240,14 +1321,10 @@ var adHosts = [
 	/(^|\.)tiktok\.com$/i,
 	/(^|\.)tiktokcdn\.com$/i,
 	/(^|\.)byteoversea\.com$/i,
-
-	// Mix
 	/(^|\.)yahoo\.com$/i,
 	/(^|\.)yimg\.com$/i,
 	/(^|\.)yahooinc\.com$/i,
 	/(^|\.)yandex\./i,
-
-	// OEM ad / telemetry ecosystems
 	/(^|\.)xiaomi\./i,
 	/(^|\.)miui\.com$/i,
 	/(^|\.)mistat\.xiaomi\.com$/i,
@@ -1274,15 +1351,13 @@ var adHosts = [
 	/(^|\.)bdapi-ads\.realmemobile\.com$/i,
 	/(^|\.)bdapi-in-ads\.realmemobile\.com$/i,
 	/(^|\.)adsfs\.oppomobile\.com$/i,
-
-	// Existing broad ad/tracker nets
 	/(^|\.)taboola\.com$/i,
 	/(^|\.)outbrain\.com$/i,
 	/(^|\.)criteo\.com$/i,
 	/(^|\.)adsrvr\.org$/i,
 	/(^|\.)scorecardresearch\.com$/i,
 ];
-
+// blocking adservers and google adsense
 var adUrls = [
 	/\/ads?(\/|\.|\?|$)/i,
 	/\/adserver/i,
@@ -1502,7 +1577,7 @@ function toggleAds() {
 	setAdblock(!adblockOn());
 	if (adblockOn()) void ensureGhostery();
 }
-
+// ghostery integration / ad bypass/blocker
 async function ensureGhostery() {
 	if (ghosteryEngine) return ghosteryEngine;
 	if (ghosteryEnginePromise) return ghosteryEnginePromise;
@@ -1511,9 +1586,7 @@ async function ensureGhostery() {
 		try {
 			var mod = null;
 			var moduleCandidates = [
-				// Browser-bundled module (no bare package specifiers).
 				"https://esm.sh/@ghostery/adblocker?bundle",
-				// Legacy local path fallback (works only if pre-bundled in this project).
 				"/vendor/adblocker/index.js",
 			];
 			var lastError = null;
@@ -2033,6 +2106,10 @@ async function loadUrl(url, pushHistory = true) {
 		showSettingsPage();
 		return;
 	}
+	if (isAccountsInternalUrl(url)) {
+		showAccountsPage();
+		return;
+	}
 	if (isPartnersInternalUrl(url)) {
 		showPartnersPage();
 		return;
@@ -2276,6 +2353,7 @@ function showSettingsPage() {
 		item.element.style.display = "none";
 	});
 	if (creditsPage) creditsPage.classList.remove("active");
+	if (accountsPage) accountsPage.classList.remove("active");
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.remove("active");
@@ -2286,12 +2364,30 @@ function showSettingsPage() {
 	setParticlesVisible(isMatrixThemeActive());
 }
 
+function showAccountsPage() {
+	blankState.style.display = "none";
+	tabFrames.forEach((item) => {
+		item.element.style.display = "none";
+	});
+	if (settingsPage) settingsPage.classList.remove("active");
+	if (creditsPage) creditsPage.classList.remove("active");
+	if (partnersPage) partnersPage.classList.remove("active");
+	if (gamesPage) gamesPage.classList.remove("active");
+	if (aiPage) aiPage.classList.remove("active");
+	if (extensionPage) extensionPage.classList.remove("active");
+	if (extensionStorePage) extensionStorePage.classList.remove("active");
+	if (accountsPage) accountsPage.classList.add("active");
+	addressInput.value = accountsInternalUrl;
+	setParticlesVisible(isMatrixThemeActive());
+}
+
 function showPartnersPage() {
 	blankState.style.display = "none";
 	tabFrames.forEach((item) => {
 		item.element.style.display = "none";
 	});
 	if (settingsPage) settingsPage.classList.remove("active");
+	if (accountsPage) accountsPage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.remove("active");
@@ -2308,6 +2404,7 @@ function showGamesPage() {
 		item.element.style.display = "none";
 	});
 	if (settingsPage) settingsPage.classList.remove("active");
+	if (accountsPage) accountsPage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.remove("active");
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.add("active");
@@ -2324,6 +2421,7 @@ function showAiPage() {
 		item.element.style.display = "none";
 	});
 	if (settingsPage) settingsPage.classList.remove("active");
+	if (accountsPage) accountsPage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.remove("active");
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
@@ -2340,6 +2438,7 @@ function showWallpaperStorePage() {
 		item.element.style.display = "none";
 	});
 	if (settingsPage) settingsPage.classList.remove("active");
+	if (accountsPage) accountsPage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.remove("active");
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
@@ -2357,6 +2456,7 @@ function showCreditsPage() {
 		item.element.style.display = "none";
 	});
 	if (settingsPage) settingsPage.classList.remove("active");
+	if (accountsPage) accountsPage.classList.remove("active");
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.remove("active");
@@ -2369,6 +2469,7 @@ function showCreditsPage() {
 
 function hideInternalPages() {
 	if (settingsPage) settingsPage.classList.remove("active");
+	if (accountsPage) accountsPage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.remove("active");
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
@@ -2624,7 +2725,6 @@ function decodeLegacyBookmarkletSource(rawSource) {
 		text = next;
 	}
 
-	// This source is bookmarklet-style and often inserts whitespace between operator symbols.
 	text = text
 		.replace(/=\s+>/g, "=>")
 		.replace(/\|\s+\|/g, "||")
@@ -2701,6 +2801,11 @@ function isSettingsInternalUrl(url) {
 	return normalized === settingsInternalUrl;
 }
 
+function isAccountsInternalUrl(url) {
+	var normalized = getInternalRoute(url);
+	return normalized === accountsInternalUrl || normalized === "frosted://account";
+}
+
 function isCreditsInternalUrl(url) {
 	var normalized = getInternalRoute(url);
 	return normalized === creditsInternalUrl;
@@ -2740,6 +2845,7 @@ function isWallpaperStoreInternalUrl(url) {
 async function openGameFromCatalog(url, options = {}) {
 	var tab = getActiveTab();
 	if (!tab) return;
+	markGamePlayed(url);
 	var useBlob = Boolean(options?.useBlob);
 	var finalUrl = url;
 	rawHtmlFallbackTriedUrlByTab.delete(tab.id);
@@ -3909,7 +4015,7 @@ var wallpapers = {
 		label: "Onyx",
 		category: "wallpapers",
 		type: "image",
-		file: "wallpapers/onyx.jpg",
+		file: "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/onyx.jpg",
 		theme: {
 			color1: "#000001",
 			color2: "#464646",
@@ -3923,7 +4029,7 @@ var wallpapers = {
 		label: "Sky Night",
 		category: "wallpapers",
 		type: "image",
-		file: "wallpapers/skynight.jpg",
+		file: "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/skynight.jpg",
 		theme: {
 			color1: "#8ac3d6",
 			color2: "#9ab0d8",
@@ -3937,7 +4043,7 @@ var wallpapers = {
 		label: "Evening Mountains",
 		category: "wallpapers",
 		type: "image",
-		file: "wallpapers/evening-mountains.jpg",
+		file: "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/evening-mountains.jpg",
 		theme: {
 			color1: "#c49564",
 			color2: "#7c6454",
@@ -3951,7 +4057,7 @@ var wallpapers = {
 		label: "Twilight Ridge",
 		category: "wallpapers",
 		type: "image",
-		file: "wallpapers/twilight-ridge.png",
+		file: "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/twilight-ridge.png",
 		theme: {
 			color1: "#a7b7ff",
 			color2: "#86d0ff",
@@ -4489,6 +4595,394 @@ function savePanicUrl() {
 	}, 2000);
 }
 
+function getAccountApiBase() {
+	var configured = String(window?._CONFIG?.ACCOUNT_API_BASE || "").trim();
+	if (!configured) return "";
+	return configured.replace(/\/+$/, "");
+}
+
+function getAccountApiTimeoutMs() {
+	var timeout = Number.parseInt(window?._CONFIG?.ACCOUNT_API_TIMEOUT_MS || "15000", 10);
+	if (!Number.isFinite(timeout) || timeout < 1000) return 15000;
+	return timeout;
+}
+
+function isAccountApiConfigured() {
+	return Boolean(getAccountApiBase());
+}
+
+function setAccountStatus(message) {
+	if (!accountUserStatus) return;
+	accountUserStatus.textContent = String(message || "").trim() || "Not logged in.";
+}
+
+function setAccountSyncStatus(message) {
+	if (!accountSyncStatus) return;
+	accountSyncStatus.textContent = String(message || "").trim() || "Sync idle.";
+}
+
+function setAccountButtonsDisabled(disabled) {
+	var controls = [
+		accountSignupBtn,
+		accountLoginBtn,
+		accountLogoutBtn,
+		accountSyncPushBtn,
+		accountSyncPullBtn,
+		accountSyncBtn,
+	];
+	controls.forEach((el) => {
+		if (!el) return;
+		el.disabled = Boolean(disabled);
+	});
+}
+
+function persistAccountState() {
+	if (accountState.token) {
+		localStorage.setItem(accountTokenStorageKey, accountState.token);
+	} else {
+		localStorage.removeItem(accountTokenStorageKey);
+	}
+	if (accountState.user && accountState.user.username) {
+		localStorage.setItem(accountUserStorageKey, JSON.stringify(accountState.user));
+	} else {
+		localStorage.removeItem(accountUserStorageKey);
+	}
+}
+
+function restoreAccountStateFromStorage() {
+	accountState.token = String(localStorage.getItem(accountTokenStorageKey) || "").trim();
+	accountState.user = null;
+	try {
+		var savedUser = JSON.parse(localStorage.getItem(accountUserStorageKey) || "null");
+		if (savedUser && typeof savedUser.username === "string") accountState.user = savedUser;
+	} catch {
+		accountState.user = null;
+	}
+}
+
+function clearAccountState() {
+	accountState.token = "";
+	accountState.user = null;
+	persistAccountState();
+	updateAccountUi();
+}
+
+function updateAccountUi() {
+	if (!isAccountApiConfigured()) {
+		setAccountStatus("Account API not configured. Set ACCOUNT_API_BASE in public/config.js");
+		setAccountSyncStatus("Sync unavailable until API is configured.");
+		setAccountButtonsDisabled(true);
+		return;
+	}
+	setAccountButtonsDisabled(false);
+	if (accountState.user?.username) {
+		setAccountStatus(`Logged in as ${accountState.user.username}`);
+	} else {
+		setAccountStatus("Not logged in.");
+	}
+}
+
+function parseAccountApiResponsePayload(text) {
+	if (!text) return null;
+	try {
+		return JSON.parse(text);
+	} catch {
+		return null;
+	}
+}
+
+async function accountApiRequest(path, options = {}) {
+	var base = getAccountApiBase();
+	if (!base) throw new Error("Account API base URL is not configured.");
+	var url = `${base}${path}`;
+	var controller = new AbortController();
+	var timeoutId = setTimeout(() => controller.abort("timeout"), getAccountApiTimeoutMs());
+	try {
+		var headers = {
+			"content-type": "application/json",
+			...options.headers,
+		};
+		if (accountState.token) headers.authorization = `Bearer ${accountState.token}`;
+		var response = await fetch(url, {
+			method: options.method || "GET",
+			headers,
+			body: options.body ? JSON.stringify(options.body) : undefined,
+			signal: controller.signal,
+		});
+		var text = await response.text();
+		var payload = parseAccountApiResponsePayload(text) || {};
+		if (!response.ok) {
+			var message = String(payload?.error || payload?.message || response.statusText || "Request failed");
+			if (response.status === 401) clearAccountState();
+			throw new Error(message);
+		}
+		return payload;
+	} finally {
+		clearTimeout(timeoutId);
+	}
+}
+
+function getDefaultGameDataStore() {
+	return {
+		schemaVersion: gameDataSchemaVersion,
+		version: 0,
+		updatedAt: new Date(0).toISOString(),
+		games: {},
+	};
+}
+
+function loadGameDataStore() {
+	try {
+		var parsed = JSON.parse(localStorage.getItem(gameDataStorageKey) || "null");
+		if (!parsed || typeof parsed !== "object") return getDefaultGameDataStore();
+		var store = {
+			schemaVersion: gameDataSchemaVersion,
+			version: Number.isFinite(parsed.version) ? Number(parsed.version) : 0,
+			updatedAt: String(parsed.updatedAt || new Date(0).toISOString()),
+			games: parsed.games && typeof parsed.games === "object" ? parsed.games : {},
+		};
+		return store;
+	} catch {
+		return getDefaultGameDataStore();
+	}
+}
+
+function saveGameDataStore(store) {
+	var nextStore = store && typeof store === "object" ? store : getDefaultGameDataStore();
+	localStorage.setItem(gameDataStorageKey, JSON.stringify(nextStore));
+}
+
+function commitGameDataStore(mutator) {
+	var current = loadGameDataStore();
+	var next = mutator && typeof mutator === "function" ? mutator(current) || current : current;
+	next.schemaVersion = gameDataSchemaVersion;
+	next.version = Number(next.version || 0) + 1;
+	next.updatedAt = new Date().toISOString();
+	saveGameDataStore(next);
+	return next;
+}
+
+function sanitizeGameId(value) {
+	return String(value || "")
+		.trim()
+		.toLowerCase()
+		.replace(/[^a-z0-9._:-]/g, "_")
+		.slice(0, 120);
+}
+
+function setGameData(gameId, payload) {
+	var key = sanitizeGameId(gameId);
+	if (!key) return null;
+	return commitGameDataStore((store) => {
+		store.games[key] = {
+			updatedAt: new Date().toISOString(),
+			data: payload,
+		};
+		return store;
+	});
+}
+
+function getGameData(gameId) {
+	var key = sanitizeGameId(gameId);
+	if (!key) return null;
+	var store = loadGameDataStore();
+	return store.games?.[key] || null;
+}
+
+function markGamePlayed(url) {
+	var value = String(url || "").trim();
+	if (!value) return;
+	var key = sanitizeGameId(value);
+	if (!key) return;
+	setGameData(key, {
+		url: value,
+		lastPlayedAt: new Date().toISOString(),
+	});
+}
+
+function replaceLocalGameStoreFromServer(payload) {
+	if (!payload || typeof payload !== "object") return;
+	var incoming = {
+		schemaVersion: gameDataSchemaVersion,
+		version: Number.isFinite(payload.version) ? Number(payload.version) : 0,
+		updatedAt: String(payload.updatedAt || new Date(0).toISOString()),
+		games: payload.games && typeof payload.games === "object" ? payload.games : {},
+	};
+	saveGameDataStore(incoming);
+}
+
+function requireAccountSession() {
+	if (!accountState.token) throw new Error("Please login first.");
+}
+
+async function initAccountUi() {
+	updateAccountUi();
+	if (!isAccountApiConfigured()) return;
+	if (!accountState.token) return;
+	try {
+		var me = await accountApiRequest("/api/auth/me");
+		if (!me?.user?.username) throw new Error("Session invalid.");
+		accountState.user = me.user;
+		persistAccountState();
+		updateAccountUi();
+		setAccountSyncStatus("Session restored.");
+	} catch (error) {
+		clearAccountState();
+		setAccountSyncStatus(error?.message || "Session restore failed.");
+	}
+}
+
+function getAccountCredentialsInput() {
+	var username = String(accountUsernameInput?.value || "").trim().toLowerCase();
+	var password = String(accountPasswordInput?.value || "");
+	if (!username || !password) {
+		throw new Error("Username and password are required.");
+	}
+	return { username, password };
+}
+
+async function handleAccountSignup() {
+	if (!isAccountApiConfigured()) {
+		updateAccountUi();
+		return;
+	}
+	try {
+		setAccountSyncStatus("Creating account...");
+		var creds = getAccountCredentialsInput();
+		var response = await accountApiRequest("/api/auth/signup", {
+			method: "POST",
+			body: creds,
+		});
+		accountState.token = String(response?.token || "");
+		accountState.user = response?.user || null;
+		persistAccountState();
+		updateAccountUi();
+		setAccountSyncStatus("Account created and logged in.");
+	} catch (error) {
+		setAccountSyncStatus(error?.message || "Signup failed.");
+	}
+}
+
+async function handleAccountLogin() {
+	if (!isAccountApiConfigured()) {
+		updateAccountUi();
+		return;
+	}
+	try {
+		setAccountSyncStatus("Logging in...");
+		var creds = getAccountCredentialsInput();
+		var response = await accountApiRequest("/api/auth/login", {
+			method: "POST",
+			body: creds,
+		});
+		accountState.token = String(response?.token || "");
+		accountState.user = response?.user || null;
+		persistAccountState();
+		updateAccountUi();
+		setAccountSyncStatus("Login successful.");
+	} catch (error) {
+		setAccountSyncStatus(error?.message || "Login failed.");
+	}
+}
+
+async function handleAccountLogout() {
+	if (!accountState.token) {
+		clearAccountState();
+		setAccountSyncStatus("You are already logged out.");
+		return;
+	}
+	try {
+		setAccountSyncStatus("Logging out...");
+		await accountApiRequest("/api/auth/logout", { method: "POST" });
+	} catch {
+	}
+	clearAccountState();
+	setAccountSyncStatus("Logged out.");
+}
+
+async function uploadGameDataToServer() {
+	try {
+		requireAccountSession();
+		setAccountSyncStatus("Uploading local save...");
+		var store = loadGameDataStore();
+		var response = await accountApiRequest("/api/data", {
+			method: "PUT",
+			body: {
+				data: store,
+				clientVersion: Number(store.version || 0),
+				clientUpdatedAt: store.updatedAt,
+			},
+		});
+		setAccountSyncStatus(
+			`Upload complete. Server version ${Number(response?.serverVersion || 0)} updated at ${String(
+				response?.updatedAt || "unknown"
+			)}`
+		);
+	} catch (error) {
+		setAccountSyncStatus(error?.message || "Upload failed.");
+	}
+}
+
+async function downloadGameDataFromServer() {
+	try {
+		requireAccountSession();
+		setAccountSyncStatus("Downloading cloud save...");
+		var response = await accountApiRequest("/api/data");
+		var data = response?.data;
+		if (data && typeof data === "object") {
+			replaceLocalGameStoreFromServer(data);
+			setAccountSyncStatus(
+				`Download complete. Loaded server version ${Number(response?.version || 0)} from ${String(
+					response?.updatedAt || "unknown"
+				)}`
+			);
+			return;
+		}
+		setAccountSyncStatus("No cloud save found for this account yet.");
+	} catch (error) {
+		setAccountSyncStatus(error?.message || "Download failed.");
+	}
+}
+
+async function syncGameDataWithServer() {
+	try {
+		requireAccountSession();
+		setAccountSyncStatus("Sync in progress...");
+		setAccountButtonsDisabled(true);
+		var store = loadGameDataStore();
+		var response = await accountApiRequest("/api/sync", {
+			method: "POST",
+			body: {
+				localData: store,
+				localVersion: Number(store.version || 0),
+				localUpdatedAt: store.updatedAt,
+				conflictStrategy: "latest",
+			},
+		});
+		if (response?.resolvedData && typeof response.resolvedData === "object") {
+			replaceLocalGameStoreFromServer(response.resolvedData);
+		}
+		setAccountSyncStatus(
+			`Sync complete. Source: ${String(response?.resolution || "unknown")} | server version ${Number(
+				response?.serverVersion || 0
+			)}`
+		);
+	} catch (error) {
+		setAccountSyncStatus(error?.message || "Sync failed.");
+	} finally {
+		updateAccountUi();
+	}
+}
+
+window.FrostedAccountSync = Object.freeze({
+	getStore: loadGameDataStore,
+	setGameData,
+	getGameData,
+	syncNow: syncGameDataWithServer,
+	upload: uploadGameDataToServer,
+	download: downloadGameDataFromServer,
+});
+
 function showLoading(show) {
 	if (!loadingBanner) return;
 	if (show) {
@@ -4534,6 +5028,7 @@ function injectErudaIntoActiveTab() {
 			targetWindow.eruda?.init?.();
 			return;
 		}
+		// eruda
 		var script = targetDocument.createElement("script");
 		script.id = "fb-eruda-script";
 		script.src = "//cdn.jsdelivr.net/npm/eruda";

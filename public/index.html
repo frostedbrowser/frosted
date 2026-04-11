@@ -43,6 +43,7 @@
 		<script src="/scram/scramjet.all.js"></script>
 		<script src="/baremux/index.js"></script>
 		<link rel="stylesheet" href="index.css" />
+		<script src="config.js"></script>
 		<script src="register-sw.js" defer></script>
 		<script src="search.js" defer></script>
 		<script>
@@ -98,6 +99,9 @@
 								<div class="action-menu" id="actionMenu" role="menu" aria-label="Quick actions">
 									<button class="action-menu-item" id="gamesBtn" type="button" role="menuitem">
 										<i class="fa-solid fa-gamepad"></i> Games
+									</button>
+									<button class="action-menu-item" id="accountsBtn" type="button" role="menuitem">
+										<i class="fa-solid fa-user"></i> Accounts
 									</button>
 									<button class="action-menu-item" id="wallpaperAppBtn" type="button" role="menuitem">
 										<i class="fa-solid fa-image"></i> Open Wallpapers
@@ -278,6 +282,34 @@
 								</div>
 							</div>
 						</div>
+						<div id="accountsPage" class="internal-page">
+							<div class="settings-page-shell">
+								<div class="settings-page-header">
+									<h2>Accounts</h2>
+								</div>
+								<div class="settings-page-body">
+									<div class="settings-section account-section">
+										<label class="settings-label">Account Sync</label>
+										<div class="settings-row account-auth-row">
+											<input class="settings-input" id="accountUsernameInput" type="text" placeholder="Username" />
+											<input class="settings-input" id="accountPasswordInput" type="password" placeholder="Password" />
+										</div>
+										<div class="settings-row account-btn-row">
+											<button class="settings-btn" id="accountSignupBtn" type="button">Sign Up</button>
+											<button class="settings-btn" id="accountLoginBtn" type="button">Login</button>
+											<button class="settings-btn" id="accountLogoutBtn" type="button">Logout</button>
+										</div>
+										<div class="settings-row account-btn-row">
+											<button class="settings-btn" id="accountSyncPushBtn" type="button">Upload Save</button>
+											<button class="settings-btn" id="accountSyncPullBtn" type="button">Download Save</button>
+											<button class="settings-btn" id="accountSyncBtn" type="button">Sync</button>
+										</div>
+										<div class="settings-hint" id="accountUserStatus">Not logged in.</div>
+										<div class="settings-hint" id="accountSyncStatus">Sync idle.</div>
+									</div>
+								</div>
+							</div>
+						</div>
 						<div id="creditsPage" class="internal-page">
 							<div class="credits-page-shell">
 								<div class="settings-page-header">
@@ -360,6 +392,24 @@
 											<i class="fa-brands fa-discord"></i>
 										</a>
 									</article>
+									<article class="partner-card">
+										<div class="partner-logo-wrap">
+											<img
+												class="partner-logo-img"
+												src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/cine.png"
+												alt="Cine-OS logo"
+												width="56"
+												height="56"
+												loading="lazy"
+												onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';"
+											/>
+											<div class="partner-logo">COS</div>
+										</div>
+										<h3>// Cine-OS</h3>
+										<a class="partner-btn" href="https://discord.gg/cmdkxMgBEm" target="_blank" rel="noopener noreferrer">
+											<i class="fa-brands fa-discord"></i>
+										</a>
+									</article>
 							</div>
 								</div>
 							</div>
@@ -377,6 +427,7 @@
 										type="text"
 										placeholder="Search games..."
 									/>
+									<button id="gamesSyncBtn" class="settings-btn games-sync-btn" type="button">Sync</button>
 								</div>
 								<div class="games-grid" id="gamesGrid"></div>
 							</div>

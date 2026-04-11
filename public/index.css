@@ -1590,6 +1590,26 @@ body.has-video-wallpaper .home-search input::placeholder {
 	color: var(--muted);
 }
 
+.account-section .settings-input {
+	min-width: 0;
+}
+
+.account-auth-row {
+	flex-wrap: wrap;
+}
+
+.account-auth-row .settings-input {
+	flex: 1 1 220px;
+}
+
+.account-btn-row {
+	flex-wrap: wrap;
+}
+
+.account-btn-row .settings-btn {
+	flex: 1 1 140px;
+}
+
 .panic-box {
 	display: grid;
 	gap: 0.45rem;
@@ -1630,11 +1650,19 @@ body.has-video-wallpaper .home-search input::placeholder {
 
 .games-toolbar {
 	padding: 0 1rem 0.4rem;
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	flex-wrap: wrap;
 }
 
 .games-search {
-	width: 100%;
+	flex: 1 1 320px;
 	font-family: "Poppins", system-ui, sans-serif;
+}
+
+.games-sync-btn {
+	flex: 0 0 auto;
 }
 
 .ai-page-shell {
