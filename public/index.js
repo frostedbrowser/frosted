@@ -80,13 +80,16 @@ var pageRefs = {
 	wallpaperStoreApplyBtn: qs("#wallpaperStoreApplyBtn"),
 	creditsLink: qs("#creditsLink"),
 	wallpaperSelect: qs("#wallpaperSelect"),
+	accountAuthPanel: qs("#accountAuthPanel"),
+	accountDashboardPanel: qs("#accountDashboardPanel"),
+	accountDashboardUser: qs("#accountDashboardUser"),
+	accountDashboardVersion: qs("#accountDashboardVersion"),
+	accountDashboardUpdatedAt: qs("#accountDashboardUpdatedAt"),
 	accountUsernameInput: qs("#accountUsernameInput"),
 	accountPasswordInput: qs("#accountPasswordInput"),
 	accountSignupBtn: qs("#accountSignupBtn"),
 	accountLoginBtn: qs("#accountLoginBtn"),
 	accountLogoutBtn: qs("#accountLogoutBtn"),
-	accountSyncPushBtn: qs("#accountSyncPushBtn"),
-	accountSyncPullBtn: qs("#accountSyncPullBtn"),
 	accountSyncBtn: qs("#accountSyncBtn"),
 	accountUserStatus: qs("#accountUserStatus"),
 	accountSyncStatus: qs("#accountSyncStatus"),
@@ -189,13 +192,16 @@ var {
 	wallpaperStoreApplyBtn,
 	creditsLink,
 	wallpaperSelect,
+	accountAuthPanel,
+	accountDashboardPanel,
+	accountDashboardUser,
+	accountDashboardVersion,
+	accountDashboardUpdatedAt,
 	accountUsernameInput,
 	accountPasswordInput,
 	accountSignupBtn,
 	accountLoginBtn,
 	accountLogoutBtn,
-	accountSyncPushBtn,
-	accountSyncPullBtn,
 	accountSyncBtn,
 	accountUserStatus,
 	accountSyncStatus,
@@ -746,16 +752,6 @@ function bindEvents() {
 	if (accountLogoutBtn) {
 		accountLogoutBtn.addEventListener("click", () => {
 			void handleAccountLogout();
-		});
-	}
-	if (accountSyncPushBtn) {
-		accountSyncPushBtn.addEventListener("click", () => {
-			void uploadGameDataToServer();
-		});
-	}
-	if (accountSyncPullBtn) {
-		accountSyncPullBtn.addEventListener("click", () => {
-			void downloadGameDataFromServer();
 		});
 	}
 	if (accountSyncBtn) {
@@ -4626,14 +4622,43 @@ function setAccountButtonsDisabled(disabled) {
 		accountSignupBtn,
 		accountLoginBtn,
 		accountLogoutBtn,
-		accountSyncPushBtn,
-		accountSyncPullBtn,
 		accountSyncBtn,
 	];
 	controls.forEach((el) => {
 		if (!el) return;
 		el.disabled = Boolean(disabled);
 	});
+}
+
+function hasActiveAccountSession() {
+	return Boolean(accountState.token && accountState.user?.username);
+}
+
+function formatDashboardTimestamp(value) {
+	var parsed = new Date(String(value || ""));
+	if (Number.isNaN(parsed.getTime())) return "Never";
+	return parsed.toLocaleString();
+}
+
+function updateAccountDashboard() {
+	if (accountDashboardUser) {
+		accountDashboardUser.textContent = hasActiveAccountSession()
+			? `Signed in as ${String(accountState.user.username)}`
+			: "Signed out";
+	}
+	var store = loadGameDataStore();
+	if (accountDashboardVersion) {
+		accountDashboardVersion.textContent = String(Number(store?.version || 0));
+	}
+	if (accountDashboardUpdatedAt) {
+		accountDashboardUpdatedAt.textContent = formatDashboardTimestamp(store?.updatedAt);
+	}
+}
+
+function updateAccountPanelVisibility() {
+	var signedIn = hasActiveAccountSession();
+	if (accountAuthPanel) accountAuthPanel.style.display = signedIn ? "none" : "grid";
+	if (accountDashboardPanel) accountDashboardPanel.style.display = signedIn ? "grid" : "none";
 }
 
 function persistAccountState() {
@@ -4668,6 +4693,8 @@ function clearAccountState() {
 }
 
 function updateAccountUi() {
+	updateAccountDashboard();
+	updateAccountPanelVisibility();
 	if (!isAccountApiConfigured()) {
 		setAccountStatus("Account API not configured. Set ACCOUNT_API_BASE in public/config.js");
 		setAccountSyncStatus("Sync unavailable until API is configured.");
@@ -4923,27 +4950,6 @@ async function uploadGameDataToServer() {
 	}
 }
 
-async function downloadGameDataFromServer() {
-	try {
-		requireAccountSession();
-		setAccountSyncStatus("Downloading cloud save...");
-		var response = await accountApiRequest("/api/data");
-		var data = response?.data;
-		if (data && typeof data === "object") {
-			replaceLocalGameStoreFromServer(data);
-			setAccountSyncStatus(
-				`Download complete. Loaded server version ${Number(response?.version || 0)} from ${String(
-					response?.updatedAt || "unknown"
-				)}`
-			);
-			return;
-		}
-		setAccountSyncStatus("No cloud save found for this account yet.");
-	} catch (error) {
-		setAccountSyncStatus(error?.message || "Download failed.");
-	}
-}
-
 async function syncGameDataWithServer() {
 	try {
 		requireAccountSession();
@@ -4979,8 +4985,6 @@ window.FrostedAccountSync = Object.freeze({
 	setGameData,
 	getGameData,
 	syncNow: syncGameDataWithServer,
-	upload: uploadGameDataToServer,
-	download: downloadGameDataFromServer,
 });
 
 function showLoading(show) {

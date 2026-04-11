@@ -1602,12 +1602,70 @@ body.has-video-wallpaper .home-search input::placeholder {
 	flex: 1 1 220px;
 }
 
+.account-auth-panel {
+	display: grid;
+	gap: 0.6rem;
+}
+
 .account-btn-row {
 	flex-wrap: wrap;
 }
 
 .account-btn-row .settings-btn {
 	flex: 1 1 140px;
+}
+
+.account-dashboard-panel {
+	display: none;
+	gap: 0.6rem;
+	padding: 0.7rem;
+	border-radius: 0.8rem;
+	border: 1px solid var(--border);
+	background: var(--surface-2);
+}
+
+.account-dashboard-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 0.6rem;
+	flex-wrap: wrap;
+}
+
+.account-dashboard-title {
+	font-size: 0.82rem;
+	font-weight: 600;
+	color: var(--text);
+}
+
+.account-dashboard-user {
+	font-size: 0.74rem;
+	color: var(--muted);
+}
+
+.account-dashboard-grid {
+	display: grid;
+	gap: 0.6rem;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.account-dashboard-card {
+	border: 1px solid var(--border);
+	border-radius: 0.7rem;
+	padding: 0.55rem 0.65rem;
+	background: var(--surface-3);
+}
+
+.account-dashboard-label {
+	font-size: 0.68rem;
+	color: var(--muted);
+}
+
+.account-dashboard-value {
+	margin-top: 0.2rem;
+	font-size: 0.82rem;
+	color: var(--text);
+	word-break: break-word;
 }
 
 .panic-box {

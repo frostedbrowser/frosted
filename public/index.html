@@ -290,19 +290,35 @@
 								<div class="settings-page-body">
 									<div class="settings-section account-section">
 										<label class="settings-label">Account Sync</label>
-										<div class="settings-row account-auth-row">
-											<input class="settings-input" id="accountUsernameInput" type="text" placeholder="Username" />
-											<input class="settings-input" id="accountPasswordInput" type="password" placeholder="Password" />
+										<div class="account-auth-panel" id="accountAuthPanel">
+											<div class="settings-row account-auth-row">
+												<input class="settings-input" id="accountUsernameInput" type="text" placeholder="Username" />
+												<input class="settings-input" id="accountPasswordInput" type="password" placeholder="Password" />
+											</div>
+											<div class="settings-row account-btn-row">
+												<button class="settings-btn" id="accountSignupBtn" type="button">Sign Up</button>
+												<button class="settings-btn" id="accountLoginBtn" type="button">Login</button>
+											</div>
 										</div>
-										<div class="settings-row account-btn-row">
-											<button class="settings-btn" id="accountSignupBtn" type="button">Sign Up</button>
-											<button class="settings-btn" id="accountLoginBtn" type="button">Login</button>
-											<button class="settings-btn" id="accountLogoutBtn" type="button">Logout</button>
-										</div>
-										<div class="settings-row account-btn-row">
-											<button class="settings-btn" id="accountSyncPushBtn" type="button">Upload Save</button>
-											<button class="settings-btn" id="accountSyncPullBtn" type="button">Download Save</button>
-											<button class="settings-btn" id="accountSyncBtn" type="button">Sync</button>
+										<div class="account-dashboard-panel" id="accountDashboardPanel">
+											<div class="account-dashboard-header">
+												<div class="account-dashboard-title">Dashboard</div>
+												<div class="account-dashboard-user" id="accountDashboardUser">Signed in</div>
+											</div>
+											<div class="account-dashboard-grid">
+												<div class="account-dashboard-card">
+													<div class="account-dashboard-label">Local Save Version</div>
+													<div class="account-dashboard-value" id="accountDashboardVersion">0</div>
+												</div>
+												<div class="account-dashboard-card">
+													<div class="account-dashboard-label">Last Local Update</div>
+													<div class="account-dashboard-value" id="accountDashboardUpdatedAt">Never</div>
+												</div>
+											</div>
+											<div class="settings-row account-btn-row">
+												<button class="settings-btn" id="accountLogoutBtn" type="button">Logout</button>
+												<button class="settings-btn" id="accountSyncBtn" type="button">Sync</button>
+											</div>
 										</div>
 										<div class="settings-hint" id="accountUserStatus">Not logged in.</div>
 										<div class="settings-hint" id="accountSyncStatus">Sync idle.</div>
