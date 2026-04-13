@@ -13,7 +13,7 @@
 "use strict";
 var qs = (sel) => document.querySelector(sel);
 var qsa = (sel) => Array.from(document.querySelectorAll(sel));
-// variables for global functions
+
 var shellRefs = {
 	tabsEl: qs("#tabs"),
 	tabCounter: qs("#tabCounter"),
@@ -29,7 +29,6 @@ var shellRefs = {
 	homeBtn: qs("#homeBtn"),
 	wallpaperAppBtn: qs("#wallpaperAppBtn"),
 	gamesBtn: qs("#gamesBtn"),
-	accountsBtn: qs("#accountsBtn"),
 	aiBtn: qs("#aiBtn"),
 	erudaBtn: qs("#erudaBtn"),
 	adsToggleBtn: qs("#adsToggleBtn"),
@@ -44,10 +43,9 @@ var shellRefs = {
 	historyContainer: qs("#historyContainer"),
 	particlesLayer: qs("#particles-js"),
 };
-// page vars
+
 var pageRefs = {
 	settingsPage: qs("#settingsPage"),
-	accountsPage: qs("#accountsPage"),
 	creditsPage: qs("#creditsPage"),
 	partnersPage: qs("#partnersPage"),
 	gamesPage: qs("#gamesPage"),
@@ -57,7 +55,6 @@ var pageRefs = {
 	gamesGrid: qs("#gamesGrid"),
 	gamesCount: qs("#gamesCount"),
 	gamesSearchInput: qs("#gamesSearchInput"),
-	gamesSyncBtn: qs("#gamesSyncBtn"),
 	aiPromptInput: qs("#aiPromptInput"),
 	aiSolveBtn: qs("#aiSolveBtn"),
 	aiResult: qs("#aiResult"),
@@ -80,21 +77,8 @@ var pageRefs = {
 	wallpaperStoreApplyBtn: qs("#wallpaperStoreApplyBtn"),
 	creditsLink: qs("#creditsLink"),
 	wallpaperSelect: qs("#wallpaperSelect"),
-	accountAuthPanel: qs("#accountAuthPanel"),
-	accountDashboardPanel: qs("#accountDashboardPanel"),
-	accountDashboardUser: qs("#accountDashboardUser"),
-	accountDashboardVersion: qs("#accountDashboardVersion"),
-	accountDashboardUpdatedAt: qs("#accountDashboardUpdatedAt"),
-	accountUsernameInput: qs("#accountUsernameInput"),
-	accountPasswordInput: qs("#accountPasswordInput"),
-	accountSignupBtn: qs("#accountSignupBtn"),
-	accountLoginBtn: qs("#accountLoginBtn"),
-	accountLogoutBtn: qs("#accountLogoutBtn"),
-	accountSyncBtn: qs("#accountSyncBtn"),
-	accountUserStatus: qs("#accountUserStatus"),
-	accountSyncStatus: qs("#accountSyncStatus"),
 };
-// panic vars
+
 var panicRefs = {
 	currentPanicKey: qs("#current-panic-key"),
 	changePanicKeyBtn: qs("#change-panic-key-btn"),
@@ -103,12 +87,13 @@ var panicRefs = {
 	panicUrlSaveBtn: qs("#save-panic-btn"),
 	panicNowBtn: qs("#panic-now-btn"),
 	panicStatus: qs("#panic-status"),
-	openModeSelect: qs("#openModeSelect"),
+	openModeAboutBtn: qs("#openModeAboutBtn"),
+	openModeBlobBtn: qs("#openModeBlobBtn"),
 	openModeStatus: qs("#openModeStatus"),
 	autoBlobToggle: qs("#autoBlobToggle"),
 	autoBlobStatus: qs("#autoBlobStatus"),
 };
-// cloak vars
+
 var cloakRefs = {
 	cloakEnabledToggle: qs("#cloakEnabledToggle"),
 	cloakTitleInput: qs("#cloak-title"),
@@ -119,7 +104,7 @@ var cloakRefs = {
 	cloakStatus: qs("#cloak-status"),
 	faviconLink: document.querySelector("link[rel~='icon']"),
 };
-// other variables
+
 var errorRefs = {
 	errorPanel: qs("#error-panel"),
 	errorTitle: qs("#sj-error"),
@@ -141,7 +126,6 @@ var {
 	homeBtn,
 	wallpaperAppBtn,
 	gamesBtn,
-	accountsBtn,
 	aiBtn,
 	erudaBtn,
 	adsToggleBtn,
@@ -159,7 +143,6 @@ var {
 
 var {
 	settingsPage,
-	accountsPage,
 	creditsPage,
 	partnersPage,
 	gamesPage,
@@ -169,7 +152,6 @@ var {
 	gamesGrid,
 	gamesCount,
 	gamesSearchInput,
-	gamesSyncBtn,
 	aiPromptInput,
 	aiSolveBtn,
 	aiResult,
@@ -192,19 +174,6 @@ var {
 	wallpaperStoreApplyBtn,
 	creditsLink,
 	wallpaperSelect,
-	accountAuthPanel,
-	accountDashboardPanel,
-	accountDashboardUser,
-	accountDashboardVersion,
-	accountDashboardUpdatedAt,
-	accountUsernameInput,
-	accountPasswordInput,
-	accountSignupBtn,
-	accountLoginBtn,
-	accountLogoutBtn,
-	accountSyncBtn,
-	accountUserStatus,
-	accountSyncStatus,
 } = pageRefs;
 
 var {
@@ -215,7 +184,8 @@ var {
 	panicUrlSaveBtn,
 	panicNowBtn,
 	panicStatus,
-	openModeSelect,
+	openModeAboutBtn,
+	openModeBlobBtn,
 	openModeStatus,
 	autoBlobToggle,
 	autoBlobStatus,
@@ -246,11 +216,13 @@ scramjet.init();
 
 var connection = new BareMux.BareMuxConnection("/baremux/worker.js");
 
+// App state and caches.
 var tabs = [];
 var activeTabId = null;
 var nextTabId = 1;
 var transportReady = false;
 var tabFrames = new Map();
+var frameLoadTimeoutIdByTab = new Map();
 var suppressNextFrameNavSyncByTab = new Set();
 var aiChatHistory = [];
 var aiTypingRunId = 0;
@@ -259,12 +231,11 @@ var gamesCatalog = [];
 var gameBlobUrlsByTab = new Map();
 var rawHtmlFallbackTriedUrlByTab = new Map();
 var pendingGameClickScriptsByTab = new Map();
+var canonicalGameUrlByTab = new Map();
+var restoredGameProgressMarkerByTab = new Map();
 var gameClickScriptDelayMs = 4200;
-var loadingShownAtMs = 0;
-var loadingHideTimerId = 0;
-var loadingMinVisibleMs = 1000;
 
-// Visual/particles vars.
+// Visual/particles state.
 var particleCanvas = null;
 var particleCtx = null;
 var particleDots = [];
@@ -285,97 +256,11 @@ var quickContextMenuEl = null;
 var defaultAppIconHref =
 	"https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/icons/frosted.png";
 
-	// tried to make the wallpaper load better for lowend devices / chromebooks
+// Device/accessibility state.
 var reducedMotionQuery = window.matchMedia
 	? window.matchMedia("(prefers-reduced-motion: reduce)")
 	: null;
-var connectionInfo =
-	typeof navigator !== "undefined"
-		? navigator.connection || navigator.mozConnection || navigator.webkitConnection || null
-		: null;
-var isChromebookDevice = /\bCrOS\b/i.test(String(navigator.userAgent || ""));
-var wallpaperVideoFallbackKey = "skynight";
-var lowPerformanceMode = false;
-var wallpaperImagePreloadCache = new Map();
-var wallpaperVideoPreloadCache = new Map();
-var wallpaperPreloadScheduled = 0;
-var maxWallpaperPreloadEntries = 4;
 
-function computeLowPerformanceMode() {
-	return false;
-}
-
-function refreshLowPerformanceMode() {
-	lowPerformanceMode = computeLowPerformanceMode();
-	if (document.body) {
-		document.body.classList.toggle("performance-mode", lowPerformanceMode);
-	}
-	return lowPerformanceMode;
-}
-
-function shouldRenderVideoWallpaper(key) {
-	return getWallpaperType(key) === "video";
-}
-
-function getWallpaperRenderKey(key) {
-	return key;
-}
-
-function trimWallpaperPreloadCache(cache, isVideo = false) {
-	while (cache.size > maxWallpaperPreloadEntries) {
-		var oldestKey = cache.keys().next().value;
-		var oldest = cache.get(oldestKey);
-		cache.delete(oldestKey);
-		if (isVideo && oldest) {
-			try {
-				oldest.pause();
-				oldest.removeAttribute("src");
-				oldest.load();
-			} catch {}
-		}
-	}
-}
-
-function preloadWallpaperAsset(key, revision = getWallpaperRevision()) {
-	var normalized = normalizeWallpaperKey(key);
-	var type = getWallpaperType(normalized);
-	var assetUrl = buildWallpaperAssetUrl(normalized, revision);
-	if (type === "video") {
-		var cachedVideo = wallpaperVideoPreloadCache.get(normalized);
-		if (cachedVideo?.dataset?.src === assetUrl) return;
-		var preloadVideo = document.createElement("video");
-		preloadVideo.preload = "metadata";
-		preloadVideo.muted = true;
-		preloadVideo.playsInline = true;
-		preloadVideo.dataset.src = assetUrl;
-		preloadVideo.src = assetUrl;
-		preloadVideo.load();
-		wallpaperVideoPreloadCache.set(normalized, preloadVideo);
-		trimWallpaperPreloadCache(wallpaperVideoPreloadCache, true);
-		return;
-	}
-	var cachedImage = wallpaperImagePreloadCache.get(normalized);
-	if (cachedImage?.src === assetUrl) return;
-	var preloadImage = new Image();
-	preloadImage.decoding = "async";
-	preloadImage.src = assetUrl;
-	wallpaperImagePreloadCache.set(normalized, preloadImage);
-	trimWallpaperPreloadCache(wallpaperImagePreloadCache, false);
-}
-
-function scheduleChromebookWallpaperPreload(activeKey) {
-	if (!isChromebookDevice) return;
-	if (wallpaperPreloadScheduled) clearTimeout(wallpaperPreloadScheduled);
-	wallpaperPreloadScheduled = setTimeout(() => {
-		wallpaperPreloadScheduled = 0;
-		var normalizedActive = normalizeWallpaperKey(activeKey || localStorage.getItem(wallpaperKey) || "skynight");
-		var registry = getWallpaperRegistry();
-		var animatedKeys = Object.keys(registry).filter((key) => registry[key]?.type === "video");
-		var candidateKeys = [normalizedActive, ...animatedKeys.filter((key) => key !== normalizedActive)].slice(0, 3);
-		candidateKeys.forEach((key) => preloadWallpaperAsset(key));
-	}, 180);
-}
-// taglines made by ai because im too lazy :v:
 var taglines = [
 	"probably works as expected",
 	"still loading... please wait",
@@ -406,11 +291,6 @@ var taglines = [
 	"crafted with questionable decisions",
 	"hotfixes are just updates with attitude",
 	"today's forecast: 70% chance of shipping",
-	"i mean its alright like",
-	"pretty good day huh, not bad at all",
-	"idk about you but i think frosted is good",
-	"i like this feature, alot",
-	"very very unstable build"
 ];
 
 var chromeBarConfig = {
@@ -445,10 +325,9 @@ function applyChromeBarConfig(config = chromeBarConfig) {
 }
 
 function init() {
-	refreshLowPerformanceMode();
 	applyChromeBarConfig();
-	renderAdblockToggle();
-	void ensureGhostery();
+	updateAdblockToggleLabel();
+	void ensureGhosteryEngine();
 	loadInstalledExtensionWallpapers();
 
 	if (randomTagline) {
@@ -457,14 +336,11 @@ function init() {
 
 	populateWallpaperOptions();
 	loadWallpaper();
-	scheduleChromebookWallpaperPreload(localStorage.getItem(wallpaperKey) || "skynight");
 	initParticles();
 	loadPanicSettings();
 	loadOpenModeSettings();
 	loadAutoBlobSettings();
 	loadCloakSettings();
-	restoreAccountStateFromStorage();
-	void initAccountUi();
 	applyCloakVisualState(document.hidden || !document.hasFocus());
 	runStartupBrandSequence();
 	loadAiMode();
@@ -505,9 +381,8 @@ function maybeAutoOpenBlobAfterStartup() {
 		sessionStorage.setItem(autoOpenBlobSessionKey, "1");
 	} catch {
 	}
-	var startupMode = getSelectedOpenMode();
 	setTimeout(() => {
-		openCurrentPageInMode(startupMode);
+		openCurrentPageInMode("blob");
 	}, autoOpenBlobDelayMs);
 }
 
@@ -520,9 +395,7 @@ function isAutoBlobEnabled() {
 
 function updateAutoBlobStatusText() {
 	if (!autoBlobStatus) return;
-	autoBlobStatus.textContent = `Auto open on startup (${getOpenModeDisplayValue(
-		getSelectedOpenMode()
-	)}): ${
+	autoBlobStatus.textContent = `Auto Blob on startup: ${
 		isAutoBlobEnabled() ? "enabled" : "disabled"
 	}`;
 }
@@ -534,21 +407,12 @@ function loadAutoBlobSettings() {
 }
 
 var settingsInternalUrl = "frosted://settings";
-var accountsInternalUrl = "frosted://accounts";
 var creditsInternalUrl = "frosted://credits";
 var gamesInternalUrl = "frosted://games";
 var aiInternalUrl = "frosted://ai";
 var partnersInternalUrl = "frosted://partners";
 var wallpapersInternalUrl = "frosted://wallpapers";
 var aiModeKey = "fb_ai_mode";
-var accountTokenStorageKey = "fb_account_token";
-var accountUserStorageKey = "fb_account_user";
-var gameDataStorageKey = "fb_game_data_store";
-var gameDataSchemaVersion = 1;
-var accountState = {
-	token: "",
-	user: null,
-};
 
 function bindEvents() {
 	newTabBtn.addEventListener("click", () => createTab(""));
@@ -599,9 +463,6 @@ function bindEvents() {
 	homeBtn.addEventListener("click", goHome);
 
 	gamesBtn.addEventListener("click", () => navigateFromInput(gamesInternalUrl));
-	if (accountsBtn) {
-		accountsBtn.addEventListener("click", () => navigateFromInput(accountsInternalUrl));
-	}
 	if (wallpaperAppBtn) {
 		wallpaperAppBtn.addEventListener("click", () => navigateFromInput(wallpapersInternalUrl));
 		wallpaperAppBtn.addEventListener("contextmenu", (event) => {
@@ -614,7 +475,7 @@ function bindEvents() {
 		erudaBtn.addEventListener("click", injectErudaIntoActiveTab);
 	}
 	if (adsToggleBtn) {
-		adsToggleBtn.addEventListener("click", toggleAds);
+		adsToggleBtn.addEventListener("click", toggleAdblock);
 	}
 	settingsBtn.addEventListener("click", () => navigateFromInput(settingsInternalUrl));
 	if (creditsLink) {
@@ -701,9 +562,14 @@ function bindEvents() {
 			setOpenMode("aboutblank", true);
 		});
 	}
-	if (openModeSelect) {
-		openModeSelect.addEventListener("change", () => {
-			setOpenMode(openModeSelect.value || "aboutblank");
+	if (openModeAboutBtn) {
+		openModeAboutBtn.addEventListener("click", () => {
+			setOpenMode("aboutblank", true);
+		});
+	}
+	if (openModeBlobBtn) {
+		openModeBlobBtn.addEventListener("click", () => {
+			setOpenMode("blob", true);
 		});
 	}
 	if (autoBlobToggle) {
@@ -732,38 +598,6 @@ function bindEvents() {
 	if (gamesSearchInput) {
 		gamesSearchInput.addEventListener("input", () => {
 			renderGames();
-		});
-	}
-	if (gamesSyncBtn) {
-		gamesSyncBtn.addEventListener("click", () => {
-			void syncGameDataWithServer();
-		});
-	}
-	if (accountSignupBtn) {
-		accountSignupBtn.addEventListener("click", () => {
-			void handleAccountSignup();
-		});
-	}
-	if (accountLoginBtn) {
-		accountLoginBtn.addEventListener("click", () => {
-			void handleAccountLogin();
-		});
-	}
-	if (accountLogoutBtn) {
-		accountLogoutBtn.addEventListener("click", () => {
-			void handleAccountLogout();
-		});
-	}
-	if (accountSyncBtn) {
-		accountSyncBtn.addEventListener("click", () => {
-			void syncGameDataWithServer();
-		});
-	}
-	if (accountPasswordInput) {
-		accountPasswordInput.addEventListener("keydown", (event) => {
-			if (event.key !== "Enter") return;
-			event.preventDefault();
-			void handleAccountLogin();
 		});
 	}
 	if (cloakEnabledToggle) {
@@ -796,11 +630,7 @@ function bindEvents() {
 		applyCloakVisualState(document.hidden || !document.hasFocus());
 	});
 	if (reducedMotionQuery) {
-		reducedMotionQuery.addEventListener("change", () => {
-			refreshLowPerformanceMode();
-			restartParticlesAnimation();
-			loadWallpaper();
-		});
+		reducedMotionQuery.addEventListener("change", restartParticlesAnimation);
 	}
 
 	window.addEventListener(
@@ -823,10 +653,6 @@ function bindEvents() {
 
 function initParticles() {
 	if (!particlesLayer || !browserStage) return;
-	if (lowPerformanceMode) {
-		setParticlesVisible(false);
-		return;
-	}
 	if (particlesLayer.parentElement !== browserStage) {
 		browserStage.appendChild(particlesLayer);
 	} else if (particlesLayer !== browserStage.lastElementChild) {
@@ -932,12 +758,10 @@ function setParticlesVisible(visible) {
 }
 
 function shouldShowParticlesForCurrentView() {
-	if (lowPerformanceMode) return false;
 	var matrixActive = isMatrixThemeActive();
 	var onBlank = blankState?.style.display === "flex";
 	var onInternal =
 		settingsPage?.classList.contains("active") ||
-		accountsPage?.classList.contains("active") ||
 		gamesPage?.classList.contains("active") ||
 		aiPage?.classList.contains("active") ||
 		partnersPage?.classList.contains("active") ||
@@ -1096,15 +920,21 @@ function createTab(url) {
 	renderTabs();
 }
 
-function disposeTabFrame(tabId) {
+function destroyTabFrame(tabId) {
+	var pendingTimeout = frameLoadTimeoutIdByTab.get(tabId);
+	if (pendingTimeout) {
+		clearTimeout(pendingTimeout);
+		frameLoadTimeoutIdByTab.delete(tabId);
+	}
 	var frame = tabFrames.get(tabId);
-	if (!frame || !frame.element) return;
+	if (!frame) return;
 	try {
 		frame.element.src = "about:blank";
 	} catch {
 	}
 	frame.element.remove();
 	tabFrames.delete(tabId);
+	suppressNextFrameNavSyncByTab.delete(tabId);
 }
 
 function closeTab(id) {
@@ -1117,7 +947,9 @@ function closeTab(id) {
 		gameBlobUrlsByTab.delete(removed.id);
 	}
 	rawHtmlFallbackTriedUrlByTab.delete(removed.id);
-	disposeTabFrame(removed.id);
+	canonicalGameUrlByTab.delete(removed.id);
+	restoredGameProgressMarkerByTab.delete(removed.id);
+	destroyTabFrame(removed.id);
 
 	if (!tabs.length) {
 		createTab("");
@@ -1141,16 +973,14 @@ function setActiveTab(id, keepView) {
 		showBlank();
 	} else if (isSettingsInternalUrl(tab.url)) {
 		showSettingsPage();
-	} else if (isAccountsInternalUrl(tab.url)) {
-		showAccountsPage();
 	} else if (isGamesInternalUrl(tab.url)) {
 		showGamesPage();
 	} else if (isAiInternalUrl(tab.url)) {
 		showAiPage();
 	} else if (isPartnersInternalUrl(tab.url)) {
 		showPartnersPage();
-	} else if (isWallpaperInternalUrl(tab.url) || isWallpaperStoreInternalUrl(tab.url)) {
-		showWallpaperStorePage();
+	} else if (isExtensionInternalUrl(tab.url) || isExtensionStoreInternalUrl(tab.url)) {
+		showExtensionStorePage();
 	} else if (isCreditsInternalUrl(tab.url)) {
 		showCreditsPage();
 	} else {
@@ -1216,11 +1046,10 @@ function getTabFaviconCandidates(url) {
 	if (!url) return [defaultAppIconHref];
 	if (
 		isSettingsInternalUrl(url) ||
-		isAccountsInternalUrl(url) ||
 		isCreditsInternalUrl(url) ||
 		isPartnersInternalUrl(url) ||
-		isWallpaperInternalUrl(url) ||
-		isWallpaperStoreInternalUrl(url)
+		isExtensionInternalUrl(url) ||
+		isExtensionStoreInternalUrl(url)
 	)
 		return [defaultAppIconHref];
 	if (isGamesInternalUrl(url)) return [defaultAppIconHref];
@@ -1246,11 +1075,10 @@ function getActiveTab() {
 function getDisplayTitle(url) {
 	if (!url) return "New Tab";
 	if (isSettingsInternalUrl(url)) return "Settings";
-	if (isAccountsInternalUrl(url)) return "Accounts";
 	if (isPartnersInternalUrl(url)) return "Partners";
 	if (isGamesInternalUrl(url)) return "Games";
 	if (isAiInternalUrl(url)) return "AI";
-	if (isWallpaperInternalUrl(url) || isWallpaperStoreInternalUrl(url)) return "Wallpapers";
+	if (isExtensionInternalUrl(url) || isExtensionStoreInternalUrl(url)) return "Wallpapers";
 	if (isCreditsInternalUrl(url)) return "Credits";
 	try {
 		var parsed = new URL(url);
@@ -1264,11 +1092,10 @@ function normalizeInput(input) {
 	if (!input || !searchEngine) return "";
 	var raw = normalizeInternalScheme(String(input).trim());
 	if (isSettingsInternalUrl(raw)) return settingsInternalUrl;
-	if (isAccountsInternalUrl(raw)) return accountsInternalUrl;
 	if (isPartnersInternalUrl(raw)) return partnersInternalUrl;
 	if (isGamesInternalUrl(raw)) return gamesInternalUrl;
 	if (isAiInternalUrl(raw)) return aiInternalUrl;
-	if (isWallpaperInternalUrl(raw) || isWallpaperStoreInternalUrl(raw)) return wallpapersInternalUrl;
+	if (isExtensionInternalUrl(raw) || isExtensionStoreInternalUrl(raw)) return wallpapersInternalUrl;
 	if (isCreditsInternalUrl(raw)) return creditsInternalUrl;
 	return search(raw, searchEngine.value);
 }
@@ -1279,8 +1106,8 @@ async function navigateFromInput(input, pushHistory = true) {
 	await loadUrl(target, pushHistory);
 }
 
-var adHosts = [
-	// 98% of ads blocked on adblock.turtlecute.org
+var adblockHostPatterns = [
+	// Ads
 	/(^|\.)doubleclick\.net$/i,
 	/(^|\.)googlesyndication\.com$/i,
 	/(^|\.)googleadservices\.com$/i,
@@ -1289,6 +1116,8 @@ var adHosts = [
 	/(^|\.)contextweb\.com$/i,
 	/(^|\.)fastclick\.net$/i,
 	/(^|\.)amazon-adsystem\.com$/i,
+
+	// Analytics
 	/(^|\.)googletagmanager\.com$/i,
 	/(^|\.)google-analytics\.com$/i,
 	/(^|\.)analytics\.google\.com$/i,
@@ -1298,8 +1127,12 @@ var adHosts = [
 	/(^|\.)freshmarketer\.com$/i,
 	/(^|\.)luckyorange\.com$/i,
 	/(^|\.)stats\.wp\.com$/i,
+
+	// Error trackers
 	/(^|\.)bugsnag\.com$/i,
 	/(^|\.)sentry\.io$/i,
+
+	// Social trackers
 	/(^|\.)facebook\.com$/i,
 	/(^|\.)fbcdn\.net$/i,
 	/(^|\.)twitter\.com$/i,
@@ -1317,10 +1150,13 @@ var adHosts = [
 	/(^|\.)tiktok\.com$/i,
 	/(^|\.)tiktokcdn\.com$/i,
 	/(^|\.)byteoversea\.com$/i,
+
+	// Mix
 	/(^|\.)yahoo\.com$/i,
 	/(^|\.)yimg\.com$/i,
-	/(^|\.)yahooinc\.com$/i,
 	/(^|\.)yandex\./i,
+
+	// OEM ad / telemetry ecosystems
 	/(^|\.)xiaomi\./i,
 	/(^|\.)miui\.com$/i,
 	/(^|\.)mistat\.xiaomi\.com$/i,
@@ -1336,25 +1172,16 @@ var adHosts = [
 	/(^|\.)supportmetrics\.apple\.com$/i,
 	/(^|\.)metrics\.icloud\.com$/i,
 	/(^|\.)metrics\.mzstatic\.com$/i,
-	/(^|\.)api-adservices\.apple\.com$/i,
-	/(^|\.)adtech\.yahooinc\.com$/i,
-	/(^|\.)auction\.unityads\.unity3d\.com$/i,
-	/(^|\.)webview\.unityads\.unity3d\.com$/i,
-	/(^|\.)config\.unityads\.unity3d\.com$/i,
-	/(^|\.)adserver\.unityads\.unity3d\.com$/i,
-	/(^|\.)iot-eu-logser\.realme\.com$/i,
-	/(^|\.)iot-logser\.realme\.com$/i,
-	/(^|\.)bdapi-ads\.realmemobile\.com$/i,
-	/(^|\.)bdapi-in-ads\.realmemobile\.com$/i,
-	/(^|\.)adsfs\.oppomobile\.com$/i,
+
+	// Existing broad ad/tracker nets
 	/(^|\.)taboola\.com$/i,
 	/(^|\.)outbrain\.com$/i,
 	/(^|\.)criteo\.com$/i,
 	/(^|\.)adsrvr\.org$/i,
 	/(^|\.)scorecardresearch\.com$/i,
 ];
-// blocking adservers and google adsense
-var adUrls = [
+
+var adblockUrlPatterns = [
 	/\/ads?(\/|\.|\?|$)/i,
 	/\/adserver/i,
 	/advert/i,
@@ -1377,191 +1204,27 @@ var adUrls = [
 	/supportmetrics\.apple\.com/i,
 	/metrics\.icloud\.com/i,
 	/metrics\.mzstatic\.com/i,
-	/(?:^|\/)ads?\.js(?:$|[?#;$&])/i,
-	/(?:^|\/)pageads?\.js(?:$|[?#;$&])/i,
-	/(?:^|\/)adservice\.js(?:$|[?#;$&])/i,
-	/\/widget\/ads(?:[./]|$|[?#;$&])/i,
-	/\/(?:assets?|scripts?|widgets?)\/(?:ads?|pageads?)(?:[./]|$|[?#;$&])/i,
-	/adbox/i,
-	/textads/i,
-];
-var hardBlockedAdKeywords = [
-	"adblock.turtlecute.org/js/pagead.js",
-	"adblock.turtlecute.org/js/widget/ads.js",
-	"https%3a%2f%2fadblock.turtlecute.org%2fjs%2fpagead.js",
-	"https%3a%2f%2fadblock.turtlecute.org%2fjs%2fwidget%2fads.js",
 ];
 
-function matchesHardBlockedAdKeyword(rawUrl) {
-	var source = String(rawUrl || "").trim();
-	if (!source) return false;
-	var variants = [source.toLowerCase()];
-	try {
-		var once = decodeURIComponent(source);
-		variants.push(String(once || "").toLowerCase());
-		try {
-			var twice = decodeURIComponent(once);
-			variants.push(String(twice || "").toLowerCase());
-		} catch {}
-	} catch {}
-	return variants.some((value) => hardBlockedAdKeywords.some((keyword) => value.includes(keyword)));
-}
+var adblockEnabledStorage = "fb_adblock_enabled";
 
-var adblockAllowHostPatterns = [];
-
-function isAdblockAllowlistedHost(hostname) {
-	var host = String(hostname || "").trim().toLowerCase();
-	if (!host) return false;
-	return adblockAllowHostPatterns.some((pattern) => pattern.test(host));
-}
-
-function isAdblockAllowlistedUrl(rawUrl, fallbackBase = "") {
-	var target = String(rawUrl || "").trim();
-	if (!target) return false;
-	try {
-		var resolved = resolveAdblockTargetUrl(target, fallbackBase || window.location.href);
-		var parsed = new URL(resolved, fallbackBase || window.location.href);
-		return isAdblockAllowlistedHost(parsed.hostname);
-	} catch {
-		return false;
-	}
-}
-
-var adCssSelectors = [
-	".adbox.banner_ads.adsbox",
-	".adbox",
-	".banner_ads",
-	".adsbox",
-	".textads",
-	"[id^='google_ads']",
-	".unity-ads",
-	"#unity-ads",
-	"iframe[src*='doubleclick']",
-	"iframe[src*='googlesyndication']",
-	"iframe[src*='unityads']",
-];
-
-function injectAdCss(targetDoc) {
-	if (!targetDoc || targetDoc.__fbAdCssInjected) return;
-	targetDoc.__fbAdCssInjected = true;
-	try {
-		var style = targetDoc.createElement("style");
-		style.id = "fb-adblock-cosmetic";
-		style.textContent = `${adCssSelectors.join(", ")} { display: none !important; visibility: hidden !important; }`;
-		(targetDoc.head || targetDoc.documentElement).appendChild(style);
-	} catch {
-	}
-}
-
-function removeAdNodes(targetDoc) {
-	if (!targetDoc) return;
-	try {
-		var sweep = (root) => {
-			if (!root || !root.querySelectorAll) return;
-			var scriptNodes = root.querySelectorAll("script[src]");
-			scriptNodes.forEach((scriptEl) => {
-				var src = String(scriptEl.getAttribute("src") || "").trim();
-				if (!src) return;
-				if (shouldBlockReq(src, targetDoc.location?.href || window.location.href, "script")) {
-					scriptEl.removeAttribute("src");
-					scriptEl.type = "application/x-blocked-script";
-					scriptEl.remove();
-				}
-			});
-			var frameNodes = root.querySelectorAll("iframe[src]");
-			frameNodes.forEach((frameEl) => {
-				var src = String(frameEl.getAttribute("src") || "").trim();
-				if (!src) return;
-				if (shouldBlockReq(src, targetDoc.location?.href || window.location.href, "sub_frame")) {
-					frameEl.removeAttribute("src");
-					frameEl.remove();
-				}
-			});
-		};
-
-		sweep(targetDoc);
-
-		if (!targetDoc.__fbAdblockObserverBound) {
-			targetDoc.__fbAdblockObserverBound = true;
-			var observer = new MutationObserver((mutations) => {
-				for (var mutation of mutations) {
-					if (mutation.type === "attributes") {
-						var el = mutation.target;
-						if (!el || el.nodeType !== 1) continue;
-						var tag = String(el.tagName || "").toLowerCase();
-						if (tag !== "script" && tag !== "iframe") continue;
-						var attr = tag === "script" ? "src" : "src";
-						var value = String(el.getAttribute(attr) || "").trim();
-						if (!value) continue;
-						var reqType = tag === "script" ? "script" : "sub_frame";
-						if (shouldBlockReq(value, targetDoc.location?.href || window.location.href, reqType)) {
-							el.removeAttribute(attr);
-							if (tag === "script") el.type = "application/x-blocked-script";
-							el.remove();
-						}
-						continue;
-					}
-					for (var node of mutation.addedNodes || []) {
-						if (!node || node.nodeType !== 1) continue;
-						var element = node;
-						var tagName = String(element.tagName || "").toLowerCase();
-						if (tagName === "script") {
-							var scriptSrc = String(element.getAttribute("src") || "").trim();
-							if (
-								scriptSrc &&
-								shouldBlockReq(scriptSrc, targetDoc.location?.href || window.location.href, "script")
-							) {
-								element.removeAttribute("src");
-								element.type = "application/x-blocked-script";
-								element.remove();
-								continue;
-							}
-						}
-						if (tagName === "iframe") {
-							var frameSrc = String(element.getAttribute("src") || "").trim();
-							if (
-								frameSrc &&
-								shouldBlockReq(frameSrc, targetDoc.location?.href || window.location.href, "sub_frame")
-							) {
-								element.removeAttribute("src");
-								element.remove();
-								continue;
-							}
-						}
-						sweep(element);
-					}
-				}
-			});
-			observer.observe(targetDoc.documentElement || targetDoc, {
-				subtree: true,
-				childList: true,
-				attributes: true,
-				attributeFilter: ["src"],
-			});
-		}
-	} catch {
-	}
-}
-
-var adblockKey = "fb_adblock_enabled";
-
-function adblockOn() {
-	var raw = localStorage.getItem(adblockKey);
+function isAdblockEnabled() {
+	var raw = localStorage.getItem(adblockEnabledStorage);
 	if (raw === null) {
-		localStorage.setItem(adblockKey, "true");
+		localStorage.setItem(adblockEnabledStorage, "true");
 		return true;
 	}
 	return String(raw).toLowerCase() === "true";
 }
 
-function setAdblock(enabled) {
-	localStorage.setItem(adblockKey, enabled ? "true" : "false");
-	renderAdblockToggle();
+function setAdblockEnabled(enabled) {
+	localStorage.setItem(adblockEnabledStorage, enabled ? "true" : "false");
+	updateAdblockToggleLabel();
 }
 
-function renderAdblockToggle() {
+function updateAdblockToggleLabel() {
 	if (!adsToggleBtn) return;
-	var enabled = adblockOn();
+	var enabled = isAdblockEnabled();
 	adsToggleBtn.textContent = enabled ? "ads: off" : "ads: on";
 	adsToggleBtn.setAttribute("aria-pressed", enabled ? "true" : "false");
 	adsToggleBtn.title = enabled
@@ -1569,12 +1232,12 @@ function renderAdblockToggle() {
 		: "Ad blocker is disabled (ads are on)";
 }
 
-function toggleAds() {
-	setAdblock(!adblockOn());
-	if (adblockOn()) void ensureGhostery();
+function toggleAdblock() {
+	setAdblockEnabled(!isAdblockEnabled());
+	if (isAdblockEnabled()) void ensureGhosteryEngine();
 }
-// ghostery integration / ad bypass/blocker
-async function ensureGhostery() {
+
+async function ensureGhosteryEngine() {
 	if (ghosteryEngine) return ghosteryEngine;
 	if (ghosteryEnginePromise) return ghosteryEnginePromise;
 
@@ -1582,7 +1245,9 @@ async function ensureGhostery() {
 		try {
 			var mod = null;
 			var moduleCandidates = [
+				// Browser-bundled module (no bare package specifiers).
 				"https://esm.sh/@ghostery/adblocker?bundle",
+				// Legacy local path fallback (works only if pre-bundled in this project).
 				"/vendor/adblocker/index.js",
 			];
 			var lastError = null;
@@ -1616,7 +1281,7 @@ async function ensureGhostery() {
 	return ghosteryEnginePromise;
 }
 
-function normReqType(type) {
+function normalizeAdblockRequestType(type) {
 	var raw = String(type || "other").trim().toLowerCase();
 	if (!raw) return "other";
 	if (raw === "document" || raw === "main_frame" || raw === "navigate") return "main_frame";
@@ -1628,12 +1293,12 @@ function normReqType(type) {
 	return raw;
 }
 
-function inferReqType(input, init) {
+function inferFetchRequestType(input, init) {
 	var requestLike = input && typeof input === "object" ? input : null;
 	var destination = String(requestLike?.destination || init?.destination || "")
 		.trim()
 		.toLowerCase();
-	if (destination) return normReqType(destination);
+	if (destination) return normalizeAdblockRequestType(destination);
 
 	var mode = String(requestLike?.mode || init?.mode || "")
 		.trim()
@@ -1643,7 +1308,7 @@ function inferReqType(input, init) {
 	return "xmlhttprequest";
 }
 
-function ghosteryBlocks(rawUrl, baseHref, requestType = "other", sourceUrl = "") {
+function shouldBlockWithGhostery(rawUrl, baseHref, requestType = "other", sourceUrl = "") {
 	if (!ghosteryEngine || !ghosteryRequestCtor) return null;
 	try {
 		var absoluteUrl = new URL(String(rawUrl), baseHref || window.location.href).href;
@@ -1659,7 +1324,7 @@ function ghosteryBlocks(rawUrl, baseHref, requestType = "other", sourceUrl = "")
 		}
 
 		var request = ghosteryRequestCtor.fromRawDetails({
-			type: normReqType(requestType),
+			type: normalizeAdblockRequestType(requestType),
 			url: absoluteUrl,
 			sourceUrl: sourceUrl || baseHref || window.location.href,
 		});
@@ -1669,146 +1334,21 @@ function ghosteryBlocks(rawUrl, baseHref, requestType = "other", sourceUrl = "")
 		return null;
 	}
 }
-//  adblock 
-function resolveAdblockTargetUrl(rawUrl, baseHref = "") {
-	var target = String(rawUrl || "").trim();
-	if (!target) return "";
-	if (/^(?:https?|wss?)%3A/i.test(target)) {
-		try {
-			var decodedDirect = decodeURIComponent(target);
-			if (/^(?:https?|wss?):\/\//i.test(decodedDirect)) {
-				target = decodedDirect;
-			}
-		} catch {
-		}
-	}
-	try {
-		var absolute = new URL(target, baseHref || window.location.href).href;
-		var decoded = fromScramjetProxyUrl(absolute);
-		if (!decoded || decoded === absolute) {
-			try {
-				var parsedAbsolute = new URL(absolute);
-				var embedded = String(parsedAbsolute.pathname || "").match(/(https?%3A%2F%2F.+)$/i);
-				if (embedded && embedded[1]) {
-					var decodedEmbedded = decodeURIComponent(embedded[1]);
-					if (/^https?:\/\//i.test(decodedEmbedded)) return decodedEmbedded;
-				}
-			} catch {
-			}
-			return absolute;
-		}
-		if (/^(?:https?|wss?)%3A/i.test(decoded)) {
-			try {
-				decoded = decodeURIComponent(decoded);
-			} catch {
-			}
-		}
-		return new URL(decoded, absolute).href;
-	} catch {
-		return target;
-	}
-}
 
-function isScramjetProxyUrl(rawUrl, fallbackBase = "") {
-	try {
-		var parsed = new URL(String(rawUrl || ""), fallbackBase || window.location.href);
-		return parsed.pathname.startsWith("/scramjet/") || /https?%3A%2F%2F/i.test(parsed.pathname);
-	} catch {
-		return false;
-	}
-}
-
-function shouldBlockReq(rawUrl, baseHref, requestType = "other", sourceUrl = "") {
+function shouldBlockAdRequest(rawUrl, baseHref, requestType = "other", sourceUrl = "") {
 	if (!rawUrl) return false;
-	if (matchesHardBlockedAdKeyword(rawUrl)) return true;
 	try {
-		var resolvedUrl = resolveAdblockTargetUrl(rawUrl, baseHref || window.location.href);
-		if (matchesHardBlockedAdKeyword(resolvedUrl)) return true;
-		var parsed = new URL(resolvedUrl, baseHref || window.location.href);
-		var isProxyUrl = isScramjetProxyUrl(rawUrl, baseHref || window.location.href);
-		var type = normReqType(requestType);
-		if (isAdblockAllowlistedHost(parsed.hostname) && type === "main_frame" && !isProxyUrl) {
-			return false;
-		}
+		var parsed = new URL(String(rawUrl), baseHref || window.location.href);
 		var protocol = parsed.protocol.toLowerCase();
 		if (protocol === "data:" || protocol === "blob:" || protocol === "about:") return false;
-		var appOrigin = new URL(window.location.href).origin;
-		if (parsed.origin === appOrigin && !isProxyUrl) return false;
-		if (type === "main_frame" || type === "sub_frame") {
-			var current = new URL(String(baseHref || window.location.href));
-			if (parsed.origin === current.origin && !isProxyUrl) return false;
-		}
 
-		var ghosteryDecision = ghosteryBlocks(parsed.href, baseHref, type, sourceUrl);
+		var ghosteryDecision = shouldBlockWithGhostery(parsed.href, baseHref, requestType, sourceUrl);
 		if (ghosteryDecision === true) return true;
 
 		var host = parsed.hostname.toLowerCase();
-		if (adHosts.some((pattern) => pattern.test(host))) return true;
+		if (adblockHostPatterns.some((pattern) => pattern.test(host))) return true;
 		var target = `${host}${parsed.pathname}${parsed.search}`.toLowerCase();
-		return adUrls.some((pattern) => pattern.test(target));
-	} catch {
-		return false;
-	}
-}
-
-var redirKeys = new Set([
-	"redirect",
-	"redirect_uri",
-	"redir",
-	"url",
-	"u",
-	"target",
-	"dest",
-	"destination",
-	"next",
-	"out",
-	"to",
-	"goto",
-	"continue",
-	"r",
-	"ref",
-]);
-
-function hasUserAct(targetWindow) {
-	try {
-		return Boolean(targetWindow?.navigator?.userActivation?.isActive);
-	} catch {
-		return false;
-	}
-}
-
-function isXOriginNav(rawUrl, baseHref) {
-	try {
-		var parsed = new URL(String(rawUrl), baseHref || window.location.href);
-		var current = new URL(String(baseHref || window.location.href));
-		return parsed.origin !== current.origin;
-	} catch {
-		return false;
-	}
-}
-
-function shouldBlockNav(rawUrl, baseHref, sourceUrl = "") {
-	if (!rawUrl) return false;
-	if (matchesHardBlockedAdKeyword(rawUrl)) return true;
-	try {
-		var resolvedUrl = resolveAdblockTargetUrl(rawUrl, baseHref || window.location.href);
-		if (matchesHardBlockedAdKeyword(resolvedUrl)) return true;
-		var parsed = new URL(resolvedUrl, baseHref || window.location.href);
-		var protocol = parsed.protocol.toLowerCase();
-		if (protocol === "javascript:" || protocol === "data:" || protocol === "file:") return true;
-		if (shouldBlockReq(parsed.href, baseHref, "main_frame", sourceUrl)) return true;
-		for (var [name, value] of parsed.searchParams.entries()) {
-			var normalizedName = String(name || "").trim().toLowerCase();
-			if (!redirKeys.has(normalizedName)) continue;
-			var nestedTarget = String(value || "").trim();
-			if (!nestedTarget) continue;
-			if (/^https?:\/\//i.test(nestedTarget)) {
-				if (shouldBlockReq(nestedTarget, parsed.href, "main_frame", parsed.href)) return true;
-			}
-		}
-		var fullTarget = `${parsed.hostname}${parsed.pathname}${parsed.search}`.toLowerCase();
-		if (/popunder|clickunder|forced[-_]?redirect/.test(fullTarget)) return true;
-		return false;
+		return adblockUrlPatterns.some((pattern) => pattern.test(target));
 	} catch {
 		return false;
 	}
@@ -1874,27 +1414,24 @@ function syncTabUrlFromFrame(tabId, frameElement) {
 	addHistory(nextUrl);
 }
 
-function injectAdblock(tabId, frameElement) {
+function injectAdblockIntoFrame(frameElement) {
 	var frameWindow = frameElement?.contentWindow;
 	if (!frameWindow) return;
 	if (frameWindow.__fbAdblockInstalled) return;
 	frameWindow.__fbAdblockInstalled = true;
-	void ensureGhostery();
+	void ensureGhosteryEngine();
 
 	var shouldBlock = (target, requestType = "other", sourceUrl = "") =>
-		adblockOn() &&
-		shouldBlockReq(target, frameWindow.location?.href, requestType, sourceUrl);
+		isAdblockEnabled() &&
+		shouldBlockAdRequest(target, frameWindow.location?.href, requestType, sourceUrl);
 	var responseCtor = frameWindow.Response || Response;
-	var targetDoc = frameWindow.document;
-	injectAdCss(targetDoc);
-	removeAdNodes(targetDoc);
 
 	if (typeof frameWindow.fetch === "function") {
 		var originalFetch = frameWindow.fetch.bind(frameWindow);
 		frameWindow.fetch = (input, init) => {
 			var target = typeof input === "string" ? input : input?.url;
 			var sourceUrl = typeof input === "object" ? input?.referrer || "" : "";
-			if (shouldBlock(target, inferReqType(input, init), sourceUrl)) {
+			if (shouldBlock(target, inferFetchRequestType(input, init), sourceUrl)) {
 				return Promise.resolve(
 					new responseCtor("", {
 						status: 204,
@@ -1947,163 +1484,36 @@ function injectAdblock(tabId, frameElement) {
 		};
 		frameWindow.WebSocket.prototype = OriginalWebSocket.prototype;
 	}
-
-	if (typeof frameWindow.open === "function") {
-		var originalOpen = frameWindow.open.bind(frameWindow);
-		frameWindow.open = (url, target, features) => {
-			var rawTarget = String(url || "").trim();
-			var baseHref = frameWindow.location?.href || window.location.href;
-			if (!rawTarget) return null;
-			if (shouldBlockNav(rawTarget, baseHref, baseHref)) return null;
-			if (!hasUserAct(frameWindow) && isXOriginNav(rawTarget, baseHref)) {
-				return null;
-			}
-			var targetValue = String(target || "").trim().toLowerCase();
-			if (!targetValue || targetValue === "_self") {
-				try {
-					frameWindow.location.assign(rawTarget);
-				} catch {
-				}
-				return frameWindow;
-			}
-			if (targetValue === "_top" || targetValue === "_parent" || targetValue === "_blank") {
-				try {
-					var resolved = new URL(rawTarget, baseHref).href;
-					loadUrl(resolved);
-				} catch {
-				}
-				return null;
-			}
-			return originalOpen(rawTarget, target, features);
-		};
-	}
-
-	try {
-		var locationProto = Object.getPrototypeOf(frameWindow.location);
-		if (locationProto && !locationProto.__fbNavigationPatched) {
-			locationProto.__fbNavigationPatched = true;
-			var originalAssign = locationProto.assign;
-			var originalReplace = locationProto.replace;
-			if (typeof originalAssign === "function") {
-				locationProto.assign = function (target) {
-					var currentHref = String(this?.href || frameWindow.location?.href || window.location.href);
-					if (shouldBlockNav(target, currentHref, currentHref)) return;
-					if (!hasUserAct(frameWindow) && isXOriginNav(target, currentHref)) {
-						return;
-					}
-					return originalAssign.call(this, target);
-				};
-			}
-			if (typeof originalReplace === "function") {
-				locationProto.replace = function (target) {
-					var currentHref = String(this?.href || frameWindow.location?.href || window.location.href);
-					if (shouldBlockNav(target, currentHref, currentHref)) return;
-					if (!hasUserAct(frameWindow) && isXOriginNav(target, currentHref)) {
-						return;
-					}
-					return originalReplace.call(this, target);
-				};
-			}
-		}
-	} catch {
-	}
-
-	try {
-		if (targetDoc && !targetDoc.__fbNavigationGuardsBound) {
-			targetDoc.__fbNavigationGuardsBound = true;
-			targetDoc.addEventListener(
-				"click",
-				(event) => {
-					var anchor = event.target?.closest?.("a[href]");
-					if (!anchor) return;
-					var href = String(anchor.getAttribute("href") || "").trim();
-					if (!href) return;
-					var baseHref = frameWindow.location?.href || window.location.href;
-					if (shouldBlockNav(href, baseHref, baseHref)) {
-						event.preventDefault();
-						event.stopImmediatePropagation();
-						return;
-					}
-					var linkTarget = String(anchor.getAttribute("target") || "").trim().toLowerCase();
-					if (linkTarget === "_top" || linkTarget === "_parent" || linkTarget === "_blank") {
-						event.preventDefault();
-						try {
-							var resolved = new URL(href, baseHref).href;
-							loadUrl(resolved);
-						} catch {
-						}
-					}
-				},
-				true
-			);
-			targetDoc.addEventListener(
-				"submit",
-				(event) => {
-					var form = event.target;
-					if (!form || form.tagName !== "FORM") return;
-					var method = String(form.getAttribute("method") || "GET").trim().toUpperCase();
-					var action = String(form.getAttribute("action") || frameWindow.location?.href || "").trim();
-					var baseHref = frameWindow.location?.href || window.location.href;
-					if (shouldBlockNav(action, baseHref, baseHref)) {
-						event.preventDefault();
-						event.stopImmediatePropagation();
-						return;
-					}
-					var formTarget = String(form.getAttribute("target") || "").trim().toLowerCase();
-					if (formTarget === "_top" || formTarget === "_parent" || formTarget === "_blank") {
-						event.preventDefault();
-						// ad prevention from cineby.gd
-						if (method !== "GET") return;
-						try {
-							var resolvedAction = new URL(action || baseHref, baseHref).href;
-							var formUrl = new URL(resolvedAction);
-							var formData = new FormData(form);
-							for (var [key, value] of formData.entries()) {
-								formUrl.searchParams.set(key, String(value));
-							}
-							loadUrl(formUrl.href);
-						} catch {
-						}
-					}
-				},
-				true
-			);
-		}
-	} catch {
-	}
-
 }
 
 async function loadUrl(url, pushHistory = true) {
 	resetError();
 	var tab = getActiveTab();
 	if (!tab) return;
-	var previousUrl = String(tab.url || "").trim();
-	var normalizedNextUrl = String(url || "").trim();
+	var previousUrl = String(tab.url || "");
 
 	if (pushHistory && tab.url) {
 		tab.backStack.push(tab.url);
 		tab.forwardStack = [];
 	}
 
+	if (previousUrl && previousUrl !== String(url || "")) {
+		destroyTabFrame(tab.id);
+	}
+
 	tab.url = url;
 	tab.title = getDisplayTitle(url);
+	if (!isCatalogGameUrl(url) && !String(url || "").startsWith("blob:")) {
+		canonicalGameUrlByTab.delete(tab.id);
+		restoredGameProgressMarkerByTab.delete(tab.id);
+	}
 	addressInput.value = url;
 	homeSearchInput.value = url;
 	renderTabs();
 	updateNavButtons();
 
-	var changedUrl = Boolean(previousUrl && previousUrl !== normalizedNextUrl);
-	if (changedUrl) {
-		disposeTabFrame(tab.id);
-	}
-
 	if (isSettingsInternalUrl(url)) {
 		showSettingsPage();
-		return;
-	}
-	if (isAccountsInternalUrl(url)) {
-		showAccountsPage();
 		return;
 	}
 	if (isPartnersInternalUrl(url)) {
@@ -2118,8 +1528,8 @@ async function loadUrl(url, pushHistory = true) {
 		showAiPage();
 		return;
 	}
-	if (isWallpaperInternalUrl(url) || isWallpaperStoreInternalUrl(url)) {
-		showWallpaperStorePage();
+	if (isExtensionInternalUrl(url) || isExtensionStoreInternalUrl(url)) {
+		showExtensionStorePage();
 		return;
 	}
 	if (isCreditsInternalUrl(url)) {
@@ -2135,14 +1545,24 @@ async function loadUrl(url, pushHistory = true) {
 		showFrameForTab(tab.id);
 		var proxiedUrl = toScramjetProxyUrl(url);
 		if (!proxiedUrl) throw new Error("Invalid Scramjet target URL.");
+		var pendingTimeout = frameLoadTimeoutIdByTab.get(tab.id);
+		if (pendingTimeout) clearTimeout(pendingTimeout);
+		frameLoadTimeoutIdByTab.set(
+			tab.id,
+			setTimeout(() => {
+				if (tab.id === activeTabId) showLoading(false);
+				frameLoadTimeoutIdByTab.delete(tab.id);
+			}, 12000)
+		);
+		await new Promise((resolve) => setTimeout(resolve, 2000));
 		suppressNextFrameNavSyncByTab.add(tab.id);
 		frame.element.src = proxiedUrl;
 		hideBlank();
 		addHistory(url);
 	} catch (err) {
 		showError("Failed to initialize proxy runtime.", err);
-	} finally {
 		showLoading(false);
+	} finally {
 	}
 }
 
@@ -2152,10 +1572,6 @@ function ensureTabFrame(tabId) {
 
 	var created = scramjet.createFrame();
 	created.frame.className = "proxy-frame";
-	created.frame.setAttribute(
-		"sandbox",
-		"allow-scripts allow-same-origin allow-forms allow-modals allow-pointer-lock allow-downloads allow-presentation"
-	);
 	created.frame.style.display = "none";
 	created.frame.style.width = "100%";
 	created.frame.style.height = "100%";
@@ -2163,10 +1579,16 @@ function ensureTabFrame(tabId) {
 	created.frame.style.position = "absolute";
 	created.frame.style.inset = "0";
 	created.frame.addEventListener("load", () => {
+		var pendingTimeout = frameLoadTimeoutIdByTab.get(tabId);
+		if (pendingTimeout) {
+			clearTimeout(pendingTimeout);
+			frameLoadTimeoutIdByTab.delete(tabId);
+		}
+		if (tabId === activeTabId) showLoading(false);
 		syncTabUrlFromFrame(tabId, created.frame);
 		try {
-			if (shouldInjectAdblock(tabId)) {
-				injectAdblock(tabId, created.frame);
+			if (shouldInjectAdblockForTab(tabId)) {
+				injectAdblockIntoFrame(created.frame);
 			}
 		} catch {
 		}
@@ -2276,7 +1698,7 @@ function attachQuickContextMenuToFrame(frameElement) {
 	}
 }
 
-function shouldInjectAdblock(tabId) {
+function shouldInjectAdblockForTab(tabId) {
 	var tab = tabs.find((entry) => entry.id === tabId);
 	if (!tab) return true;
 	var currentUrl = String(tab.url || "").trim();
@@ -2320,7 +1742,7 @@ function reloadActive() {
 function goHome() {
 	var tab = getActiveTab();
 	if (!tab) return;
-	disposeTabFrame(tab.id);
+	destroyTabFrame(tab.id);
 	tab.url = "";
 	tab.title = "New Tab";
 	addressInput.value = "";
@@ -2349,7 +1771,6 @@ function showSettingsPage() {
 		item.element.style.display = "none";
 	});
 	if (creditsPage) creditsPage.classList.remove("active");
-	if (accountsPage) accountsPage.classList.remove("active");
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.remove("active");
@@ -2360,30 +1781,12 @@ function showSettingsPage() {
 	setParticlesVisible(isMatrixThemeActive());
 }
 
-function showAccountsPage() {
-	blankState.style.display = "none";
-	tabFrames.forEach((item) => {
-		item.element.style.display = "none";
-	});
-	if (settingsPage) settingsPage.classList.remove("active");
-	if (creditsPage) creditsPage.classList.remove("active");
-	if (partnersPage) partnersPage.classList.remove("active");
-	if (gamesPage) gamesPage.classList.remove("active");
-	if (aiPage) aiPage.classList.remove("active");
-	if (extensionPage) extensionPage.classList.remove("active");
-	if (extensionStorePage) extensionStorePage.classList.remove("active");
-	if (accountsPage) accountsPage.classList.add("active");
-	addressInput.value = accountsInternalUrl;
-	setParticlesVisible(isMatrixThemeActive());
-}
-
 function showPartnersPage() {
 	blankState.style.display = "none";
 	tabFrames.forEach((item) => {
 		item.element.style.display = "none";
 	});
 	if (settingsPage) settingsPage.classList.remove("active");
-	if (accountsPage) accountsPage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.remove("active");
@@ -2400,7 +1803,6 @@ function showGamesPage() {
 		item.element.style.display = "none";
 	});
 	if (settingsPage) settingsPage.classList.remove("active");
-	if (accountsPage) accountsPage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.remove("active");
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.add("active");
@@ -2417,7 +1819,6 @@ function showAiPage() {
 		item.element.style.display = "none";
 	});
 	if (settingsPage) settingsPage.classList.remove("active");
-	if (accountsPage) accountsPage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.remove("active");
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
@@ -2428,13 +1829,12 @@ function showAiPage() {
 	setParticlesVisible(isMatrixThemeActive());
 }
 
-function showWallpaperStorePage() {
+function showExtensionStorePage() {
 	blankState.style.display = "none";
 	tabFrames.forEach((item) => {
 		item.element.style.display = "none";
 	});
 	if (settingsPage) settingsPage.classList.remove("active");
-	if (accountsPage) accountsPage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.remove("active");
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
@@ -2452,7 +1852,6 @@ function showCreditsPage() {
 		item.element.style.display = "none";
 	});
 	if (settingsPage) settingsPage.classList.remove("active");
-	if (accountsPage) accountsPage.classList.remove("active");
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
 	if (aiPage) aiPage.classList.remove("active");
@@ -2465,7 +1864,6 @@ function showCreditsPage() {
 
 function hideInternalPages() {
 	if (settingsPage) settingsPage.classList.remove("active");
-	if (accountsPage) accountsPage.classList.remove("active");
 	if (creditsPage) creditsPage.classList.remove("active");
 	if (partnersPage) partnersPage.classList.remove("active");
 	if (gamesPage) gamesPage.classList.remove("active");
@@ -2487,13 +1885,50 @@ function isTypingTarget(target) {
 	return tag === "input" || tag === "textarea" || tag === "select" || target.isContentEditable;
 }
 
+function normalizeWispUrl(rawUrl) {
+	var input = String(rawUrl || "").trim();
+	if (!input) return "";
+	try {
+		var parsed = new URL(input, window.location.origin);
+		if (parsed.protocol === "http:") parsed.protocol = "ws:";
+		if (parsed.protocol === "https:") parsed.protocol = "wss:";
+		if (parsed.protocol !== "ws:" && parsed.protocol !== "wss:") return "";
+		if (!parsed.pathname || parsed.pathname === "/") {
+			parsed.pathname = "/wisp/";
+		} else if (!parsed.pathname.endsWith("/")) {
+			parsed.pathname = `${parsed.pathname}/`;
+		}
+		return parsed.toString();
+	} catch {
+		return "";
+	}
+}
+
+function getWispTransportCandidates() {
+	var configuredPrimary = normalizeWispUrl(window?._CONFIG?.WISP_URL || window?.WISP_URL);
+	var configuredFallback = normalizeWispUrl(window?._CONFIG?.WISP_FALLBACK_URL);
+	var sameOrigin = normalizeWispUrl(
+		`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/wisp/`
+	);
+	var ordered = [configuredPrimary, sameOrigin, configuredFallback].filter(Boolean);
+	return Array.from(new Set(ordered));
+}
+
 async function ensureTransport() {
 	if (transportReady) return;
 	await registerSW();
-	var wispUrl =
-		(location.protocol === "https:" ? "wss" : "ws") + "://" + location.host + "/wisp/";
-	await connection.setTransport("/libcurl/index.mjs", [{ websocket: wispUrl }]);
-	transportReady = true;
+	var candidates = getWispTransportCandidates();
+	var lastError = null;
+	for (var wispUrl of candidates) {
+		try {
+			await connection.setTransport("/libcurl/index.mjs", [{ websocket: wispUrl }]);
+			transportReady = true;
+			return;
+		} catch (error) {
+			lastError = error;
+		}
+	}
+	throw lastError || new Error("Unable to establish proxy transport.");
 }
 
 var historyKey = "fb_history";
@@ -2534,6 +1969,51 @@ function renderHistory() {
 		});
 		historyContainer.appendChild(row);
 	});
+}
+
+function readStorageObject(storage) {
+	var output = {};
+	if (!storage) return output;
+	for (var i = 0; i < storage.length; i += 1) {
+		var key = storage.key(i);
+		if (!key) continue;
+		try {
+			output[key] = storage.getItem(key);
+		} catch {
+		}
+	}
+	return output;
+}
+
+function captureFrameStorageSnapshot(frameElement) {
+	try {
+		var frameWindow = frameElement?.contentWindow;
+		if (!frameWindow) return null;
+		return {
+			localStorage: readStorageObject(frameWindow.localStorage),
+			sessionStorage: readStorageObject(frameWindow.sessionStorage),
+		};
+	} catch {
+		return null;
+	}
+}
+
+function applyStorageSnapshotToFrame(frameElement, snapshot) {
+	try {
+		var frameWindow = frameElement?.contentWindow;
+		if (!frameWindow || !snapshot) return false;
+		var localEntries = Object.entries(snapshot.localStorage || {});
+		var sessionEntries = Object.entries(snapshot.sessionStorage || {});
+		localEntries.forEach(([key, value]) => {
+			frameWindow.localStorage.setItem(key, value ?? "");
+		});
+		sessionEntries.forEach(([key, value]) => {
+			frameWindow.sessionStorage.setItem(key, value ?? "");
+		});
+		return true;
+	} catch {
+		return false;
+	}
 }
 
 function renderGames() {
@@ -2612,7 +2092,7 @@ async function loadGamesCatalog() {
 				desc: String(entry?.desc || entry?.description || entry?.author || "").trim(),
 				url: String(entry?.url || "").trim(),
 				image: String(entry?.image || entry?.cover || "").trim(),
-				clickScript: String(entry?.clickScript || "").trim(),
+				clickScript: String(entry?.clickScript || entry?.defaultClickScript || "").trim(),
 				useBlob: Boolean(entry?.useBlob),
 			}))
 			.filter((entry) => entry.title && entry.url);
@@ -2721,6 +2201,7 @@ function decodeLegacyBookmarkletSource(rawSource) {
 		text = next;
 	}
 
+	// This source is bookmarklet-style and often inserts whitespace between operator symbols.
 	text = text
 		.replace(/=\s+>/g, "=>")
 		.replace(/\|\s+\|/g, "||")
@@ -2797,11 +2278,6 @@ function isSettingsInternalUrl(url) {
 	return normalized === settingsInternalUrl;
 }
 
-function isAccountsInternalUrl(url) {
-	var normalized = getInternalRoute(url);
-	return normalized === accountsInternalUrl || normalized === "frosted://account";
-}
-
 function isCreditsInternalUrl(url) {
 	var normalized = getInternalRoute(url);
 	return normalized === creditsInternalUrl;
@@ -2822,17 +2298,15 @@ function isAiInternalUrl(url) {
 	return normalized === aiInternalUrl;
 }
 
-function isWallpaperInternalUrl(url) {
+function isExtensionInternalUrl(url) {
 	var normalized = getInternalRoute(url);
 	return normalized === "frosted://extension";
 }
 
-function isWallpaperStoreInternalUrl(url) {
+function isExtensionStoreInternalUrl(url) {
 	var normalized = getInternalRoute(url);
 	return (
 		normalized === wallpapersInternalUrl ||
-		normalized === "frosted://wallpapers" ||
-		normalized === "frosted://wallpaper" ||
 		normalized === "frosted://extensionstore" ||
 		normalized === "frosted://webstore"
 	);
@@ -2841,7 +2315,8 @@ function isWallpaperStoreInternalUrl(url) {
 async function openGameFromCatalog(url, options = {}) {
 	var tab = getActiveTab();
 	if (!tab) return;
-	markGamePlayed(url);
+	canonicalGameUrlByTab.set(tab.id, url);
+	restoredGameProgressMarkerByTab.delete(tab.id);
 	var useBlob = Boolean(options?.useBlob);
 	var finalUrl = url;
 	rawHtmlFallbackTriedUrlByTab.delete(tab.id);
@@ -3535,13 +3010,6 @@ function normalizeStoreWallpaperEntry(rawEntry, index = 0) {
 	};
 }
 
-function getWallpaperMediaUrlCandidates(filePath) {
-	var raw = String(filePath || "").trim();
-	if (!raw) return [];
-	if (/^(https?:|blob:|data:|about:|\/)/i.test(raw)) return [raw];
-	return [raw, `/${raw.replace(/^\/+/, "")}`];
-}
-
 function readInstalledExtensionWallpapers() {
 	try {
 		var parsed = JSON.parse(localStorage.getItem(extensionWallpaperStorageKey) || "{}");
@@ -3699,54 +3167,20 @@ function renderWallpaperStorePreview(entry) {
 	wallpaperStorePreviewTitle.textContent = entry.label;
 	wallpaperStorePreviewMeta.textContent = `${
 		entry.type === "video" ? "Animated" : "Static"
-	} ? ${installed ? "Installed" : "Not installed"}`;
+	} • ${installed ? "Installed" : "Not installed"}`;
 
 	if (entry.type === "video") {
 		var previewVideo = document.createElement("video");
-		var previewCandidates = getWallpaperMediaUrlCandidates(entry.file);
-		var previewSrc = previewCandidates[0] || "";
-		var previewFallbackSrc = previewCandidates[1] || "";
-		previewVideo.src = previewSrc;
+		previewVideo.src = entry.file;
 		previewVideo.muted = true;
-		previewVideo.defaultMuted = true;
 		previewVideo.autoplay = true;
 		previewVideo.loop = true;
-		previewVideo.preload = "auto";
-		previewVideo.controls = true;
 		previewVideo.playsInline = true;
-		if (previewFallbackSrc && previewFallbackSrc !== previewSrc) {
-			previewVideo.addEventListener(
-				"error",
-				() => {
-					if (previewVideo.dataset.fallbackTried === "1") return;
-					previewVideo.dataset.fallbackTried = "1";
-					previewVideo.src = previewFallbackSrc;
-					previewVideo.load();
-				},
-				{ once: true }
-			);
-		}
 		wallpaperStorePreviewMedia.appendChild(previewVideo);
-		var previewPlay = previewVideo.play();
-		if (previewPlay && typeof previewPlay.catch === "function") previewPlay.catch(() => {});
 	} else {
 		var previewImg = document.createElement("img");
-		var previewImgCandidates = getWallpaperMediaUrlCandidates(entry.file);
-		previewImg.src = previewImgCandidates[0] || "";
+		previewImg.src = entry.file;
 		previewImg.alt = entry.label;
-		previewImg.loading = "lazy";
-		previewImg.decoding = "async";
-		if (previewImgCandidates[1]) {
-			previewImg.addEventListener(
-				"error",
-				() => {
-					if (previewImg.dataset.fallbackTried === "1") return;
-					previewImg.dataset.fallbackTried = "1";
-					previewImg.src = previewImgCandidates[1];
-				},
-				{ once: true }
-			);
-		}
 		wallpaperStorePreviewMedia.appendChild(previewImg);
 	}
 
@@ -3908,29 +3342,14 @@ function renderWallpaperStoreGrid() {
 		thumbWrap.className = "store-wallpaper-thumb";
 		if (entry.type === "video") {
 			var thumbVideo = document.createElement("video");
-			var thumbCandidates = getWallpaperMediaUrlCandidates(entry.file);
-			thumbVideo.dataset.src = thumbCandidates[0] || "";
-			thumbVideo.dataset.fallbackSrc = thumbCandidates[1] || "";
+			thumbVideo.src = entry.file;
 			thumbVideo.muted = true;
-			thumbVideo.defaultMuted = true;
 			thumbVideo.loop = true;
 			thumbVideo.autoplay = false;
 			thumbVideo.playsInline = true;
 			thumbVideo.preload = "metadata";
 			thumbVideo.disablePictureInPicture = true;
-			thumbVideo.src = thumbVideo.dataset.src || "";
-			thumbVideo.addEventListener("error", () => {
-				var fallbackSrc = String(thumbVideo.dataset.fallbackSrc || "").trim();
-				if (!fallbackSrc || thumbVideo.dataset.fallbackTried === "1") return;
-				thumbVideo.dataset.fallbackTried = "1";
-				thumbVideo.src = fallbackSrc;
-				thumbVideo.load();
-			});
-			var warmVideoThumb = () => {
-				if (!thumbVideo.src) thumbVideo.src = thumbVideo.dataset.src || "";
-			};
 			card.addEventListener("mouseenter", () => {
-				warmVideoThumb();
 				var playPromise = thumbVideo.play();
 				if (playPromise && typeof playPromise.catch === "function") playPromise.catch(() => {});
 			});
@@ -3941,22 +3360,8 @@ function renderWallpaperStoreGrid() {
 			thumbWrap.appendChild(thumbVideo);
 		} else {
 			var thumbImg = document.createElement("img");
-			var thumbImgCandidates = getWallpaperMediaUrlCandidates(entry.file);
-			thumbImg.src = thumbImgCandidates[0] || "";
+			thumbImg.src = entry.file;
 			thumbImg.alt = entry.label;
-			thumbImg.loading = "lazy";
-			thumbImg.decoding = "async";
-			if (thumbImgCandidates[1]) {
-				thumbImg.addEventListener(
-					"error",
-					() => {
-						if (thumbImg.dataset.fallbackTried === "1") return;
-						thumbImg.dataset.fallbackTried = "1";
-						thumbImg.src = thumbImgCandidates[1];
-					},
-					{ once: true }
-				);
-			}
 			thumbWrap.appendChild(thumbImg);
 		}
 
@@ -4011,7 +3416,7 @@ var wallpapers = {
 		label: "Onyx",
 		category: "wallpapers",
 		type: "image",
-		file: "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/onyx.jpg",
+		file: "wallpapers/onyx.jpg",
 		theme: {
 			color1: "#000001",
 			color2: "#464646",
@@ -4025,7 +3430,7 @@ var wallpapers = {
 		label: "Sky Night",
 		category: "wallpapers",
 		type: "image",
-		file: "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/skynight.jpg",
+		file: "wallpapers/skynight.jpg",
 		theme: {
 			color1: "#8ac3d6",
 			color2: "#9ab0d8",
@@ -4039,7 +3444,7 @@ var wallpapers = {
 		label: "Evening Mountains",
 		category: "wallpapers",
 		type: "image",
-		file: "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/evening-mountains.jpg",
+		file: "wallpapers/evening-mountains.jpg",
 		theme: {
 			color1: "#c49564",
 			color2: "#7c6454",
@@ -4053,7 +3458,7 @@ var wallpapers = {
 		label: "Twilight Ridge",
 		category: "wallpapers",
 		type: "image",
-		file: "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/twilight-ridge.png",
+		file: "wallpapers/twilight-ridge.png",
 		theme: {
 			color1: "#a7b7ff",
 			color2: "#86d0ff",
@@ -4067,7 +3472,7 @@ var wallpapers = {
 		label: "Winter (Animated)",
 		category: "animated-wallpapers",
 		type: "video",
-		file: "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/winter.mp4",
+		file: "wallpapers/animated/winter.mp4",
 		theme: {
 			color1: "#bad9ff",
 			color2: "#d9f2ff",
@@ -4168,7 +3573,6 @@ function ensureWallpaperVideoElement() {
 	videoEl.defaultMuted = true;
 	videoEl.loop = true;
 	videoEl.autoplay = true;
-	videoEl.preload = isChromebookDevice ? "auto" : "metadata";
 	videoEl.playsInline = true;
 	videoEl.setAttribute("aria-hidden", "true");
 	videoEl.setAttribute("tabindex", "-1");
@@ -4217,19 +3621,17 @@ function applyWallpaper(key) {
 	var normalized = normalizeWallpaperKey(key);
 	var revision = bumpWallpaperRevision();
 	var theme = getWallpaperTheme(normalized);
-	preloadWallpaperAsset(normalized, revision);
-	var wallpaperRenderKey = getWallpaperRenderKey(normalized);
-	if (shouldRenderVideoWallpaper(normalized)) {
+	var wallpaperType = getWallpaperType(normalized);
+	if (wallpaperType === "video") {
 		showWallpaperVideo(buildWallpaperAssetUrl(normalized, revision));
 		renderWallpaperBackground("");
 	} else {
 		hideWallpaperVideo();
-		renderWallpaperBackground(buildWallpaperCssValue(wallpaperRenderKey, revision));
+		renderWallpaperBackground(buildWallpaperCssValue(normalized, revision));
 	}
 	document.body.dataset.wallpaper = normalized;
 	if (wallpaperSelect) wallpaperSelect.value = normalized;
 	localStorage.setItem(wallpaperKey, normalized);
-	scheduleChromebookWallpaperPreload(normalized);
 	applyTheme(theme.color1, theme.color2, theme.bg1, theme.bg2, theme.nav1, theme.nav2);
 }
 
@@ -4269,31 +3671,17 @@ function loadWallpaper() {
 }
 
 function bootstrapWallpaperFromStorage() {
-	refreshLowPerformanceMode();
 	var saved = normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "skynight");
 	var theme = getWallpaperTheme(saved);
-	if (shouldRenderVideoWallpaper(saved)) {
+	if (getWallpaperType(saved) === "video") {
 		showWallpaperVideo(buildWallpaperAssetUrl(saved));
 		renderWallpaperBackground("");
 	} else {
 		hideWallpaperVideo();
-		renderWallpaperBackground(buildWallpaperCssValue(getWallpaperRenderKey(saved)));
+		renderWallpaperBackground(buildWallpaperCssValue(saved));
 	}
 	document.body.dataset.wallpaper = saved;
 	applyTheme(theme.color1, theme.color2, theme.bg1, theme.bg2, theme.nav1, theme.nav2);
-}
-
-function syncWallpaperVideoVisibility() {
-	var videoEl = document.getElementById(wallpaperVideoElementId);
-	if (!videoEl || !videoEl.classList.contains("is-active")) return;
-	if (document.hidden || !document.hasFocus()) {
-		videoEl.pause();
-		return;
-	}
-	var playResult = videoEl.play();
-	if (playResult && typeof playResult.catch === "function") {
-		playResult.catch(() => {});
-	}
 }
 
 var panicKeyStorage = "fb_panic_key";
@@ -4363,41 +3751,31 @@ function loadPanicSettings() {
 
 function loadOpenModeSettings() {
 	var raw = String(localStorage.getItem(openModeStorage) || "aboutblank").toLowerCase();
-	var selected = normalizeOpenMode(raw);
+	var allowed = new Set(["aboutblank", "blob"]);
+	var selected = allowed.has(raw) ? raw : "aboutblank";
 	updateOpenModeUI(selected);
 	if (raw !== selected) {
 		localStorage.setItem(openModeStorage, selected);
 	}
 	if (openModeStatus) {
-		openModeStatus.textContent = `Open mode set to ${getOpenModeDisplayValue(selected)}.`;
+		openModeStatus.textContent = `Open mode set to ${
+			selected === "blob" ? "blob:." : "about:blank."
+		}`;
 	}
 }
 
 function setOpenMode(mode, shouldLaunch = false) {
-	var selected = normalizeOpenMode(mode);
+	var selected = mode === "blob" ? mode : "aboutblank";
 	localStorage.setItem(openModeStorage, selected);
 	updateOpenModeUI(selected);
 	if (openModeStatus) {
-		openModeStatus.textContent = `Open mode set to ${getOpenModeDisplayValue(selected)}.`;
+		openModeStatus.textContent = `Open mode set to ${
+			selected === "blob" ? "blob:." : "about:blank."
+		}`;
 	}
-	updateAutoBlobStatusText();
 	if (shouldLaunch) {
 		openCurrentPageInMode(selected);
 	}
-}
-
-function getSelectedOpenMode() {
-	var raw = String(localStorage.getItem(openModeStorage) || "aboutblank").toLowerCase();
-	return normalizeOpenMode(raw);
-}
-
-function normalizeOpenMode(mode) {
-	var raw = String(mode || "").trim().toLowerCase();
-	return raw === "blob" ? "blob" : "aboutblank";
-}
-
-function getOpenModeDisplayValue(mode) {
-	return normalizeOpenMode(mode) === "blob" ? "blob:" : "about:blank";
 }
 
 function buildWrapperHtml(appUrl, mode = "aboutblank") {
@@ -4449,14 +3827,18 @@ function buildWrapperHtml(appUrl, mode = "aboutblank") {
 	);
 }
 function updateOpenModeUI(selected) {
-	if (openModeSelect) {
-		openModeSelect.value = selected;
+	if (openModeAboutBtn) {
+		openModeAboutBtn.classList.toggle("active", selected === "aboutblank");
 	}
+	if (openModeBlobBtn) {
+		openModeBlobBtn.classList.toggle("active", selected === "blob");
+	}
+
 }
 
 function openCurrentPageInMode(mode) {
 	var appUrl = window.location.href;
-	var selected = normalizeOpenMode(mode);
+	var selected = mode === "blob" ? mode : "aboutblank";
 	var wrapperHtml = buildWrapperHtml(appUrl, selected);
 	if (selected === "aboutblank") {
 		var popup = window.open("about:blank", "_blank");
@@ -4468,15 +3850,10 @@ function openCurrentPageInMode(mode) {
 			popup.document.open();
 			popup.document.write(wrapperHtml);
 			popup.document.close();
-			var handoffResult = finalizePreviousTabAfterHandoff();
 			if (openModeStatus) {
-				openModeStatus.textContent = handoffResult === "closed"
-					? "Opened in about:blank (new tab) and closed previous tab."
-					: handoffResult === "replaced"
-						? "Opened in about:blank (new tab). Previous tab was replaced to about:blank."
-						: "Opened in about:blank (new tab). Browser blocked closing previous tab.";
+				openModeStatus.textContent =
+					"Opened in about:blank.";
 			}
-			return;
 		} catch {
 			var fallbackBlob = new Blob([wrapperHtml], { type: "text/html;charset=utf-8" });
 			var fallbackBlobUrl = URL.createObjectURL(fallbackBlob);
@@ -4491,39 +3868,14 @@ function openCurrentPageInMode(mode) {
 			if (openModeStatus) {
 				openModeStatus.textContent = "Popup restricted; opened in blob fallback.";
 			}
-			return;
 		}
+		return;
 	}
 
 	var blob = new Blob([wrapperHtml], { type: "text/html;charset=utf-8" });
 	var blobUrl = URL.createObjectURL(blob);
+	if (openModeStatus) openModeStatus.textContent = "Opened in blob: (same tab).";
 	window.location.replace(blobUrl);
-	if (openModeStatus) {
-		openModeStatus.textContent = "Opened in blob: (same tab).";
-	}
-	setTimeout(() => {
-		URL.revokeObjectURL(blobUrl);
-	}, 600_000);
-}
-
-function closeCurrentTab() {
-	try {
-		window.open("", "_self");
-		window.close();
-		return Boolean(window.closed);
-	} catch {
-	}
-	return false;
-}
-
-function finalizePreviousTabAfterHandoff() {
-	if (closeCurrentTab()) return "closed";
-	try {
-		window.location.replace("about:blank");
-		return "replaced";
-	} catch {
-	}
-	return "failed";
 }
 
 function navigateToPanicUrl() {
@@ -4591,426 +3943,9 @@ function savePanicUrl() {
 	}, 2000);
 }
 
-function getAccountApiBase() {
-	var configured = String(window?._CONFIG?.ACCOUNT_API_BASE || "").trim();
-	if (!configured) return "";
-	return configured.replace(/\/+$/, "");
-}
-
-function getAccountApiTimeoutMs() {
-	var timeout = Number.parseInt(window?._CONFIG?.ACCOUNT_API_TIMEOUT_MS || "15000", 10);
-	if (!Number.isFinite(timeout) || timeout < 1000) return 15000;
-	return timeout;
-}
-
-function isAccountApiConfigured() {
-	return Boolean(getAccountApiBase());
-}
-
-function setAccountStatus(message) {
-	if (!accountUserStatus) return;
-	accountUserStatus.textContent = String(message || "").trim() || "Not logged in.";
-}
-
-function setAccountSyncStatus(message) {
-	if (!accountSyncStatus) return;
-	accountSyncStatus.textContent = String(message || "").trim() || "Sync idle.";
-}
-
-function setAccountButtonsDisabled(disabled) {
-	var controls = [
-		accountSignupBtn,
-		accountLoginBtn,
-		accountLogoutBtn,
-		accountSyncBtn,
-	];
-	controls.forEach((el) => {
-		if (!el) return;
-		el.disabled = Boolean(disabled);
-	});
-}
-
-function hasActiveAccountSession() {
-	return Boolean(accountState.token && accountState.user?.username);
-}
-
-function formatDashboardTimestamp(value) {
-	var parsed = new Date(String(value || ""));
-	if (Number.isNaN(parsed.getTime())) return "Never";
-	return parsed.toLocaleString();
-}
-
-function updateAccountDashboard() {
-	if (accountDashboardUser) {
-		accountDashboardUser.textContent = hasActiveAccountSession()
-			? `Signed in as ${String(accountState.user.username)}`
-			: "Signed out";
-	}
-	var store = loadGameDataStore();
-	if (accountDashboardVersion) {
-		accountDashboardVersion.textContent = String(Number(store?.version || 0));
-	}
-	if (accountDashboardUpdatedAt) {
-		accountDashboardUpdatedAt.textContent = formatDashboardTimestamp(store?.updatedAt);
-	}
-}
-
-function updateAccountPanelVisibility() {
-	var signedIn = hasActiveAccountSession();
-	if (accountAuthPanel) accountAuthPanel.style.display = signedIn ? "none" : "grid";
-	if (accountDashboardPanel) accountDashboardPanel.style.display = signedIn ? "grid" : "none";
-}
-
-function persistAccountState() {
-	if (accountState.token) {
-		localStorage.setItem(accountTokenStorageKey, accountState.token);
-	} else {
-		localStorage.removeItem(accountTokenStorageKey);
-	}
-	if (accountState.user && accountState.user.username) {
-		localStorage.setItem(accountUserStorageKey, JSON.stringify(accountState.user));
-	} else {
-		localStorage.removeItem(accountUserStorageKey);
-	}
-}
-
-function restoreAccountStateFromStorage() {
-	accountState.token = String(localStorage.getItem(accountTokenStorageKey) || "").trim();
-	accountState.user = null;
-	try {
-		var savedUser = JSON.parse(localStorage.getItem(accountUserStorageKey) || "null");
-		if (savedUser && typeof savedUser.username === "string") accountState.user = savedUser;
-	} catch {
-		accountState.user = null;
-	}
-}
-
-function clearAccountState() {
-	accountState.token = "";
-	accountState.user = null;
-	persistAccountState();
-	updateAccountUi();
-}
-
-function updateAccountUi() {
-	updateAccountDashboard();
-	updateAccountPanelVisibility();
-	if (!isAccountApiConfigured()) {
-		setAccountStatus("Account API not configured. Set ACCOUNT_API_BASE in public/config.js");
-		setAccountSyncStatus("Sync unavailable until API is configured.");
-		setAccountButtonsDisabled(true);
-		return;
-	}
-	setAccountButtonsDisabled(false);
-	if (accountState.user?.username) {
-		setAccountStatus(`Logged in as ${accountState.user.username}`);
-	} else {
-		setAccountStatus("Not logged in.");
-	}
-}
-
-function parseAccountApiResponsePayload(text) {
-	if (!text) return null;
-	try {
-		return JSON.parse(text);
-	} catch {
-		return null;
-	}
-}
-
-async function accountApiRequest(path, options = {}) {
-	var base = getAccountApiBase();
-	if (!base) throw new Error("Account API base URL is not configured.");
-	var url = `${base}${path}`;
-	var controller = new AbortController();
-	var timeoutId = setTimeout(() => controller.abort("timeout"), getAccountApiTimeoutMs());
-	try {
-		var headers = {
-			"content-type": "application/json",
-			...options.headers,
-		};
-		if (accountState.token) headers.authorization = `Bearer ${accountState.token}`;
-		var response = await fetch(url, {
-			method: options.method || "GET",
-			headers,
-			body: options.body ? JSON.stringify(options.body) : undefined,
-			signal: controller.signal,
-		});
-		var text = await response.text();
-		var payload = parseAccountApiResponsePayload(text) || {};
-		if (!response.ok) {
-			var message = String(payload?.error || payload?.message || response.statusText || "Request failed");
-			if (response.status === 401) clearAccountState();
-			throw new Error(message);
-		}
-		return payload;
-	} finally {
-		clearTimeout(timeoutId);
-	}
-}
-
-function getDefaultGameDataStore() {
-	return {
-		schemaVersion: gameDataSchemaVersion,
-		version: 0,
-		updatedAt: new Date(0).toISOString(),
-		games: {},
-	};
-}
-
-function loadGameDataStore() {
-	try {
-		var parsed = JSON.parse(localStorage.getItem(gameDataStorageKey) || "null");
-		if (!parsed || typeof parsed !== "object") return getDefaultGameDataStore();
-		var store = {
-			schemaVersion: gameDataSchemaVersion,
-			version: Number.isFinite(parsed.version) ? Number(parsed.version) : 0,
-			updatedAt: String(parsed.updatedAt || new Date(0).toISOString()),
-			games: parsed.games && typeof parsed.games === "object" ? parsed.games : {},
-		};
-		return store;
-	} catch {
-		return getDefaultGameDataStore();
-	}
-}
-
-function saveGameDataStore(store) {
-	var nextStore = store && typeof store === "object" ? store : getDefaultGameDataStore();
-	localStorage.setItem(gameDataStorageKey, JSON.stringify(nextStore));
-}
-
-function commitGameDataStore(mutator) {
-	var current = loadGameDataStore();
-	var next = mutator && typeof mutator === "function" ? mutator(current) || current : current;
-	next.schemaVersion = gameDataSchemaVersion;
-	next.version = Number(next.version || 0) + 1;
-	next.updatedAt = new Date().toISOString();
-	saveGameDataStore(next);
-	return next;
-}
-
-function sanitizeGameId(value) {
-	return String(value || "")
-		.trim()
-		.toLowerCase()
-		.replace(/[^a-z0-9._:-]/g, "_")
-		.slice(0, 120);
-}
-
-function setGameData(gameId, payload) {
-	var key = sanitizeGameId(gameId);
-	if (!key) return null;
-	return commitGameDataStore((store) => {
-		store.games[key] = {
-			updatedAt: new Date().toISOString(),
-			data: payload,
-		};
-		return store;
-	});
-}
-
-function getGameData(gameId) {
-	var key = sanitizeGameId(gameId);
-	if (!key) return null;
-	var store = loadGameDataStore();
-	return store.games?.[key] || null;
-}
-
-function markGamePlayed(url) {
-	var value = String(url || "").trim();
-	if (!value) return;
-	var key = sanitizeGameId(value);
-	if (!key) return;
-	setGameData(key, {
-		url: value,
-		lastPlayedAt: new Date().toISOString(),
-	});
-}
-
-function replaceLocalGameStoreFromServer(payload) {
-	if (!payload || typeof payload !== "object") return;
-	var incoming = {
-		schemaVersion: gameDataSchemaVersion,
-		version: Number.isFinite(payload.version) ? Number(payload.version) : 0,
-		updatedAt: String(payload.updatedAt || new Date(0).toISOString()),
-		games: payload.games && typeof payload.games === "object" ? payload.games : {},
-	};
-	saveGameDataStore(incoming);
-}
-
-function requireAccountSession() {
-	if (!accountState.token) throw new Error("Please login first.");
-}
-
-async function initAccountUi() {
-	updateAccountUi();
-	if (!isAccountApiConfigured()) return;
-	if (!accountState.token) return;
-	try {
-		var me = await accountApiRequest("/api/auth/me");
-		if (!me?.user?.username) throw new Error("Session invalid.");
-		accountState.user = me.user;
-		persistAccountState();
-		updateAccountUi();
-		setAccountSyncStatus("Session restored.");
-	} catch (error) {
-		clearAccountState();
-		setAccountSyncStatus(error?.message || "Session restore failed.");
-	}
-}
-
-function getAccountCredentialsInput() {
-	var username = String(accountUsernameInput?.value || "").trim().toLowerCase();
-	var password = String(accountPasswordInput?.value || "");
-	if (!username || !password) {
-		throw new Error("Username and password are required.");
-	}
-	return { username, password };
-}
-
-async function handleAccountSignup() {
-	if (!isAccountApiConfigured()) {
-		updateAccountUi();
-		return;
-	}
-	try {
-		setAccountSyncStatus("Creating account...");
-		var creds = getAccountCredentialsInput();
-		var response = await accountApiRequest("/api/auth/signup", {
-			method: "POST",
-			body: creds,
-		});
-		accountState.token = String(response?.token || "");
-		accountState.user = response?.user || null;
-		persistAccountState();
-		updateAccountUi();
-		setAccountSyncStatus("Account created and logged in.");
-	} catch (error) {
-		setAccountSyncStatus(error?.message || "Signup failed.");
-	}
-}
-
-async function handleAccountLogin() {
-	if (!isAccountApiConfigured()) {
-		updateAccountUi();
-		return;
-	}
-	try {
-		setAccountSyncStatus("Logging in...");
-		var creds = getAccountCredentialsInput();
-		var response = await accountApiRequest("/api/auth/login", {
-			method: "POST",
-			body: creds,
-		});
-		accountState.token = String(response?.token || "");
-		accountState.user = response?.user || null;
-		persistAccountState();
-		updateAccountUi();
-		setAccountSyncStatus("Login successful.");
-	} catch (error) {
-		setAccountSyncStatus(error?.message || "Login failed.");
-	}
-}
-
-async function handleAccountLogout() {
-	if (!accountState.token) {
-		clearAccountState();
-		setAccountSyncStatus("You are already logged out.");
-		return;
-	}
-	try {
-		setAccountSyncStatus("Logging out...");
-		await accountApiRequest("/api/auth/logout", { method: "POST" });
-	} catch {
-	}
-	clearAccountState();
-	setAccountSyncStatus("Logged out.");
-}
-
-async function uploadGameDataToServer() {
-	try {
-		requireAccountSession();
-		setAccountSyncStatus("Uploading local save...");
-		var store = loadGameDataStore();
-		var response = await accountApiRequest("/api/data", {
-			method: "PUT",
-			body: {
-				data: store,
-				clientVersion: Number(store.version || 0),
-				clientUpdatedAt: store.updatedAt,
-			},
-		});
-		setAccountSyncStatus(
-			`Upload complete. Server version ${Number(response?.serverVersion || 0)} updated at ${String(
-				response?.updatedAt || "unknown"
-			)}`
-		);
-	} catch (error) {
-		setAccountSyncStatus(error?.message || "Upload failed.");
-	}
-}
-
-async function syncGameDataWithServer() {
-	try {
-		requireAccountSession();
-		setAccountSyncStatus("Sync in progress...");
-		setAccountButtonsDisabled(true);
-		var store = loadGameDataStore();
-		var response = await accountApiRequest("/api/sync", {
-			method: "POST",
-			body: {
-				localData: store,
-				localVersion: Number(store.version || 0),
-				localUpdatedAt: store.updatedAt,
-				conflictStrategy: "latest",
-			},
-		});
-		if (response?.resolvedData && typeof response.resolvedData === "object") {
-			replaceLocalGameStoreFromServer(response.resolvedData);
-		}
-		setAccountSyncStatus(
-			`Sync complete. Source: ${String(response?.resolution || "unknown")} | server version ${Number(
-				response?.serverVersion || 0
-			)}`
-		);
-	} catch (error) {
-		setAccountSyncStatus(error?.message || "Sync failed.");
-	} finally {
-		updateAccountUi();
-	}
-}
-
-window.FrostedAccountSync = Object.freeze({
-	getStore: loadGameDataStore,
-	setGameData,
-	getGameData,
-	syncNow: syncGameDataWithServer,
-});
-
 function showLoading(show) {
 	if (!loadingBanner) return;
-	if (show) {
-		if (loadingHideTimerId) {
-			clearTimeout(loadingHideTimerId);
-			loadingHideTimerId = 0;
-		}
-		loadingShownAtMs = Date.now();
-		loadingBanner.classList.add("show");
-		return;
-	}
-
-	if (!loadingBanner.classList.contains("show")) return;
-	var elapsed = Date.now() - loadingShownAtMs;
-	var waitMs = Math.max(0, loadingMinVisibleMs - elapsed);
-	if (waitMs === 0) {
-		loadingBanner.classList.remove("show");
-		return;
-	}
-	if (loadingHideTimerId) clearTimeout(loadingHideTimerId);
-	loadingHideTimerId = setTimeout(() => {
-		loadingHideTimerId = 0;
-		loadingBanner.classList.remove("show");
-	}, waitMs);
+	loadingBanner.classList.toggle("show", show);
 }
 
 function showError(title, detail) {
@@ -5032,7 +3967,6 @@ function injectErudaIntoActiveTab() {
 			targetWindow.eruda?.init?.();
 			return;
 		}
-		// eruda
 		var script = targetDocument.createElement("script");
 		script.id = "fb-eruda-script";
 		script.src = "//cdn.jsdelivr.net/npm/eruda";
@@ -5058,7 +3992,19 @@ function resetError() {
 
 bootstrapWallpaperFromStorage();
 init();
-document.addEventListener("visibilitychange", syncWallpaperVideoVisibility);
-window.addEventListener("blur", syncWallpaperVideoVisibility);
-window.addEventListener("focus", syncWallpaperVideoVisibility);
-// hi
+
+var initialLoadingPopupHidden = false;
+function hideInitialLoadingPopup() {
+	if (initialLoadingPopupHidden) return;
+	initialLoadingPopupHidden = true;
+	showLoading(false);
+}
+
+if (document.readyState === "complete" || document.readyState === "interactive") {
+	hideInitialLoadingPopup();
+} else {
+	document.addEventListener("DOMContentLoaded", hideInitialLoadingPopup, { once: true });
+	window.addEventListener("load", hideInitialLoadingPopup, { once: true });
+}
+
+setTimeout(hideInitialLoadingPopup, 1200);

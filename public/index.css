@@ -515,56 +515,49 @@ body.has-video-wallpaper .wallpaper-video.is-active {
 .loading-banner {
 	position: absolute;
 	inset: 0;
-	padding: 0.85rem 1.1rem;
-	font-size: 0.9rem;
-	font-weight: 600;
-	letter-spacing: 0.01em;
-	color: #e5e7eb;
-	background: transparent;
-	border: none;
 	display: none;
-	z-index: 40;
 	align-items: center;
 	justify-content: center;
-	gap: 0.6rem;
+	background: rgba(3, 7, 15, 0.4);
+	z-index: 9;
 }
 
 .loading-banner.show {
 	display: flex;
 }
 
-.loading-banner span {
-	display: inline-flex;
-	align-items: center;
-	padding: 0.35rem 0.72rem;
-	border-radius: 999px;
-	background: rgba(22, 29, 43, 0.52);
+.loading-popup {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	padding: 0.75rem 0.95rem;
+	border-radius: 0.8rem;
+	font-size: 0.82rem;
+	color: #e5e7eb;
+	background: rgba(11, 18, 31, 0.9);
 	border: 1px solid rgba(255, 255, 255, 0.16);
-	color: rgba(236, 244, 255, 0.95);
-	backdrop-filter: blur(6px);
+	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+	max-width: min(92vw, 380px);
+	text-align: center;
 }
 
-.loading-spinner {
-	width: 1.15rem;
-	height: 1.15rem;
-	border-radius: 999px;
-	border: 2px solid rgba(255, 255, 255, 0.22);
-	border-top-color: #ffffff;
-	animation: proxy-loading-spin 0.8s linear infinite;
-	box-shadow:
-		0 0 0 1px rgba(255, 255, 255, 0.12),
-		0 0 12px rgba(255, 255, 255, 0.45),
-		0 0 24px rgba(110, 200, 255, 0.32);
-	filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.45));
+.loading-popup-title {
+	font-weight: 600;
+	font-size: 0.92rem;
 }
 
-@keyframes proxy-loading-spin {
-	from {
-		transform: rotate(0deg);
-	}
-	to {
-		transform: rotate(360deg);
-	}
+.loading-popup-copy {
+	color: #d1d8e6;
+	line-height: 1.35;
+}
+
+.loading-popup-link {
+	color: #9bc8ff;
+	text-decoration: none;
+}
+
+.loading-popup-link:hover {
+	text-decoration: underline;
 }
 
 .browser-overlay {
@@ -835,7 +828,7 @@ body.matrix-theme-active #aiPage {
 		linear-gradient(145deg, rgba(7, 17, 31, 0.88), rgba(6, 13, 24, 0.8)),
 		radial-gradient(circle at 0% 0%, rgba(127, 184, 255, 0.14), transparent 40%);
 	padding: 1.15rem;
-	min-height: 1275px;
+	min-height: 1000px;
 	overflow: hidden;
 	box-shadow:
 		0 18px 44px rgba(0, 0, 0, 0.4),
@@ -844,12 +837,12 @@ body.matrix-theme-active #aiPage {
 
 .wallpaper-store-stage {
 	display: grid;
-	grid-template-columns: minmax(260px, 1.05fr) minmax(0, 1.2fr) minmax(280px, 1fr);
+	grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.55fr) minmax(260px, 0.9fr);
 	grid-template-areas: "rail content preview";
 	gap: 1rem;
 	align-items: stretch;
 	min-width: 0;
-	min-height: 1145px;
+	min-height: 1000px;
 }
 
 .wallpaper-store-rail {
@@ -867,13 +860,15 @@ body.matrix-theme-active #aiPage {
 .wallpaper-store-content {
 	grid-area: content;
 	min-height: 0;
-	height: 1145px;
+	height: 940px;
 	border-radius: 1rem;
 	border: 1px solid rgba(190, 222, 255, 0.16);
 	background: rgba(5, 11, 20, 0.52);
 	padding: 0.75rem;
 	min-width: 0;
-	overflow: auto;
+	overflow-y: auto;
+	overflow-x: hidden;
+	scrollbar-gutter: stable;
 }
 
 .extension-store-grid {
@@ -884,6 +879,7 @@ body.matrix-theme-active #aiPage {
 	gap: 1rem;
 	margin-top: 0;
 	align-content: start;
+	padding: 0.2rem 0.05rem 0.5rem;
 }
 
 .store-wallpaper-card {
@@ -898,6 +894,7 @@ body.matrix-theme-active #aiPage {
 	gap: 0.34rem;
 	align-self: start;
 	cursor: pointer;
+	will-change: transform;
 	transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
@@ -924,8 +921,7 @@ body.matrix-theme-active #aiPage {
 
 .store-wallpaper-thumb {
 	width: 100%;
-	aspect-ratio: 16 / 10;
-	min-height: 118px;
+	aspect-ratio: 16 / 9;
 	border-radius: 0.7rem;
 	overflow: hidden;
 	border: 1px solid rgba(201, 228, 255, 0.22);
@@ -1069,8 +1065,7 @@ body.matrix-theme-active #aiPage {
 
 .wallpaper-preview-media {
 	width: 100%;
-	aspect-ratio: 16 / 9;
-	min-height: 360px;
+	aspect-ratio: 16 / 10;
 	border-radius: 0.9rem;
 	border: 1px solid rgba(255, 255, 255, 0.12);
 	background: radial-gradient(circle at top, rgba(52, 93, 164, 0.5), rgba(8, 14, 28, 0.92));
@@ -1551,12 +1546,8 @@ body.has-video-wallpaper .home-search input::placeholder {
 	gap: 0.6rem;
 }
 
-.open-mode-row {
-	flex-wrap: wrap;
-}
-
 .open-mode-row .open-mode-btn {
-	flex: 1 1 180px;
+	flex: 1 1 220px;
 }
 
 .open-mode-btn.active {
@@ -1588,84 +1579,6 @@ body.has-video-wallpaper .home-search input::placeholder {
 .settings-hint {
 	font-size: 0.72rem;
 	color: var(--muted);
-}
-
-.account-section .settings-input {
-	min-width: 0;
-}
-
-.account-auth-row {
-	flex-wrap: wrap;
-}
-
-.account-auth-row .settings-input {
-	flex: 1 1 220px;
-}
-
-.account-auth-panel {
-	display: grid;
-	gap: 0.6rem;
-}
-
-.account-btn-row {
-	flex-wrap: wrap;
-}
-
-.account-btn-row .settings-btn {
-	flex: 1 1 140px;
-}
-
-.account-dashboard-panel {
-	display: none;
-	gap: 0.6rem;
-	padding: 0.7rem;
-	border-radius: 0.8rem;
-	border: 1px solid var(--border);
-	background: var(--surface-2);
-}
-
-.account-dashboard-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	gap: 0.6rem;
-	flex-wrap: wrap;
-}
-
-.account-dashboard-title {
-	font-size: 0.82rem;
-	font-weight: 600;
-	color: var(--text);
-}
-
-.account-dashboard-user {
-	font-size: 0.74rem;
-	color: var(--muted);
-}
-
-.account-dashboard-grid {
-	display: grid;
-	gap: 0.6rem;
-	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-}
-
-.account-dashboard-card {
-	border: 1px solid var(--border);
-	border-radius: 0.7rem;
-	padding: 0.55rem 0.65rem;
-	background: var(--surface-3);
-}
-
-.account-dashboard-label {
-	font-size: 0.68rem;
-	color: var(--muted);
-}
-
-.account-dashboard-value {
-	margin-top: 0.2rem;
-	font-size: 0.82rem;
-	color: var(--text);
-	word-break: break-word;
 }
 
 .panic-box {
@@ -1709,18 +1622,14 @@ body.has-video-wallpaper .home-search input::placeholder {
 .games-toolbar {
 	padding: 0 1rem 0.4rem;
 	display: flex;
+	gap: 0.55rem;
 	align-items: center;
-	gap: 0.6rem;
 	flex-wrap: wrap;
 }
 
 .games-search {
-	flex: 1 1 320px;
+	flex: 1 1 280px;
 	font-family: "Poppins", system-ui, sans-serif;
-}
-
-.games-sync-btn {
-	flex: 0 0 auto;
 }
 
 .ai-page-shell {
@@ -1909,6 +1818,16 @@ body.has-video-wallpaper .home-search input::placeholder {
 	flex: 1;
 	min-height: 46px;
 	padding: 0.75rem 0.9rem;
+}
+
+@media (max-height: 720px) {
+	.ai-chat {
+		padding-bottom: 4.8rem;
+	}
+
+	.ai-prompt-wrap {
+		bottom: 4.4rem;
+	}
 }
 
 .games-grid {

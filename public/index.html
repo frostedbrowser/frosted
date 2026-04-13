@@ -43,9 +43,9 @@
 		<script src="/scram/scramjet.all.js"></script>
 		<script src="/baremux/index.js"></script>
 		<link rel="stylesheet" href="index.css" />
-		<script src="config.js"></script>
 		<script src="register-sw.js" defer></script>
 		<script src="search.js" defer></script>
+		<script src="config.js" defer></script>
 		<script>
 			window.GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 			window.GROQ_API_KEY = localStorage.getItem("fb_groq_api_key") || "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";
@@ -100,9 +100,6 @@
 									<button class="action-menu-item" id="gamesBtn" type="button" role="menuitem">
 										<i class="fa-solid fa-gamepad"></i> Games
 									</button>
-									<button class="action-menu-item" id="accountsBtn" type="button" role="menuitem">
-										<i class="fa-solid fa-user"></i> Accounts
-									</button>
 									<button class="action-menu-item" id="wallpaperAppBtn" type="button" role="menuitem">
 										<i class="fa-solid fa-image"></i> Open Wallpapers
 									</button>
@@ -140,9 +137,21 @@
 			<div class="browser-shell">
 				<div class="browser-main">
 					<div class="browser-stage">
-						<div class="loading-banner" id="loadingBanner" role="status" aria-live="polite">
-							<div class="loading-spinner" aria-hidden="true"></div>
-							<span>Loading page</span>
+						<div class="loading-banner show" id="loadingBanner" role="status" aria-live="polite">
+							<div class="loading-popup">
+								<div class="loading-popup-title">Loading webpage...</div>
+								<div class="loading-popup-copy">
+									join the discord
+									<a
+										class="loading-popup-link"
+										href="https://dsc.gg/frostedbrowser"
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										dsc.gg/frostedbrowser
+									</a>
+								</div>
+							</div>
 						</div>
 						<iframe id="browserFrame" title="Browser content"></iframe>
 						<div class="browser-overlay" id="blankState">
@@ -165,10 +174,6 @@
 										<div class="tile-icon"><i class="fa-brands fa-youtube"></i></div>
 										<div class="tile-label">YouTube (Invidious)</div>
 									</button>
-									<button class="home-tile" data-url="https://streamex.sh/">
-										<div class="tile-icon"><i class="fa-film"></i></div>
-										<div class="tile-label">StreameX (Movies)</div>
-									</button>
 								</div>
 								<div class="home-credits">
 									<a href="frosted://credits" id="creditsLink">Credits</a>
@@ -186,22 +191,21 @@
 										<select class="settings-select" id="wallpaperSelect"></select>
 									</div>
 									<div class="settings-section">
-										<label class="settings-label" for="openModeSelect">Open in ...</label>
-										<div class="settings-row">
-											<select class="settings-select" id="openModeSelect">
-												<option value="aboutblank">about:blank</option>
-												<option value="blob">blob:</option>
-											</select>
+										<label class="settings-label">Open in ...</label>
+										<div class="settings-row open-mode-row">
+											<button class="settings-btn open-mode-btn" id="openModeAboutBtn" type="button">
+												Open in about:blank
+											</button>
+											<button class="settings-btn open-mode-btn" id="openModeBlobBtn" type="button">
+												Open in blob:
+											</button>
 										</div>
-										<div class="settings-hint" id="openModeStatus">
-											Open mode set to about:blank.
-										</div>
 										<div class="settings-row">
-											<label class="settings-label" for="autoBlobToggle">Auto Open On Startup</label>
+											<label class="settings-label" for="autoBlobToggle">Auto Blob</label>
 											<input id="autoBlobToggle" type="checkbox" />
 										</div>
 										<div class="settings-hint" id="autoBlobStatus">
-											Auto open on startup (about:blank): disabled
+											Auto Blob on startup: enabled
 										</div>
 									</div>
 									<div class="settings-section">
@@ -282,50 +286,6 @@
 								</div>
 							</div>
 						</div>
-						<div id="accountsPage" class="internal-page">
-							<div class="settings-page-shell">
-								<div class="settings-page-header">
-									<h2>Accounts</h2>
-								</div>
-								<div class="settings-page-body">
-									<div class="settings-section account-section">
-										<label class="settings-label">Account Sync</label>
-										<div class="account-auth-panel" id="accountAuthPanel">
-											<div class="settings-row account-auth-row">
-												<input class="settings-input" id="accountUsernameInput" type="text" placeholder="Username" />
-												<input class="settings-input" id="accountPasswordInput" type="password" placeholder="Password" />
-											</div>
-											<div class="settings-row account-btn-row">
-												<button class="settings-btn" id="accountSignupBtn" type="button">Sign Up</button>
-												<button class="settings-btn" id="accountLoginBtn" type="button">Login</button>
-											</div>
-										</div>
-										<div class="account-dashboard-panel" id="accountDashboardPanel">
-											<div class="account-dashboard-header">
-												<div class="account-dashboard-title">Dashboard</div>
-												<div class="account-dashboard-user" id="accountDashboardUser">Signed in</div>
-											</div>
-											<div class="account-dashboard-grid">
-												<div class="account-dashboard-card">
-													<div class="account-dashboard-label">Local Save Version</div>
-													<div class="account-dashboard-value" id="accountDashboardVersion">0</div>
-												</div>
-												<div class="account-dashboard-card">
-													<div class="account-dashboard-label">Last Local Update</div>
-													<div class="account-dashboard-value" id="accountDashboardUpdatedAt">Never</div>
-												</div>
-											</div>
-											<div class="settings-row account-btn-row">
-												<button class="settings-btn" id="accountLogoutBtn" type="button">Logout</button>
-												<button class="settings-btn" id="accountSyncBtn" type="button">Sync</button>
-											</div>
-										</div>
-										<div class="settings-hint" id="accountUserStatus">Not logged in.</div>
-										<div class="settings-hint" id="accountSyncStatus">Sync idle.</div>
-									</div>
-								</div>
-							</div>
-						</div>
 						<div id="creditsPage" class="internal-page">
 							<div class="credits-page-shell">
 								<div class="settings-page-header">
@@ -389,25 +349,6 @@
 											<i class="fa-brands fa-discord"></i>
 										</a>
 									</article>
-																		<article class="partner-card">
-										<div class="partner-logo-wrap">
-											<img
-												class="partner-logo-img"
-												src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/icons/flux.png"
-												alt="Flux logo"
-												width="56"
-												height="56"
-												loading="lazy"
-												onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';"
-											/>
-											<div class="partner-logo">FLUX</div>
-										</div>
-										<h3>// Flux</h3>
-										<p>simple all‑in‑one proxy site</p>
-										<a class="partner-btn" href="https://discord.gg/uCzkJ3tNa" target="_blank" rel="noopener noreferrer">
-											<i class="fa-brands fa-discord"></i>
-										</a>
-									</article>
 									<article class="partner-card">
 										<div class="partner-logo-wrap">
 											<img
@@ -443,7 +384,6 @@
 										type="text"
 										placeholder="Search games..."
 									/>
-									<button id="gamesSyncBtn" class="settings-btn games-sync-btn" type="button">Sync</button>
 								</div>
 								<div class="games-grid" id="gamesGrid"></div>
 							</div>
