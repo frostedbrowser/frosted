@@ -3,12 +3,23 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm ci
+        - npm install
     build:
       commands:
         - rm -rf dist
         - mkdir -p dist
+        - mkdir -p dist/scram
+        - mkdir -p dist/baremux
+        - mkdir -p dist/libcurl
+        - mkdir -p dist/vendor/adblocker
         - cp -r public/. dist/
+        - cp -r node_modules/@mercuryworkshop/scramjet/dist/. dist/scram/
+        - cp -r node_modules/@mercuryworkshop/bare-mux/dist/. dist/baremux/
+        - cp -r node_modules/@mercuryworkshop/libcurl-transport/dist/. dist/libcurl/
+        - cp -r node_modules/@ghostery/adblocker/dist/esm/. dist/vendor/adblocker/
+        - ls -la dist
+        - ls -la dist/scram
+        - ls -la dist/baremux
   artifacts:
     baseDirectory: dist
     files:
