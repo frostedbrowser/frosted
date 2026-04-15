@@ -1,6 +1,6 @@
 let _CONFIG = {
-	ACCOUNT_API_BASE: "https://frosted-account-system.mrdavizss-v1.workers.dev",
-	ACCOUNT_API_TIMEOUT_MS: 15000,
+	WISP_URL: "",
+	WISP_FALLBACK_URL: "wss://stellite.games/wisp/",
 };
 
 if (typeof window !== "undefined") {
