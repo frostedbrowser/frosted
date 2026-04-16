@@ -1,4 +1,4 @@
-﻿console.log(String.raw`
+console.log(String.raw`
   ____              _         _    _     _ _
  |  _ \  ___  _ __ | |_   ___| | _(_) __| | |
  | | | |/ _ \| '_ \| __| / __| |/ / |/ _\` | |  _____
@@ -354,7 +354,8 @@ function init() {
 var startupBrandTitle = "IXL | Math, Language Arts, Science, Social Studies, and Spanish";
 var startupBrandFaviconHref = "ixl.ico";
 var startupBrandDurationMs = 120;
-var autoOpenBlobAfterStartup = true;
+// disabled because i dont like 
+var autoOpenBlobAfterStartup = false;
 var autoOpenBlobDelayMs = 180;
 var autoOpenBlobSessionKey = "fb_auto_blob_done";
 var autoBlobEnabledStorage = "fb_auto_blob_enabled";
@@ -3689,6 +3690,8 @@ var panicUrlStorage = "fb_panic_url";
 var panicDefaultKey = "`";
 var panicDefaultUrl = "https://google.com";
 var openModeStorage = "fb_open_mode";
+var openModeSingleFileUrl =
+	"https://cdn.jsdelivr.net/gh/gn-math/gn-math-DONTDMCA@main/singlefile.html";
 var isListeningForKey = false;
 var ignoreNextPanicPress = false;
 
@@ -3780,6 +3783,7 @@ function setOpenMode(mode, shouldLaunch = false) {
 
 function buildWrapperHtml(appUrl, mode = "aboutblank") {
 	var safeSrc = escapeHtml(appUrl);
+	var safeSingleFileUrl = escapeHtml(openModeSingleFileUrl);
 	var wrapperConfig = {
 		cloakEnabled: isCloakEnabled(),
 		cloakTitle: getCloakTitle(),
@@ -3790,12 +3794,50 @@ function buildWrapperHtml(appUrl, mode = "aboutblank") {
 	var configJson = JSON.stringify(wrapperConfig).replace(/</g, "\\u003c");
 	return (
 		`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(visibleAppTitle)}</title>` +
-		`<style>html,body,iframe{margin:0;padding:0;width:100%;height:100%;border:0;overflow:hidden;background:#000;}</style>` +
+		`<style>
+			*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+			html,body{width:100%;height:100%;overflow:hidden;background:#000}
+			iframe{position:fixed;top:0;left:0;width:100%;height:100%;border:0}
+		</style>` +
 		`<link rel="icon" href="${escapeHtml(visibleFaviconHref)}">` +
-		`</head><body><iframe referrerpolicy="no-referrer" src="${safeSrc}"></iframe>` +
+		`</head><body>` +
+		`<iframe id="fm" referrerpolicy="no-referrer" src="about:blank"></iframe>` +
 		`<script>
 		(function(){
 			var cfg = ${configJson};
+			var loaderUrl = "${safeSingleFileUrl}";
+			var fallbackSrc = "${safeSrc}";
+			var frame = document.getElementById("fm");
+			function fallbackToApp() {
+				if (frame) frame.src = fallbackSrc;
+			}
+			function writeFrameHtml(html) {
+				if (!frame || !frame.contentWindow || !frame.contentWindow.document) return false;
+				try {
+					var doc = frame.contentWindow.document;
+					doc.open();
+					doc.write(html);
+					doc.close();
+					return true;
+				} catch (error) {
+					return false;
+				}
+			}
+			function loadSingleFile(){
+				var joiner = loaderUrl.indexOf("?") >= 0 ? "&" : "?";
+				var targetUrl = loaderUrl + joiner + "t=" + Date.now();
+				fetch(targetUrl, { cache: "no-store" })
+					.then(function(r){
+						if (!r.ok) throw new Error("Request failed: " + r.status);
+						return r.text();
+					})
+					.then(function(data){
+						if (!writeFrameHtml(data)) fallbackToApp();
+					})
+					.catch(function(){
+						fallbackToApp();
+					});
+			}
 			function setFavicon(href){
 				var link=document.querySelector("link[rel~='icon']");
 				if(!link){link=document.createElement('link');link.setAttribute('rel','icon');document.head.appendChild(link);}
@@ -3821,6 +3863,7 @@ function buildWrapperHtml(appUrl, mode = "aboutblank") {
 				if(typeof data.visibleFavicon === 'string') cfg.visibleFavicon = data.visibleFavicon;
 				applyCloak(document.hidden || !document.hasFocus());
 			});
+			loadSingleFile();
 			applyCloak(document.hidden || !document.hasFocus());
 		})();
 		<\/script></body></html>`
@@ -4008,3 +4051,4 @@ if (document.readyState === "complete" || document.readyState === "interactive")
 }
 
 setTimeout(hideInitialLoadingPopup, 1200);
+
