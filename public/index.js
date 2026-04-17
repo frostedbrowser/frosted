@@ -1905,14 +1905,82 @@ function normalizeWispUrl(rawUrl) {
 	}
 }
 
+function normalizeWispUrlList(rawValue) {
+	if (Array.isArray(rawValue)) {
+		return rawValue.map((entry) => normalizeWispUrl(entry)).filter(Boolean);
+	}
+	var input = String(rawValue || "").trim();
+	if (!input) return [];
+	if (!/[,\s]/.test(input)) {
+		var single = normalizeWispUrl(input);
+		return single ? [single] : [];
+	}
+	return input
+		.split(/[,\s]+/)
+		.map((entry) => normalizeWispUrl(entry))
+		.filter(Boolean);
+}
+
 function getWispTransportCandidates() {
-	var configuredPrimary = normalizeWispUrl(window?._CONFIG?.WISP_URL || window?.WISP_URL);
-	var configuredFallback = normalizeWispUrl(window?._CONFIG?.WISP_FALLBACK_URL);
+	var configuredPrimary = normalizeWispUrlList(window?._CONFIG?.WISP_URL || window?.WISP_URL);
+	var configuredFallback = normalizeWispUrlList(
+		window?._CONFIG?.WISP_FALLBACK_URLS || window?._CONFIG?.WISP_FALLBACK_URL
+	);
 	var sameOrigin = normalizeWispUrl(
 		`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/wisp/`
 	);
-	var ordered = [configuredPrimary, sameOrigin, configuredFallback].filter(Boolean);
+	var ordered = [...configuredPrimary, ...configuredFallback, sameOrigin].filter(Boolean);
 	return Array.from(new Set(ordered));
+}
+
+function probeWispCandidate(candidateUrl, timeoutMs = 4000) {
+	return new Promise((resolve, reject) => {
+		var socket;
+		var settled = false;
+		var timerId = setTimeout(() => {
+			cleanup();
+			reject(new Error(`Timed out while connecting to ${candidateUrl}`));
+		}, timeoutMs);
+
+		function cleanup() {
+			clearTimeout(timerId);
+			if (!socket) return;
+			socket.onopen = null;
+			socket.onerror = null;
+			socket.onclose = null;
+		}
+
+		function finish(error) {
+			if (settled) return;
+			settled = true;
+			cleanup();
+			try {
+				if (socket && socket.readyState === WebSocket.OPEN) socket.close(1000, "probe-complete");
+			} catch {
+			}
+			if (error) reject(error);
+			else resolve(candidateUrl);
+		}
+
+		try {
+			socket = new WebSocket(candidateUrl);
+		} catch (error) {
+			finish(error instanceof Error ? error : new Error(String(error)));
+			return;
+		}
+
+		socket.onopen = () => {
+			finish();
+		};
+		socket.onerror = () => {
+			finish(new Error(`Unable to reach ${candidateUrl}`));
+		};
+		socket.onclose = (event) => {
+			if (settled) return;
+			if (event.wasClean) finish();
+			else finish(new Error(`WebSocket closed before ready: ${candidateUrl}`));
+		};
+	});
 }
 
 async function ensureTransport() {
@@ -1922,6 +1990,7 @@ async function ensureTransport() {
 	var lastError = null;
 	for (var wispUrl of candidates) {
 		try {
+			await probeWispCandidate(wispUrl);
 			await connection.setTransport("/libcurl/index.mjs", [{ websocket: wispUrl }]);
 			transportReady = true;
 			return;
@@ -1929,7 +1998,10 @@ async function ensureTransport() {
 			lastError = error;
 		}
 	}
-	throw lastError || new Error("Unable to establish proxy transport.");
+	throw (
+		lastError ||
+		new Error(`Unable to establish proxy transport. Candidates: ${candidates.join(", ")}`)
+	);
 }
 
 var historyKey = "fb_history";
@@ -4051,4 +4123,3 @@ if (document.readyState === "complete" || document.readyState === "interactive")
 }
 
 setTimeout(hideInitialLoadingPopup, 1200);
-
