@@ -1,8 +1,17 @@
-let _CONFIG = {
-	WISP_URL: "",
+const sameOriginWispUrl =
+	typeof window !== "undefined"
+		? `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/wisp/`
+		: "";
+
+const defaultConfig = {
+	WISP_URL: sameOriginWispUrl,
 	WISP_FALLBACK_URL: "wss://stellite.games/wisp/",
 };
 
 if (typeof window !== "undefined") {
-	window._CONFIG = Object.assign({}, _CONFIG, window._CONFIG || {});
+	var existingConfig = window._CONFIG && typeof window._CONFIG === "object" ? window._CONFIG : {};
+	window._CONFIG = Object.assign({}, existingConfig, defaultConfig);
+	window._CONFIG.WISP_URL = defaultConfig.WISP_URL;
+	window._CONFIG.WISP_FALLBACK_URL = defaultConfig.WISP_FALLBACK_URL;
+	window.WISP_URL = defaultConfig.WISP_URL;
 }

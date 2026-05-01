@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
@@ -18,21 +18,21 @@
         <meta property="og:site_name" content="IXL Learning"/>
         <meta name="msapplication-TileColor" content="#00ffa6">
         <meta property="og:image" content="https://www.ixl.com/dv3/powZqMuTE7du4asFrVyNGxxoqkw/yui3/opengraph/assets/general_us.png">
-        <meta name="description" content="IXL is the world's most popular subscription-based learning site for K–12. Used by over 17 million students, IXL provides personalized learning in more than 17,000 topics, covering math, language arts, science, social studies, and Spanish. Interactive questions, awards, and certificates keep kids motivated as they master skills.">
-        <meta property="og:description" content="IXL is the world's most popular subscription-based learning site for K–12. Used by over 17 million students, IXL provides personalized learning in more than 17,000 topics, covering math, language arts, science, social studies, and Spanish. Interactive questions, awards, and certificates keep kids motivated as they master skills.">
-		<link rel="icon" href="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/icons/frosted.png" />
+        <meta name="description" content="IXL is the world's most popular subscription-based learning site for Kâ€“12. Used by over 17 million students, IXL provides personalized learning in more than 17,000 topics, covering math, language arts, science, social studies, and Spanish. Interactive questions, awards, and certificates keep kids motivated as they master skills.">
+        <meta property="og:description" content="IXL is the world's most popular subscription-based learning site for Kâ€“12. Used by over 17 million students, IXL provides personalized learning in more than 17,000 topics, covering math, language arts, science, social studies, and Spanish. Interactive questions, awards, and certificates keep kids motivated as they master skills.">
+		<link rel="icon" href="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/frosted.png" />
 		<meta
 			name="description"
 			content="Frosted is a highly niche proxy used for evading internet censorship or accessing websites in a controlled sandbox using the power of service-workers. Unblock sites today!"
 		/>
 		<meta
 			name="keywords"
-			content="proxy, web proxy, ultraviolet, service workers, unblock websites, unblock chromebook, free web proxy, proxy list, proxy sites, un block chromebook, online proxy, proxy server, proxysite, proxy youtube, bypass securly, bypass iboss, bypass lightspeed filter, holy unblocker, chromebooks, titanium network, unblock youtube, youtube proxy, unblocked youtube, youtube unblocked, frosted, unblocker, invidious, cineby, nowgg, games, ai chatbot, groq, llama 3.1, llama 3.3, ai utilities"
+			content="proxy, web proxy, ultraviolet, service workers, unblock websites, unblock chromebook, free web proxy, proxy list, proxy sites, un block chromebook, online proxy, proxy server, proxysite, proxy youtube, bypass securly, bypass iboss, bypass lightspeed filter, holy unblocker, chromebooks, titanium network, unblock youtube, youtube proxy, unblocked youtube, youtube unblocked, frosted, unblocker, invidious, cineby, nowgg, games, ai chatbot, ai utilities"
 		/>
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
-			href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+			href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap"
 			rel="stylesheet"
 		/>
 		<link
@@ -40,22 +40,14 @@
 			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 		/>
 
-		<script src="/scram/scramjet.all.js"></script>
-		<script src="/baremux/index.js"></script>
-		<link rel="stylesheet" href="index.css" />
-		<script src="register-sw.js" defer></script>
-		<script src="search.js" defer></script>
-		<script src="config.js" defer></script>
-		<script>
-			window.GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-			window.GROQ_API_KEY = localStorage.getItem("fb_groq_api_key") || "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";
-			window.GROQ_SYSTEM_PROMPT =
-				"You are a helpful assistant for users of this browser app. Keep answers concise and clear.";
-			window.GROQ_MODEL_AUTO = "llama-3.1-8b-instant";
-			window.GROQ_MODEL_FAST = "llama-3.1-8b-instant";
-			window.GROQ_MODEL_SMART = "llama-3.3-70b-versatile";
-		</script>
-		<script src="index.js" defer></script>
+		<link rel="modulepreload" href="./baremux/index.mjs?v=5" />
+		<link rel="modulepreload" href="./libcurl/index.mjs?v=5" />
+		<link rel="modulepreload" href="./epoxy/index.mjs?v=5" />
+		<link rel="stylesheet" href="./index.css?v=12" />
+		<script src="./register-sw.js?v=13" defer></script>
+		<script src="./search.js?v=5" defer></script>
+		<script src="./config.js?v=6" defer></script>
+		<script src="./index.js?v=21" defer></script>
 	</head>
 	<body>
 		<div id="particles-js"></div>
@@ -75,16 +67,21 @@
 								<i class="fa-solid fa-rotate-right"></i>
 							</button>
 						</div>
-						<form class="address-bar" id="toolbarForm">
-							<input id="addressInput" type="text" placeholder="Search or enter address" />
+						<form class="address-bar" id="toolbarForm" autocomplete="off">
+							<input
+								id="addressInput"
+								type="text"
+								placeholder="Search or enter address"
+								autocomplete="off"
+								autocorrect="off"
+								autocapitalize="off"
+								spellcheck="false"
+							/>
 							<button id="goBtn" aria-label="Go">
 								<i class="fa-solid fa-arrow-right"></i>
 							</button>
 						</form>
 						<div class="toolbar-actions">
-							<button class="toolbar-btn" id="homeBtn" aria-label="Home">
-								<i class="fa-solid fa-house"></i>
-							</button>
 							<div class="action-menu-wrap">
 								<button
 									class="toolbar-btn action-menu-btn"
@@ -97,34 +94,38 @@
 									<i class="fa-solid fa-bars"></i>
 								</button>
 								<div class="action-menu" id="actionMenu" role="menu" aria-label="Quick actions">
-									<button class="action-menu-item" id="gamesBtn" type="button" role="menuitem">
-										<i class="fa-solid fa-gamepad"></i> Games
+									<button class="action-menu-item" id="actionHomeBtn" type="button" role="menuitem" aria-label="Home" title="Home">
+										<i class="fa-solid fa-house"></i>
 									</button>
-									<button class="action-menu-item" id="wallpaperAppBtn" type="button" role="menuitem">
-										<i class="fa-solid fa-image"></i> Open Wallpapers
+									<button class="action-menu-item action-menu-item-code" id="erudaBtn" type="button" role="menuitem" aria-label="Open eruda console" title="Open eruda console">
+										&lt;/&gt;
 									</button>
-									<button class="action-menu-item" id="aiBtn" type="button" role="menuitem">
-										<img src="/chatgpt-logo.svg" alt="" class="toolbar-btn-logo" /> AI
+									<button class="action-menu-item" id="gamesBtn" type="button" role="menuitem" aria-label="Games" title="Games">
+										<i class="fa-solid fa-gamepad"></i>
 									</button>
-									<button class="action-menu-item eruda-btn" id="erudaBtn" type="button" role="menuitem">
-										&lt;/&gt; eruda
+									<button class="action-menu-item" id="aiBtn" type="button" role="menuitem" aria-label="AI" title="AI">
+										<i class="fa-solid fa-globe"></i>
 									</button>
-									<button class="action-menu-item ads-toggle-btn" id="adsToggleBtn" type="button" role="menuitem">
-										ads: off
+									<button class="action-menu-item" id="chatgptBtn" type="button" role="menuitem" aria-label="ChatGPT" title="ChatGPT">
+										<img src="./chatgpt-logo.svg" alt="ChatGPT" />
 									</button>
-									<button class="action-menu-item" id="partnershipBtn" type="button" role="menuitem">
-										<img
-											id="partnershipBtnImg"
-											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/icons/download.png"
-											alt=""
-										/>
-										Partners
+									<button class="action-menu-item" id="actionSettingsBtn" type="button" role="menuitem" aria-label="Settings" title="Settings">
+										<i class="fa-solid fa-gear"></i>
+									</button>
+									<button class="action-menu-item" id="wallpaperAppBtn" type="button" role="menuitem" aria-label="Wallpapers" title="Wallpapers">
+										<i class="fa-solid fa-image"></i>
+									</button>
+									<button class="action-menu-item" id="adsToggleBtn" type="button" role="menuitem" aria-label="Toggle ad blocker" title="Toggle ad blocker">
+										<i class="fa-solid fa-bullhorn-slash"></i>
+									</button>
+									<button class="action-menu-item" id="partnershipBtn" type="button" role="menuitem" aria-label="Partners" title="Partners">
+										<i class="fa-solid fa-handshake"></i>
+									</button>
+									<button class="action-menu-item" id="actionNewTabBtn" type="button" role="menuitem" aria-label="New tab" title="New tab">
+										<i class="fa-solid fa-plus"></i>
 									</button>
 								</div>
 							</div>
-							<button class="toolbar-btn" id="settingsBtn" aria-label="Settings">
-								<i class="fa-solid fa-gear"></i>
-							</button>
 						</div>
 					</div>
 					<div class="tabs-row">
@@ -137,9 +138,9 @@
 			<div class="browser-shell">
 				<div class="browser-main">
 					<div class="browser-stage">
-						<div class="loading-banner show" id="loadingBanner" role="status" aria-live="polite">
+						<div class="loading-banner" id="loadingBanner" role="status" aria-live="polite">
 							<div class="loading-popup">
-								<div class="loading-popup-title">Loading webpage...</div>
+								<div class="loading-popup-title">Loading рΓοху...</div>
 								<div class="loading-popup-copy">
 									join the discord
 									<a
@@ -160,11 +161,19 @@
 								<div class="home-tagline" id="randomTagline">
 									breaking things since day one
 								</div>
-								<form class="home-search" id="homeForm">
+								<form class="home-search" id="homeForm" autocomplete="off">
 									<span class="home-search-icon">
 										<i class="fa-solid fa-magnifying-glass"></i>
 									</span>
-									<input id="homeSearchInput" type="text" placeholder="Search for anything..." />
+									<input
+										id="homeSearchInput"
+										type="text"
+										placeholder="Search for anything..."
+										autocomplete="off"
+										autocorrect="off"
+										autocapitalize="off"
+										spellcheck="false"
+									/>
 									<button id="homeSearchBtn" aria-label="Search">
 										<i class="fa-solid fa-arrow-right"></i>
 									</button>
@@ -189,6 +198,16 @@
 									<div class="settings-section">
 										<label class="settings-label" for="wallpaperSelect">Wallpaper</label>
 										<select class="settings-select" id="wallpaperSelect"></select>
+									</div>
+									<div class="settings-section">
+										<label class="settings-label" for="proxySelect">Proxy Engine</label>
+										<select class="settings-select" id="proxySelect">
+											<option value="scramjet">Scramjet</option>
+											<option value="ultraviolet">Ultraviolet</option>
+										</select>
+										<div class="settings-hint" id="proxy-status">
+											Proxy mode: Scramjet
+										</div>
 									</div>
 									<div class="settings-section">
 										<label class="settings-label">Open in ...</label>
@@ -311,7 +330,7 @@
 												GN-MATH / Games
 												</p>
 												<p>
-													groq / AI Chatbot
+												groq / AI Chatbot
 													</p>
 										</p>
 									</div>
@@ -321,7 +340,7 @@
 						<div id="partnersPage" class="internal-page">
 							<div class="partners-page-shell">
 								<div class="settings-page-header partners-header">
-									<h2>Partners</h2>
+									<h2>partners</h2>
 								</div>
 								<div class="partners-grid">
 									<article class="partner-card">
@@ -339,6 +358,114 @@
 										</div>
 										<h3>// OnlyLessons</h3>
 										<a class="partner-btn" href="https://discord.gg/cmdkxMgBEm" target="_blank" rel="noopener noreferrer">
+											<i class="fa-brands fa-discord"></i>
+										</a>
+									</article>
+									<article class="partner-card">
+										<div class="partner-logo-wrap">
+											<img
+												class="partner-logo-img"
+												src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/zypher.png"
+												alt="zypher"
+												width="56"
+												height="56"
+												loading="lazy"
+												onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';"
+											/>
+											<div class="partner-logo">zy</div>
+										</div>
+										<h3>// Zypher</h3>
+										<a class="partner-btn" href="https://discord.gg/WFvTbse78V" target="_blank" rel="noopener noreferrer">
+											<i class="fa-brands fa-discord"></i>
+										</a>
+									</article>
+									<article class="partner-card">
+										<div class="partner-logo-wrap">
+											<img
+												class="partner-logo-img"
+												src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/nikehub.png"
+												alt="NikeHub logo"
+												width="56"
+												height="56"
+												loading="lazy"
+												onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';"
+											/>
+											<div class="partner-logo">NH</div>
+										</div>
+										<h3>// NikeHub</h3>
+										<a class="partner-btn" href="https://discord.gg/Y4uMau4dGy" target="_blank" rel="noopener noreferrer">
+											<i class="fa-brands fa-discord"></i>
+										</a>
+									</article>
+									<article class="partner-card">
+										<div class="partner-logo-wrap">
+											<img
+												class="partner-logo-img"
+												src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/icons/flux.png"
+												alt="flux logo"
+												width="56"
+												height="56"
+												loading="lazy"
+												onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';"
+											/>
+											<div class="partner-logo">FL</div>
+										</div>
+										<h3>// Flux</h3>
+										<a class="partner-btn" href="https://discord.gg/uCzkJ3tNa" target="_blank" rel="noopener noreferrer">
+											<i class="fa-brands fa-discord"></i>
+										</a>
+									</article>
+									<article class="partner-card">
+										<div class="partner-logo-wrap">
+											<img
+												class="partner-logo-img"
+												src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/flux2.png"
+												alt="flux2 Logo"
+												width="56"
+												height="56"
+												loading="lazy"
+												onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';"
+											/>
+											<div class="partner-logo">fl2</div>
+										</div>
+										<h3>// Flux</h3>
+										<a class="partner-btn" href="https://discord.gg/3fbJG2emb6" target="_blank" rel="noopener noreferrer">
+											<i class="fa-brands fa-discord"></i>
+										</a>
+									</article>
+									<article class="partner-card">
+										<div class="partner-logo-wrap">
+											<img
+												class="partner-logo-img"
+												src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/linkspot.png"
+												alt="Link Spot Logo"
+												width="56"
+												height="56"
+												loading="lazy"
+												onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';"
+											/>
+											<div class="partner-logo">LS</div>
+										</div>
+										<h3>// Link Spot</h3>
+										<a class="partner-btn" href="https://discord.gg/6AMD9YzyTM" target="_blank" rel="noopener noreferrer">
+											<i class="fa-brands fa-discord"></i>
+										</a>
+									</article>
+									<article class="partner-card">
+										<div class="partner-logo-wrap">
+											<img
+												class="partner-logo-img"
+												src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/comet.png"
+												alt="Comet Logo"
+												width="56"
+												height="56"
+												loading="lazy"
+												onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';"
+											/>
+											<div class="partner-logo">CO</div>
+										</div>
+										<h3>// Comet</h3>
+										<a class="partner-btn" href="https://discord.gg/nRQcnNuzb8" target="_blank" rel="noopener noreferrer">
 											<i class="fa-brands fa-discord"></i>
 										</a>
 									</article>
@@ -366,25 +493,30 @@
 						<div id="aiPage" class="internal-page">
 							<div class="ai-page-shell">
 								<div class="settings-page-header">
-									<h2>AI</h2>
+									<h2>FrostedAI V.2</h2>
 								</div>
 								<div class="ai-body">
 									<div class="ai-chat">
-										<div id="aiResult" class="ai-result">Ask me anything.</div>
 										<div class="ai-speed-row">
-											<label class="settings-label" for="aiSpeedSelect">Speed</label>
-											<select id="aiSpeedSelect" class="settings-select ai-Speed-select">
-												<option value="auto">Auto</option>
-												<option value="fast">Fast</option>
-												<option value="smart">Smart</option>
+											<label class="settings-label" for="aiModelSelect">Model</label>
+											<select id="aiModelSelect" class="settings-select ai-speed-select">
+												<option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile</option>
+												<option value="llama-3.1-8b-instant">Llama 3.1 8B Instant</option>
+												<option value="mixtral-8x7b-32768">Mixtral 8x7B 32k</option>
+												<option value="gemma2-9b-it">Gemma2 9B IT</option>
 											</select>
 										</div>
+										<div id="aiResult" class="ai-result">Ask FrostedAI anything.</div>
 										<div class="ai-prompt-wrap">
 											<input
 												id="aiPromptInput"
 												class="settings-input ai-prompt"
 												type="text"
-												placeholder="Type your prompt..."
+												autocomplete="off"
+												autocorrect="off"
+												autocapitalize="off"
+												spellcheck="false"
+												placeholder="Ask FrostedAI..."
 											/>
 											<button id="aiSolveBtn" class="settings-btn" type="button">Send</button>
 										</div>

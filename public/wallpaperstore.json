@@ -238,5 +238,81 @@
 			"bg1": "#0d182b",
 			"bg2": "#15243a"
 		}
+	},
+	{
+		"id": "moon-cat",
+		"label": "Moon Cat",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/mooncat.mp4",
+		"theme": {
+			"color1": "#b6c9ff",
+			"color2": "#e2e8ff",
+			"nav1": "#2d3759",
+			"nav2": "#202741",
+			"bg1": "#10162a",
+			"bg2": "#171f36"
+		}
+	},
+	{
+		"id": "silly-cat",
+		"label": "Silly Cat",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/sillycat.mp4",
+		"theme": {
+			"color1": "#ffd9b8",
+			"color2": "#fff0de",
+			"nav1": "#5a3e2a",
+			"nav2": "#3f2b1d",
+			"bg1": "#1f1510",
+			"bg2": "#2d1f16"
+		}
+	},
+	{
+		"id": "saturn",
+		"label": "Saturn",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/Saturn.mp4",
+		"theme": {
+			"color1": "#f8d6a0",
+			"color2": "#f5e7cf",
+			"nav1": "#5a4631",
+			"nav2": "#3f3122",
+			"bg1": "#20180f",
+			"bg2": "#2f2418"
+		}
+	},
+	{
+		"id": "winter-darkness",
+		"label": "Winter Darkness",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/winterdarkness.mp4",
+		"theme": {
+			"color1": "#b7bcc4",
+			"color2": "#d4d7dc",
+			"nav1": "#3a3f46",
+			"nav2": "#2b2f35",
+			"bg1": "#161a1f",
+			"bg2": "#1f242b"
+		}
+	},
+	{
+		"id": "cat-lake",
+		"label": "Cat Lake",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/catlake.mp4",
+		"theme": {
+			"color1": "#b7e4ff",
+			"color2": "#daf4ff",
+			"nav1": "#2a4a60",
+			"nav2": "#1e3444",
+			"bg1": "#0c1d2a",
+			"bg2": "#143044"
+		}
 	}
 ]
+
