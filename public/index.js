@@ -79,11 +79,11 @@ function setLoadingBannerMessage(mode) {
 	if (!popupTitle) return;
 	var normalized = String(mode || "").trim().toLowerCase();
 	if (normalized === "scramjet" || normalized === "sj") {
-		popupTitle.textContent = "[frosted (sj)] loading ?G???";
+		popupTitle.textContent = "[frosted (sj)] loading рΓοху";
 		return;
 	}
 	if (normalized === "ultraviolet" || normalized === "uv") {
-		popupTitle.textContent = "[frosted (uv)] loading ?G???";
+		popupTitle.textContent = "[frosted (uv)] loading рΓοху";
 		return;
 	}
 	popupTitle.textContent = "Loading webpage...";
