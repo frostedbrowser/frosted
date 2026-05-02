@@ -1,20 +1,3 @@
-var enableProxyConsoleLogs = false;
-if (enableProxyConsoleLogs) {
-	console.log(
-		"%c[frosted]%c loaded index.js",
-		[
-			"background-color: #c8f3ff",
-			"color: #0b6e99",
-			"padding: 4px 6px",
-			"border-radius: 4px",
-			"font-weight: bold",
-			"font-family: monospace",
-			"font-size: 0.9em",
-		].join("; "),
-		"color: inherit;"
-	);
-}
-
 var defaultProxyMode = "scramjet";
 
 function getProxyModeTag() {
@@ -57,7 +40,6 @@ function getFrostedPrefixForMode(mode, isProxied = true) {
 }
 
 function logFrostedBox(message, mode, isProxied = true) {
-	if (!enableProxyConsoleLogs) return;
 	console.log(
 		`%c${getFrostedPrefixForMode(mode, isProxied)}%c ${message}`,
 		[
@@ -300,8 +282,8 @@ var { errorPanel, errorTitle, errorDetails } = errorRefs;
 
 var { proxySelect, proxyStatus } = proxyRefs;
 var proxyModeStorage = "fb_proxy_mode";
-var defaultWispUrl = "wss://stellite.games/wisp/";
-var proxyRuntimeAssetVersion = "8";
+var defaultWispUrl = "wss://wisp.mercuryworkshop.me/";
+var proxyRuntimeAssetVersion = "29";
 
 function normalizeProxyMode(value) {
 	var normalized = String(value || "").trim().toLowerCase();
@@ -376,7 +358,7 @@ function probeBareMuxSharedWorker(timeoutMs = 1200) {
 				clearTimeout(timer);
 				try {
 					worker.port?.close?.();
-				} catch {}
+				} catch { }
 				resolve(Boolean(ok));
 			}
 
@@ -410,15 +392,6 @@ async function canUseScramjetReliably() {
 	}
 }
 
-function isChromebookLikeDevice() {
-	try {
-		var ua = String(navigator.userAgent || "");
-		return (/\bCrOS\b/i.test(ua) || /\bChromebook\b/i.test(ua)) && !/\bAndroid\b/i.test(ua);
-	} catch {
-		return false;
-	}
-}
-
 async function ensureMobileSafeProxyMode() {
 	if (!canUseProxyRuntimeOnThisOrigin()) {
 		if (proxyStatus) {
@@ -427,12 +400,11 @@ async function ensureMobileSafeProxyMode() {
 		return;
 	}
 	if (getProxyMode() !== "scramjet") return;
-	if (isChromebookLikeDevice()) return;
 	if (await canUseScramjetReliably()) return;
-	console.info("[frosted] SharedWorker is unavailable on this device; switching to Ultraviolet.");
+	console.warn("[frosted] SharedWorker is unavailable on this device; switching to Ultraviolet.");
 	setProxyMode("ultraviolet");
 	if (proxyStatus) {
-		proxyStatus.textContent = "SharedWorker unavailable on this device. Switched to Ultraviolet.";
+		proxyStatus.textContent = "SharedWorker unavailable. Switched to Ultraviolet.";
 	}
 }
 
@@ -501,12 +473,12 @@ function resolveAppAssetBaseUrl() {
 		var scriptCandidates = [];
 		try {
 			if (document.currentScript?.src) scriptCandidates.push(String(document.currentScript.src));
-		} catch {}
+		} catch { }
 		try {
 			qsa("script[src]").forEach((script) => {
 				if (script?.src) scriptCandidates.push(String(script.src));
 			});
-		} catch {}
+		} catch { }
 		for (var candidate of scriptCandidates) {
 			try {
 				var parsed = new URL(candidate, window.location.href);
@@ -514,9 +486,9 @@ function resolveAppAssetBaseUrl() {
 				if (!pathname.endsWith("/index.js") && !pathname.endsWith("/register-sw.js")) continue;
 				var fromScript = pathname.replace(/\/[^/]*$/, "/");
 				return new URL(fromScript, `${parsed.origin}/`).href;
-			} catch {}
+			} catch { }
 		}
-	} catch {}
+	} catch { }
 	try {
 		return new URL(appBasePath, window.location.origin).href;
 	} catch {
@@ -536,7 +508,7 @@ var appBasePath = resolveAppBasePath();
 var appAssetBaseUrl = resolveAppAssetBaseUrl();
 
 var scramjetPrefix = (() => {
-	return `${appBasePath}scramjet/`.replace(/\/{2,}/g, "/");
+	return `${appBasePath}scram/`.replace(/\/{2,}/g, "/");
 })();
 
 var uvPrefix = (() => {
@@ -562,14 +534,6 @@ function hintAssetOnce(rel, href, asType, crossOrigin = false) {
 }
 
 function prefetchProxyAssets() {
-	hintAssetOnce("preload", withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`), "script");
-	hintAssetOnce("preload", withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm`), "fetch", true);
-	hintAssetOnce("prefetch", withRuntimeAssetVersion(`${appBasePath}scram/scramjet.js`), "script");
-	hintAssetOnce("preload", withRuntimeAssetVersion(`${appBasePath}uv/uv.bundle.js`), "script");
-	hintAssetOnce("prefetch", withRuntimeAssetVersion(`${appBasePath}uv/uv.config.js`), "script");
-	hintAssetOnce("modulepreload", `${appBasePath}baremux/index.js?v=5`, "script");
-	hintAssetOnce("modulepreload", `${appBasePath}epoxy/index.mjs`, "script");
-	hintAssetOnce("modulepreload", `${appBasePath}libcurl/index.mjs`, "script");
 }
 var scramjet = null;
 var connection = null;
@@ -685,44 +649,6 @@ function loadScriptOnce(src) {
 	});
 }
 
-var scramjetWasmBootstrapPromise = null;
-
-function encodeArrayBufferToBase64(buffer) {
-	try {
-		var bytes = new Uint8Array(buffer);
-		var chunkSize = 32768;
-		var binary = "";
-		for (var i = 0; i < bytes.length; i += chunkSize) {
-			var chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
-			binary += String.fromCharCode.apply(null, chunk);
-		}
-		return btoa(binary);
-	} catch {
-		return "";
-	}
-}
-
-async function ensureScramjetWasmBootstrap() {
-	if (window.WASM) return window.WASM;
-	if (scramjetWasmBootstrapPromise) return scramjetWasmBootstrapPromise;
-	scramjetWasmBootstrapPromise = (async () => {
-		var response = await fetch(withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm.wasm`), { cache: "force-cache" });
-		if (!response.ok) {
-			throw new Error(`Failed to preload Scramjet WASM: ${response.status}`);
-		}
-		var encoded = encodeArrayBufferToBase64(await response.arrayBuffer());
-		if (!encoded) {
-			throw new Error("Failed to encode Scramjet WASM bootstrap payload.");
-		}
-		window.WASM = encoded;
-		return encoded;
-	})().catch((error) => {
-		scramjetWasmBootstrapPromise = null;
-		throw error;
-	});
-	return scramjetWasmBootstrapPromise;
-}
-
 async function ensureUvRuntime() {
 	if (window.__uv$config?.encodeUrl) return window.__uv$config;
 	if (uvRuntimePromise) return uvRuntimePromise;
@@ -791,11 +717,26 @@ function waitForServiceWorkerController(timeoutMs = 9000) {
 function hasMatchingActiveServiceWorkerController() {
 	try {
 		var controller = navigator.serviceWorker?.controller;
-		if (!controller?.scriptURL) return false;
+		if (!controller) return false;
+		if (!controller.scriptURL) return false;
+
 		var controllerUrl = new URL(controller.scriptURL, window.location.href);
 		var expectedSwUrl = new URL(`${appBasePath}sw.js`, window.location.origin);
-		return controllerUrl.origin === expectedSwUrl.origin && controllerUrl.pathname === expectedSwUrl.pathname;
-	} catch {
+
+		var match =
+			controllerUrl.origin === expectedSwUrl.origin &&
+			controllerUrl.pathname.replace(/\/+$/, "") === expectedSwUrl.pathname.replace(/\/+$/, "");
+
+		if (!match) {
+			console.warn("[frosted] service worker controller mismatch:", {
+				current: controllerUrl.href,
+				expected: expectedSwUrl.href,
+			});
+		}
+
+		return match;
+	} catch (e) {
+		console.error("[frosted] error checking service worker controller:", e);
 		return false;
 	}
 }
@@ -803,7 +744,15 @@ function hasMatchingActiveServiceWorkerController() {
 function maybeReloadForServiceWorkerControl() {
 	try {
 		if (typeof window === "undefined" || !window.location || !window.sessionStorage) return false;
-		if (window.sessionStorage.getItem(swControlReloadMarkerKey)) return false;
+		var lastReload = window.sessionStorage.getItem(swControlReloadMarkerKey);
+		if (lastReload) {
+			var elapsed = Date.now() - Number(lastReload);
+			if (elapsed < 10000) {
+				console.log("[frosted] service worker reload loop prevented; already reloaded recently.");
+				return false;
+			}
+		}
+		console.warn("[frosted] service worker is not controlling the page; reloading once to gain control.");
 		window.sessionStorage.setItem(swControlReloadMarkerKey, String(Date.now()));
 		window.location.reload();
 		return true;
@@ -853,6 +802,7 @@ async function initializeProxyRuntime() {
 			var hasController = await ensureServiceWorkerRuntimeReady();
 			if (!hasController) {
 				if (maybeReloadForServiceWorkerControl()) {
+					showLoading(true);
 					throw new Error("Service worker is activating; reloading page once to gain control.");
 				}
 				throw new Error("Service worker is installed but not controlling this page yet. Reload once and retry.");
@@ -876,9 +826,38 @@ async function initializeProxyRuntime() {
 		return { scramjet, connection };
 	}
 
+	async function repairScramjetIndexedDB() {
+		try {
+			const dbName = "$scramjet";
+			const requiredStores = ["config", "cookies", "redirectTrackers", "referrerPolicies", "publicSuffixList"];
+			const db = await new Promise((resolve, reject) => {
+				const request = indexedDB.open(dbName);
+				request.onsuccess = () => resolve(request.result);
+				request.onerror = () => reject(request.error);
+			});
+			const missing = requiredStores.filter((s) => !db.objectStoreNames.contains(s));
+			db.close();
+
+			if (missing.length > 0) {
+				console.warn(
+					`[frosted] Scramjet IndexedDB is missing stores (${missing.join(", ")}), deleting so scramjet.init() can recreate it...`
+				);
+				await new Promise((resolve, reject) => {
+					const request = indexedDB.deleteDatabase(dbName);
+					request.onsuccess = resolve;
+					request.onerror = () => resolve();
+					request.onblocked = () => resolve();
+				});
+				console.log("[frosted] Scramjet IndexedDB deleted. scramjet.init() will recreate it.");
+			}
+		} catch (e) {
+			console.warn("[frosted] Failed to repair Scramjet IndexedDB:", e);
+		}
+	}
+
 	scramjetInitPromise = (async () => {
-		var scramjetAllUrl = withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`);
-		await ensureScramjetWasmBootstrap();
+		await repairScramjetIndexedDB();
+		var scramjetAllUrl = withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`);
 		if (typeof window.$scramjetLoadController !== "function") {
 			await loadScriptOnce(scramjetAllUrl);
 		}
@@ -899,16 +878,20 @@ async function initializeProxyRuntime() {
 					strictRewrites: false,
 				},
 				files: {
-					wasm: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm`),
-					all: withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`),
-					sync: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.js`),
+					wasm: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm.wasm`),
+					all: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`),
+					sync: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.sync.js`),
 				},
 			});
 		scramjet = createScramjet();
 		try {
 			await scramjet.init();
 		} catch (error) {
-			if (!isMissingObjectStoreError(error) && !isDbConnectionClosedError(error)) throw error;
+			var eName = String(error?.name || "");
+			if (eName !== "NotFoundError" && eName !== "AbortError" && eName !== "VersionError" && !isDbConnectionClosedError(error)) {
+				throw error;
+			}
+			console.warn("[frosted] scramjet.init() had a recoverable DB error:", error.message);
 		}
 		if (!scramjetLoadStatusLogged) {
 			scramjetLoadStatusLogged = true;
@@ -925,7 +908,7 @@ async function initializeProxyRuntime() {
 	return { scramjet, connection };
 }
 
-const GAMES_JSON = [];
+
 
 var particleMode = "dots";
 var particleCanvas = null;
@@ -951,20 +934,20 @@ var reducedMotionQuery = window.matchMedia
 	: null;
 
 var taglines = [
-"v1.5 now with more stuff i guess",
-"huh you should maybe join the discord..",
-"dsc.gg/frostedbrowser",
-"privacy is very important. frosted doesnt collect any type of personal data.",
-"Are you still you In a different time In a different place With the same memories? -crusader",
-"check out our partners",
-"star github if you want.. its not like im forcing you or anything",
-"frostedOS comming soon..",
-"stop joining goon servers yall some gooners ?? - mrdavidss",
-"orange",
-"1+2=3 now dont block my site",
-"vscode autofill is straight up ass ??",
-"atleast this build is more stable than the other versions...",
-"i was supposed to release this build 2 hours ago.."
+	"v1.5 now with more stuff i guess",
+	"huh you should maybe join the discord..",
+	"dsc.gg/frostedbrowser",
+	"privacy is very important. frosted doesnt collect any type of personal data.",
+	"Are you still you In a different time In a different place With the same memories? -crusader",
+	"check out our partners",
+	"star github if you want.. its not like im forcing you or anything",
+	"frostedOS comming soon..",
+	"stop joining goon servers yall some gooners ?? - mrdavidss",
+	"orange",
+	"1+2=3 now dont block my site",
+	"vscode autofill is straight up ass 😔",
+	"atleast this build is more stable than the other versions...",
+	"i was supposed to release this build 2 hours ago.."
 ];
 
 var frosteddBarConfig = {
@@ -1000,11 +983,17 @@ function applyfrosteddBarConfig(config = frosteddBarConfig) {
 
 async function init() {
 	applyfrosteddBarConfig();
+	prefetchProxyAssets();
+	void warmProxyRuntimeAtStartup();
 	applyPrivacyDefaults();
 	void ensureMobileSafeProxyMode();
 	updateAdblockToggleLabel();
 	void ensureGhosteryEngine();
 	loadInstalledExtensionWallpapers();
+	await Promise.allSettled([
+		restoreSavedWallpaperFromStoreCatalog(),
+		ensureFirstVisitMp4Wallpaper(),
+	]);
 	bindServiceWorkerProxyFallbackListener();
 
 	if (randomTagline) {
@@ -1023,21 +1012,10 @@ async function init() {
 	loadAiMode();
 	createTab("");
 	loadProxySettings();
-	runWhenIdle(() => {
-		prefetchProxyAssets();
-		void warmProxyRuntimeAtStartup();
-	}, 1200);
-	runWhenIdle(() => {
-		Promise.allSettled([restoreSavedWallpaperFromStoreCatalog(), ensureFirstVisitMp4Wallpaper()]).then(() => {
-			populateWallpaperOptions();
-			loadWallpaper();
-		});
-	}, 700);
 	scheduleProxyRuntimePreload();
 	bindEvents();
 	showUpdatePopupIfNeeded();
 	renderHistory();
-	scheduleTransportWarmup();
 }
 
 var serviceWorkerProxyFallbackBound = false;
@@ -1088,7 +1066,7 @@ function getSeenUpdateVersion() {
 function markCurrentUpdateSeen() {
 	try {
 		localStorage.setItem(updatePopupStorageKey, updatePopupVersion);
-	} catch {}
+	} catch { }
 }
 
 function shouldShowUpdatePopup() {
@@ -1708,7 +1686,6 @@ function createTab(url) {
 		id: `tab_${nextTabId++}`,
 		title: "New Tab",
 		url: url || "",
-		favicon: "",
 		backStack: [],
 		forwardStack: [],
 	};
@@ -1822,7 +1799,7 @@ function renderTabs() {
 		var favicon = document.createElement("img");
 		favicon.className = "tab-favicon";
 		favicon.alt = "";
-		var faviconCandidates = getTabDisplayFaviconCandidates(tab);
+		var faviconCandidates = getTabFaviconCandidates(tab.url);
 		var faviconIdx = 0;
 		favicon.src = faviconCandidates[faviconIdx];
 		favicon.loading = "lazy";
@@ -1861,21 +1838,6 @@ function renderTabs() {
 	updateErudaButtonVisibility();
 }
 
-function getTabDisplayFaviconCandidates(tab) {
-	var candidates = [];
-	var addCandidate = (value) => {
-		var normalized = String(value || "").trim();
-		if (!normalized) return;
-		if (candidates.includes(normalized)) return;
-		candidates.push(normalized);
-	};
-
-	addCandidate(tab?.favicon);
-	getTabFaviconCandidates(tab?.url).forEach(addCandidate);
-	addCandidate(defaultAppIconHref);
-	return candidates.length ? candidates : [defaultAppIconHref];
-}
-
 function updateErudaButtonVisibility() {
 	if (!erudaBtn) return;
 	var shouldShow = hasActiveProxiedTab();
@@ -1904,9 +1866,6 @@ function getTabFaviconCandidates(url) {
 			host === "127.0.0.1" ||
 			host === "::1" ||
 			host === "[::1]";
-		if (!isLocalHost && parsed.origin !== window.location.origin) {
-			return [defaultAppIconHref];
-		}
 		var faviconOrigin =
 			isLocalHost || parsed.protocol === "http:" ? `${parsed.protocol}//${host}` : `https://${host}`;
 		if (parsed.port) {
@@ -1914,31 +1873,13 @@ function getTabFaviconCandidates(url) {
 		}
 		return [
 			`${faviconOrigin}/favicon.ico`,
+			`https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`,
+			`https://icons.duckduckgo.com/ip3/${encodeURIComponent(host)}.ico`,
 			defaultAppIconHref,
 		];
 	} catch {
 		return [defaultAppIconHref];
 	}
-}
-
-function resolveFrameDocumentFavicon(frameElement) {
-	try {
-		var doc = frameElement?.contentDocument;
-		if (!doc) return "";
-		var selectors = [
-			"link[rel~='icon']",
-			"link[rel='shortcut icon']",
-			"link[rel='apple-touch-icon']",
-		];
-		for (var selector of selectors) {
-			var link = doc.querySelector(selector);
-			if (!link) continue;
-			var href = String(link.href || link.getAttribute("href") || "").trim();
-			if (href) return href;
-		}
-	} catch {
-	}
-	return "";
 }
 
 function getActiveTab() {
@@ -2441,14 +2382,21 @@ function isScramjetTransportCrash(error) {
 	var message = String(error?.message || error || "").toLowerCase();
 	var stack = String(error?.stack || "").toLowerCase();
 	var detail = `${message}\n${stack}`;
-	return (
+
+	if (
 		detail.includes("service worker is installed but not controlling this page yet") ||
-		detail.includes("service worker is activating; reloading page once to gain control") ||
+		detail.includes("service worker is activating; reloading page once to gain control")
+	) {
+		return false;
+	}
+
+	return (
 		detail.includes("muxtaskended") ||
 		detail.includes("wisp") ||
 		detail.includes("hyper client") ||
 		detail.includes("n.p_ is not a function") ||
 		detail.includes("scramjet fetch failed") ||
+		detail.includes("reading 'prefix'") ||
 		detail.includes("invalid messageport") ||
 		detail.includes("all clients returned an invalid messageport") ||
 		detail.includes("failed to get a bare-mux sharedworker messageport") ||
@@ -2665,29 +2613,24 @@ function syncTabUrlFromFrame(tabId, frameElement) {
 	var changed = prevUrl !== nextUrl;
 	var isProgrammaticNav = suppressNextFrameNavSyncByTab.has(tabId);
 	if (isProgrammaticNav) suppressNextFrameNavSyncByTab.delete(tabId);
-	if (changed && !isProgrammaticNav && prevUrl) {
+	if (!changed) return;
+
+	if (!isProgrammaticNav && prevUrl) {
 		tab.backStack.push(prevUrl);
 		tab.forwardStack = [];
 	}
-	if (changed) {
-		tab.url = nextUrl;
-	}
+	tab.url = nextUrl;
 	try {
 		var frameTitle = String(frameElement?.contentWindow?.document?.title || "").trim();
 		tab.title = frameTitle || getDisplayTitle(nextUrl);
 	} catch {
 		tab.title = getDisplayTitle(nextUrl);
 	}
-	var frameFavicon = resolveFrameDocumentFavicon(frameElement);
-	if (frameFavicon) {
-		tab.favicon = frameFavicon;
-	}
 	if (tabId === activeTabId) {
 		setAddressDisplay(nextUrl, frameElement?.dataset?.proxyMode || getProxyMode());
 	}
 	renderTabs();
 	updateNavButtons();
-	if (!changed) return;
 	addHistory(nextUrl);
 }
 
@@ -2814,7 +2757,6 @@ async function loadUrl(url, pushHistory = true, allowProxyFallback = true, allow
 
 	tab.url = url;
 	tab.title = getDisplayTitle(url);
-	tab.favicon = "";
 	if (!isCatalogGameUrl(url) && !String(url || "").startsWith("blob:")) {
 		canonicalGameUrlByTab.delete(tab.id);
 		restoredGameProgressMarkerByTab.delete(tab.id);
@@ -2874,30 +2816,25 @@ async function loadUrl(url, pushHistory = true, allowProxyFallback = true, allow
 		}
 		addHistory(url);
 	} catch (err) {
+		var errDetail = String(err?.message || err || "").toLowerCase();
+		if (
+			errDetail.includes("service worker is activating") ||
+			errDetail.includes("service worker is installed but not controlling")
+		) {
+			return;
+		}
+
 		if (
 			allowProxyFallback &&
 			getProxyMode() === "scramjet" &&
 			isScramjetTransportCrash(err)
 		) {
-			if (isChromebookLikeDevice()) {
-				console.warn(
-					"[frosted] scramjet transport failed on Chromebook; keeping Scramjet selected.",
-					err
-				);
-				showError(
-					"Scramjet transport failed.",
-					"Retry the page or switch proxy mode manually if needed."
-				);
-				showLoading(false);
-				return;
-			}
 			console.warn(
-				"[frosted] scramjet transport failed; auto-fallback to ultraviolet for this navigation.",
+				"[frosted] scramjet transport failed; showing error instead of auto-fallback to prevent loops.",
 				err
 			);
-			setProxyMode("ultraviolet");
-			setLoadingBannerMessage("ultraviolet");
-			await loadUrl(url, false, false);
+			showError("Scramjet proxy failed.", err);
+			showLoading(false);
 			return;
 		}
 		showError("Failed to initialize proxy runtime.", err);
@@ -3149,7 +3086,6 @@ function goHome() {
 	destroyTabFrame(tab.id);
 	tab.url = "";
 	tab.title = "New Tab";
-	tab.favicon = "";
 	addressInput.value = "";
 	homeSearchInput.value = "";
 	renderTabs();
@@ -3368,8 +3304,9 @@ function getWispTransportCandidates() {
 	addCandidate(window?._CONFIG?.WISP_URL);
 	addCandidate(window?.WISP_URL);
 	addCandidate(defaultWispUrl);
+	addCandidate("wss://wisp.mercuryworkshop.me/");
 	addCandidate("wss://stellite.games/wisp/");
-	addCandidate(window?._CONFIG?.WISP_FALLBACK_URL);
+	addCandidate("wss://shuttle.proxy.sh/wisp/");
 
 	if (!isLikelyStaticHostForWisp(window.location.hostname)) {
 		addCandidate(`${window.location.origin.replace(/\/+$/, "")}/wisp/`);
@@ -3388,7 +3325,7 @@ async function getReachableWispCandidates(candidates) {
 				reachable.push(candidate);
 				break;
 			}
-		} catch {}
+		} catch { }
 	}
 	return reachable;
 }
@@ -3427,7 +3364,7 @@ function probeWispEndpoint(wispUrl, timeoutMs = 1200) {
 				if (socket && socket.readyState === WebSocket.OPEN) {
 					socket.close();
 				}
-			} catch {}
+			} catch { }
 			resolve(Boolean(ok));
 		}
 
@@ -3486,9 +3423,7 @@ function scheduleProxyRuntimePreload() {
 
 		await Promise.allSettled([
 			ensureUvRuntime(),
-			ensureScramjetWasmBootstrap().then(() =>
-				loadScriptOnce(withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`))
-			),
+			loadScriptOnce(withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`)),
 		]);
 
 		if (getProxyMode() === "scramjet") {
@@ -3501,25 +3436,16 @@ function scheduleProxyRuntimePreload() {
 
 async function warmProxyRuntimeAtStartup() {
 	if (!canUseProxyRuntimeOnThisOrigin()) return;
-	var scramjetAllUrl = withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`);
-	var scramjetAllWarmupPromise = ensureScramjetWasmBootstrap()
-		.then(() => loadScriptOnce(scramjetAllUrl))
-		.catch((error) => {
-			console.warn("[frosted] scramjet.all.js warmup failed.", error);
-			throw error;
-		});
+
 	try {
-		var hasController = await ensureServiceWorkerRuntimeReady();
-		if (!hasController && proxyStatus) {
-			proxyStatus.textContent = "Service worker not controlling yet. Reload once if proxy fails.";
-		}
+		await ensureServiceWorkerRuntimeReady();
 	} catch (error) {
 		console.warn("[frosted] service worker warmup failed during startup.", error);
 	}
 
 	await Promise.allSettled([
 		ensureUvRuntime(),
-		scramjetAllWarmupPromise,
+		initializeProxyRuntime(),
 	]);
 }
 
@@ -3529,7 +3455,7 @@ function scheduleTransportWarmup() {
 	if (!canUseProxyRuntimeOnThisOrigin()) return;
 	if (getProxyMode() !== "scramjet") return;
 	transportWarmupScheduled = true;
-	runWhenIdle(() => {
+	setTimeout(() => {
 		ensureTransport().catch((error) => {
 			if (getProxyMode() !== "scramjet") return;
 			if (!isScramjetTransportCrash(error)) return;
@@ -3538,7 +3464,7 @@ function scheduleTransportWarmup() {
 				proxyStatus.textContent = "Scramjet warmup failed. Try Ultraviolet if browsing fails.";
 			}
 		});
-	}, 1800);
+	}, 120);
 }
 
 var particlesInitScheduled = false;
@@ -3561,7 +3487,6 @@ function runWhenIdle(task, timeoutMs = 1000) {
 }
 
 var historyKey = "fb_history";
-var historyEnabled = false;
 var sessionHistoryItems = [];
 
 function sanitizeHistoryEntry(entry) {
@@ -3580,7 +3505,6 @@ function clearLegacyPersistentHistory() {
 }
 
 function addHistory(url) {
-	if (!historyEnabled) return;
 	var target = String(url || "").trim();
 	if (!target) return;
 	sessionHistoryItems.unshift({ url: target, at: new Date().toLocaleString() });
@@ -3596,14 +3520,6 @@ function readHistory() {
 
 function renderHistory() {
 	if (!historyContainer) return;
-	if (!historyEnabled) {
-		historyContainer.innerHTML = "";
-		var disabled = document.createElement("div");
-		disabled.className = "history-item";
-		disabled.textContent = "History is disabled for privacy.";
-		historyContainer.appendChild(disabled);
-		return;
-	}
 	var items = readHistory();
 	historyContainer.innerHTML = "";
 	if (!items.length) {
@@ -3684,61 +3600,6 @@ async function clearScramjetSessionData() {
 function applyPrivacyDefaults() {
 	clearLegacyPersistentHistory();
 	sessionHistoryItems = [];
-	renderHistory();
-}
-
-var gamesRenderToken = 0;
-
-function createGameCard(game) {
-	var card = document.createElement("button");
-	card.type = "button";
-	card.className = "game-card";
-
-	var thumb = document.createElement("img");
-	thumb.className = "game-thumb";
-	thumb.alt = game.title || "Game";
-	thumb.src = game.image || defaultAppIconHref;
-	thumb.loading = "lazy";
-	thumb.decoding = "async";
-	thumb.fetchPriority = "low";
-	thumb.referrerPolicy = "no-referrer";
-	thumb.draggable = false;
-	thumb.addEventListener(
-		"error",
-		() => {
-			thumb.src = defaultAppIconHref;
-		},
-		{ once: true }
-	);
-
-	var body = document.createElement("div");
-	body.className = "game-body";
-
-	var title = document.createElement("div");
-	title.className = "game-title";
-	title.textContent = game.title || "Untitled";
-
-	var desc = document.createElement("div");
-	desc.className = "game-desc";
-	desc.textContent = game.desc || "";
-
-	body.appendChild(title);
-	body.appendChild(desc);
-	card.appendChild(thumb);
-	card.appendChild(body);
-
-	card.addEventListener("click", async () => {
-		var target = resolveGameUrl(game.url);
-		if (!target) return;
-		queueGameClickScriptForActiveTab(game.clickScript);
-		await openGameFromCatalog(target, {
-			useBlob: game.useBlob,
-			special: game.special,
-			title: game.title,
-		});
-	});
-
-	return card;
 }
 
 function renderGames() {
@@ -3747,10 +3608,10 @@ function renderGames() {
 	var query = String(gamesSearchInput?.value || "").trim().toLowerCase();
 	var filtered = query
 		? source.filter((game) => {
-				var title = String(game.title || "").toLowerCase();
-				var desc = String(game.desc || "").toLowerCase();
-				return title.includes(query) || desc.includes(query);
-			})
+			var title = String(game.title || "").toLowerCase();
+			var desc = String(game.desc || "").toLowerCase();
+			return title.includes(query) || desc.includes(query);
+		})
 		: source;
 	if (gamesCount) {
 		gamesCount.textContent = query
@@ -3765,26 +3626,45 @@ function renderGames() {
 		gamesGrid.appendChild(empty);
 		return;
 	}
-	var renderToken = ++gamesRenderToken;
-	var index = 0;
-	var chunkSize = query ? 48 : 24;
+	filtered.forEach((game) => {
+		var card = document.createElement("button");
+		card.type = "button";
+		card.className = "game-card";
 
-	function renderChunk() {
-		if (renderToken !== gamesRenderToken || !gamesGrid) return;
-		var fragment = document.createDocumentFragment();
-		var rendered = 0;
-		while (index < filtered.length && rendered < chunkSize) {
-			fragment.appendChild(createGameCard(filtered[index]));
-			index += 1;
-			rendered += 1;
-		}
-		gamesGrid.appendChild(fragment);
-		if (index < filtered.length) {
-			runWhenIdle(renderChunk, 80);
-		}
-	}
+		var thumb = document.createElement("img");
+		thumb.className = "game-thumb";
+		thumb.alt = game.title || "Game";
+		thumb.src = game.image || "";
+		thumb.loading = "lazy";
 
-	renderChunk();
+		var body = document.createElement("div");
+		body.className = "game-body";
+
+		var title = document.createElement("div");
+		title.className = "game-title";
+		title.textContent = game.title || "Untitled";
+
+		var desc = document.createElement("div");
+		desc.className = "game-desc";
+		desc.textContent = game.desc || "";
+
+		body.appendChild(title);
+		body.appendChild(desc);
+		card.appendChild(thumb);
+		card.appendChild(body);
+
+		card.addEventListener("click", async () => {
+			var target = resolveGameUrl(game.url);
+			if (!target) return;
+			queueGameClickScriptForActiveTab(game.clickScript);
+			await openGameFromCatalog(target, {
+				useBlob: game.useBlob,
+				special: game.special,
+				title: game.title,
+			});
+		});
+		gamesGrid.appendChild(card);
+	});
 }
 
 async function loadGamesCatalog() {
@@ -3807,7 +3687,7 @@ async function loadGamesCatalog() {
 
 	async function tryFetchGamesCatalogJson(path) {
 		try {
-			var response = await fetch(path, { cache: "force-cache" });
+			var response = await fetch(path, { cache: "no-store" });
 			if (!response.ok) return [];
 			var raw = await response.json().catch(() => []);
 			return normalizeGamesCatalog(raw);
@@ -3817,7 +3697,11 @@ async function loadGamesCatalog() {
 	}
 
 	try {
-		var candidates = ["./games.json"];
+		var candidates = [
+			"./games.json",
+			"/frostedsvg/games.json",
+			"https://raw.githubusercontent.com/Frostedbrowser/frostedsvg/refs/heads/main/games.json",
+		];
 		gamesCatalog = [];
 		for (var candidate of candidates) {
 			var normalized = await tryFetchGamesCatalogJson(candidate);
@@ -4085,19 +3969,10 @@ async function openGameFromCatalog(url, options = {}) {
 	var gameTitle = String(options?.title || "").trim().toLowerCase();
 	var isFlashGame = specialFlags.includes("flash");
 	var isLikelyVex1 = /\bvex\s*1\b/.test(gameTitle);
-	var isStorageSensitiveGame = /\bretro\s*bowl\b/.test(gameTitle);
-	var isChromebookLike = isChromebookLikeDevice();
-	var skipBlobMaterialization =
-		(isChromebookLike && (isFlashGame || isLikelyVex1)) || isStorageSensitiveGame;
-
-	if (isStorageSensitiveGame && getProxyMode() === "ultraviolet") {
-		try {
-			if (await canUseScramjetReliably()) {
-				setProxyMode("scramjet");
-			}
-		} catch {
-		}
-	}
+	var isChromebookLike =
+		(/\bCrOS\b/i.test(navigator.userAgent || "") || /\bChromebook\b/i.test(navigator.userAgent || "")) &&
+		!/\bAndroid\b/i.test(navigator.userAgent || "");
+	var skipBlobMaterialization = isChromebookLike && (isFlashGame || isLikelyVex1);
 
 	var shouldMaterializeHtml =
 		!skipBlobMaterialization &&
@@ -4199,7 +4074,7 @@ async function maybeRecoverRawHtmlCatalogGame(tabId, frameElement) {
 	var recoveredInPlace = recoverRawHtmlByDocumentWrite(targetDocument, recoveryBaseUrl || currentUrl);
 	if (recoveredInPlace) return;
 
-  return;
+	return;
 }
 
 function resolveGameUrl(url) {
@@ -4267,7 +4142,7 @@ async function solveAiPrompt() {
 	aiUiThread.push({ role: "assistant", content: "Thinking...", typing: true });
 	renderAiThread(true);
 	try {
-		var aiText = await fetchAiResponse(input, () => {}, aiChatHistory);
+		var aiText = await fetchAiResponse(input, () => { }, aiChatHistory);
 		await animateAiTyping(aiText);
 		aiChatHistory.push({ role: "assistant", content: aiText });
 		aiChatHistory = normalizeAiChatHistoryEntries(aiChatHistory);
@@ -4749,7 +4624,7 @@ function normalizeAiChatHistoryEntries(entries) {
 function persistAiChatHistory() {
 	try {
 		localStorage.setItem(aiChatHistoryStorageKey, JSON.stringify(normalizeAiChatHistoryEntries(aiChatHistory)));
-	} catch {}
+	} catch { }
 }
 
 function loadAiChatHistory() {
@@ -5188,48 +5063,6 @@ function normalizeStoreWallpaperTheme(theme) {
 	};
 }
 
-function normalizeWallpaperAssetFile(file) {
-	var raw = String(file || "").trim();
-	if (!raw) return "";
-	try {
-		var parsed = new URL(raw, window.location.href);
-		var host = String(parsed.hostname || "").toLowerCase();
-		var path = String(parsed.pathname || "");
-		var pathLower = path.toLowerCase();
-		var isMedia =
-			pathLower.endsWith(".mp4") ||
-			pathLower.endsWith(".webm") ||
-			pathLower.endsWith(".mov") ||
-			pathLower.endsWith(".png") ||
-			pathLower.endsWith(".jpg") ||
-			pathLower.endsWith(".jpeg");
-
-		if (!isMedia && host === "raw.githubusercontent.com") {
-			var parts = path.split("/").filter(Boolean);
-			if (parts.length >= 4) {
-				var owner = parts[0];
-				var repo = parts[1];
-				var ref = parts[2];
-				var assetPath = parts.slice(3).join("/");
-				return `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${ref}/${assetPath}`;
-			}
-		}
-		if (!isMedia && host === "github.com") {
-			var githubParts = path.split("/").filter(Boolean);
-			if (githubParts.length >= 5 && githubParts[2] === "raw") {
-				var githubOwner = githubParts[0];
-				var githubRepo = githubParts[1];
-				var githubRef = githubParts[3];
-				var githubAssetPath = githubParts.slice(4).join("/");
-				return `https://cdn.jsdelivr.net/gh/${githubOwner}/${githubRepo}@${githubRef}/${githubAssetPath}`;
-			}
-		}
-		return parsed.toString();
-	} catch {
-		return raw;
-	}
-}
-
 function normalizeStoreWallpaperEntry(rawEntry, index = 0) {
 	var item = typeof rawEntry === "object" && rawEntry ? rawEntry : {};
 	var keySeed = item.key || item.id || item.slug || item.label || `wallpaper-${index + 1}`;
@@ -5237,7 +5070,7 @@ function normalizeStoreWallpaperEntry(rawEntry, index = 0) {
 	key = key.replace(/^(store-)+/, "store-");
 	if (!key.startsWith("store-")) key = `store-${key}`;
 	var label = String(item.label || item.name || item.title || `Wallpaper ${index + 1}`).trim();
-	var file = normalizeWallpaperAssetFile(item.file || item.url || "");
+	var file = String(item.file || item.url || "").trim();
 	var typeRaw = String(item.type || "video").trim().toLowerCase();
 	var categoryRaw = String(item.category || "animated-wallpapers").trim().toLowerCase();
 	var type = typeRaw === "image" ? "image" : "video";
@@ -5333,15 +5166,15 @@ function getFilteredWallpaperStoreEntries() {
 			: wallpaperStoreCatalog.slice();
 	var filtered = wallpaperStoreQuery
 		? base.filter((entry) => {
-				var name = String(entry.label || "").toLowerCase();
-				var file = String(entry.file || "").toLowerCase();
-				var category = String(entry.category || "").toLowerCase();
-				return (
-					name.includes(wallpaperStoreQuery) ||
-					file.includes(wallpaperStoreQuery) ||
-					category.includes(wallpaperStoreQuery)
-				);
-			})
+			var name = String(entry.label || "").toLowerCase();
+			var file = String(entry.file || "").toLowerCase();
+			var category = String(entry.category || "").toLowerCase();
+			return (
+				name.includes(wallpaperStoreQuery) ||
+				file.includes(wallpaperStoreQuery) ||
+				category.includes(wallpaperStoreQuery)
+			);
+		})
 		: base;
 	filtered.sort((a, b) => {
 		if (wallpaperStoreSort === "type") {
@@ -5408,9 +5241,8 @@ function renderWallpaperStorePreview(entry) {
 
 	var installed = isStoreWallpaperInstalled(entry.key);
 	wallpaperStorePreviewTitle.textContent = entry.label;
-	wallpaperStorePreviewMeta.textContent = `${
-		entry.type === "video" ? "Animated" : "Static"
-	} • ${installed ? "Installed" : "Not installed"}`;
+	wallpaperStorePreviewMeta.textContent = `${entry.type === "video" ? "Animated" : "Static"
+		} â€¢ ${installed ? "Installed" : "Not installed"}`;
 
 	if (entry.type === "video") {
 		var previewVideo = document.createElement("video");
@@ -5469,7 +5301,7 @@ function uninstallWallpaperFromStore(entry) {
 	updateExtensionInstallCount();
 	populateWallpaperOptions();
 	if (normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "") === entry.key) {
-		applyWallpaper("store-winter-darkness");
+		applyWallpaper("skynight");
 	}
 	renderWallpaperStoreGrid();
 }
@@ -5479,9 +5311,9 @@ function getWinterIslandStoreEntry() {
 		wallpaperStoreCatalog.find((entry) => entry.key === winterIslandDefaultStoreKey) ||
 		wallpaperStoreCatalog.find(
 			(entry) =>
-				String(entry.label || "").trim().toLowerCase() === "winter island" ||
-				String(entry.file || "").trim().toLowerCase().endsWith("/wallpapers/animated/winter.mp4") ||
-				String(entry.file || "").trim().toLowerCase() === "wallpapers/animated/winter.mp4"
+				String(entry.label || "").trim().toLowerCase() === "winter darkness" ||
+				String(entry.file || "").trim().toLowerCase().endsWith("/wallpapers/animated/winterdarkness.mp4") ||
+				String(entry.file || "").trim().toLowerCase() === "wallpapers/animated/winterdarkness.mp4"
 		) ||
 		null
 	);
@@ -5504,7 +5336,7 @@ function ensureWinterIslandInstalledAndDefault() {
 	wallpaperStoreSelectedKey = entry.key;
 	populateWallpaperOptions();
 	var savedRaw = String(localStorage.getItem(wallpaperKey) || "").trim();
-	var shouldApplyDefault = !savedRaw;
+	var shouldApplyDefault = !savedRaw || savedRaw === "skynight" || savedRaw === "winter-darkness" || savedRaw === "store-winter-island";
 	if (shouldApplyDefault) {
 		applyWallpaper(entry.key);
 	}
@@ -5565,7 +5397,7 @@ async function loadWallpaperStoreCatalog() {
 		wallpaperStoreStatus.textContent = "Loading wallpaper store...";
 	}
 	try {
-		var response = await fetch("./wallpaperstore.json", { cache: "force-cache" });
+		var response = await fetch("./wallpaperstore.json", { cache: "no-store" });
 		var raw = await response.json().catch(() => []);
 		if (!response.ok || !Array.isArray(raw)) {
 			wallpaperStoreCatalog = [];
@@ -5584,9 +5416,8 @@ async function loadWallpaperStoreCatalog() {
 		}
 		ensureWinterIslandInstalledAndDefault();
 		if (wallpaperStoreStatus) {
-			wallpaperStoreStatus.textContent = `Loaded ${wallpaperStoreCatalog.length} wallpaper${
-				wallpaperStoreCatalog.length === 1 ? "" : "s"
-			}.`;
+			wallpaperStoreStatus.textContent = `Loaded ${wallpaperStoreCatalog.length} wallpaper${wallpaperStoreCatalog.length === 1 ? "" : "s"
+				}.`;
 		}
 		renderWallpaperStoreGrid();
 	} catch {
@@ -5670,14 +5501,13 @@ function renderWallpaperStoreGrid() {
 			thumbVideo.playsInline = true;
 			thumbVideo.preload = "none";
 			thumbVideo.disablePictureInPicture = true;
-			thumbVideo.crossOrigin = "anonymous";
 			thumbVideo.dataset.src = entry.file;
 			thumbVideo.dataset.loaded = "false";
 			thumbVideo.title = "Hover to preview";
 			card.addEventListener("mouseenter", () => {
 				primeWallpaperThumbVideo(thumbVideo);
 				var playPromise = thumbVideo.play();
-				if (playPromise && typeof playPromise.catch === "function") playPromise.catch(() => {});
+				if (playPromise && typeof playPromise.catch === "function") playPromise.catch(() => { });
 			});
 			card.addEventListener("mouseleave", () => {
 				thumbVideo.pause();
@@ -5691,7 +5521,6 @@ function renderWallpaperStoreGrid() {
 			var thumbImg = document.createElement("img");
 			thumbImg.src = entry.file;
 			thumbImg.alt = entry.label;
-			thumbImg.crossOrigin = "anonymous";
 			thumbWrap.appendChild(thumbImg);
 		}
 
@@ -5779,6 +5608,19 @@ var wallpapers = {
 			bg2: "#0f1013",
 		},
 	},
+	"winter-darkness": {
+		label: "Winter Darkness",
+		file: "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/winterdarkness.mp4",
+		type: "video",
+		theme: {
+			color1: "#b7bcc4",
+			color2: "#d4d7dc",
+			nav1: "#3a3f46",
+			nav2: "#2b2f35",
+			bg1: "#161a1f",
+			bg2: "#1f242b"
+		}
+	},
 	skynight: {
 		label: "Sky Night",
 		category: "wallpapers",
@@ -5854,13 +5696,13 @@ function normalizeWallpaperKey(value) {
 	var registry = getWallpaperRegistry();
 	if (registry[key]) return key;
 	var compact = key.replace(/[^a-z0-9]/g, "");
-	return registry[compact] ? compact : "store-winter-darkness";
+	return registry[compact] ? compact : "skynight";
 }
 
 function getWallpaperFile(key) {
 	var normalized = normalizeWallpaperKey(key);
 	var registry = getWallpaperRegistry();
-	var file = normalizeWallpaperAssetFile(registry[normalized]?.file || wallpapers.skynight.file);
+	var file = registry[normalized]?.file || wallpapers.skynight.file;
 	try {
 		return new URL(file, window.location.href).toString();
 	} catch {
@@ -5932,7 +5774,6 @@ function ensureWallpaperVideoElement() {
 	videoEl.autoplay = true;
 	videoEl.playsInline = true;
 	videoEl.preload = "auto";
-	videoEl.crossOrigin = "anonymous";
 	videoEl.setAttribute("aria-hidden", "true");
 	videoEl.setAttribute("tabindex", "-1");
 	var firstChild = document.body.firstChild;
@@ -5944,12 +5785,12 @@ function ensureWallpaperVideoElement() {
 function showWallpaperVideo(videoUrl, fallbackUrl = "") {
 	var videoEl = ensureWallpaperVideoElement();
 	if (!videoUrl) return;
-	var normalizedPrimary = normalizeWallpaperAssetFile(videoUrl);
-	var normalizedFallback = normalizeWallpaperAssetFile(fallbackUrl);
+	var normalizedPrimary = String(videoUrl || "").trim();
+	var normalizedFallback = String(fallbackUrl || "").trim();
 	function tryPlayWallpaperVideo() {
 		var playResult = videoEl.play();
 		if (playResult && typeof playResult.catch === "function") {
-			playResult.catch(() => {});
+			playResult.catch(() => { });
 		}
 	}
 	videoEl.oncanplay = tryPlayWallpaperVideo;
@@ -5957,7 +5798,6 @@ function showWallpaperVideo(videoUrl, fallbackUrl = "") {
 	videoEl.onerror = function () {
 		if (!normalizedFallback) return;
 		if (videoEl.dataset.fallbackApplied === "true") return;
-		if (normalizedFallback === normalizedPrimary) return;
 		videoEl.dataset.fallbackApplied = "true";
 		videoEl.src = normalizedFallback;
 		videoEl.dataset.src = normalizedFallback;
@@ -6043,12 +5883,17 @@ function populateWallpaperOptions() {
 }
 
 function loadWallpaper() {
-	var saved = normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "store-winter-darkness");
+	var saved = normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "winter-darkness");
 	applyWallpaper(saved);
 }
 
 function bootstrapWallpaperFromStorage() {
-	var saved = normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "store-winter-darkness");
+	var raw = localStorage.getItem(wallpaperKey);
+	if (!raw || raw === "skynight" || raw === "winter" || raw === "store-winter-island" || raw === "winter-island") {
+		raw = "winter-darkness";
+		localStorage.setItem(wallpaperKey, raw);
+	}
+	var saved = normalizeWallpaperKey(raw);
 	var theme = getWallpaperTheme(saved);
 	if (getWallpaperType(saved) === "video") {
 		showWallpaperVideo(buildWallpaperAssetUrl(saved), getWallpaperFile(saved));
@@ -6137,9 +5982,8 @@ function loadOpenModeSettings() {
 		localStorage.setItem(openModeStorage, selected);
 	}
 	if (openModeStatus) {
-		openModeStatus.textContent = `Open mode set to ${
-			selected === "blob" ? "blob:." : "about:blank."
-		}`;
+		openModeStatus.textContent = `Open mode set to ${selected === "blob" ? "blob:." : "about:blank."
+			}`;
 	}
 }
 
@@ -6148,9 +5992,8 @@ function setOpenMode(mode, shouldLaunch = false) {
 	localStorage.setItem(openModeStorage, selected);
 	updateOpenModeUI(selected);
 	if (openModeStatus) {
-		openModeStatus.textContent = `Open mode set to ${
-			selected === "blob" ? "blob:." : "about:blank."
-		}`;
+		openModeStatus.textContent = `Open mode set to ${selected === "blob" ? "blob:." : "about:blank."
+			}`;
 	}
 	if (shouldLaunch) {
 		openCurrentPageInMode(selected);
@@ -6453,6 +6296,4 @@ setTimeout(hideInitialLoadingPopup, 1200);
 
 
 // gooncoded :heartbroken:
-
-
 

@@ -1,7 +1,7 @@
 "use strict";
-const stockSW = "sw.js?v=13";
-const swReadyTimeoutMs = 10000;
-const swControllerTimeoutMs = 8000;
+const stockSW = "sw.js?v=28";
+const swReadyTimeoutMs = 2000;
+const swControllerTimeoutMs = 2000;
 
 /**
  * List of hostnames that are allowed to run serviceworkers on http://
@@ -43,15 +43,15 @@ function getAppBasePath() {
 		var scriptCandidates = [];
 		try {
 			if (document.currentScript?.src) scriptCandidates.push(String(document.currentScript.src));
-		} catch {}
+		} catch { }
 		try {
 			var registerScript = document.querySelector("script[src*='register-sw.js']");
 			if (registerScript?.src) scriptCandidates.push(String(registerScript.src));
-		} catch {}
+		} catch { }
 		try {
 			var indexScript = document.querySelector("script[src*='index.js']");
 			if (indexScript?.src) scriptCandidates.push(String(indexScript.src));
-		} catch {}
+		} catch { }
 		for (var candidate of scriptCandidates) {
 			try {
 				var parsed = new URL(candidate, window.location.href);
@@ -60,7 +60,7 @@ function getAppBasePath() {
 				var fromScript = pathname.replace(/\/[^/]*$/, "/");
 				if (!fromScript.startsWith("/")) fromScript = `/${fromScript}`;
 				return fromScript.replace(/\/{2,}/g, "/");
-			} catch {}
+			} catch { }
 		}
 		var path = String(window.location.pathname || "/").replace(/\/[^/]*$/, "/");
 		if (!path.startsWith("/")) path = `/${path}`;
@@ -94,7 +94,7 @@ function bindBareMuxServiceWorkerPortBridge() {
 			var sharedWorkerPort = createBareMuxPortForServiceWorker();
 			if (!sharedWorkerPort) return;
 			replyPort.postMessage(sharedWorkerPort, [sharedWorkerPort]);
-		} catch {}
+		} catch { }
 	});
 }
 
@@ -110,8 +110,16 @@ async function registerSW() {
 	}
 
 	const registration = await navigator.serviceWorker.register(`${getAppBasePath()}${stockSW}`);
+
+	try {
+		await registration.update();
+	} catch (e) { }
+
 	if (registration.waiting) {
 		registration.waiting.postMessage({ type: "SKIP_WAITING" });
+	}
+	if (registration.active) {
+		registration.active.postMessage({ type: "SKIP_WAITING" });
 	}
 	await withTimeout(navigator.serviceWorker.ready, swReadyTimeoutMs, registration);
 
@@ -134,6 +142,7 @@ async function registerSW() {
 }
 
 if (typeof window !== "undefined") {
+	console.log("%c[frosted]%c registration script v28 loaded", "color: #00ffa6; font-weight: bold;", "");
 	bindBareMuxServiceWorkerPortBridge();
 	window.registerSW = registerSW;
 }
