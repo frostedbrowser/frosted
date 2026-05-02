@@ -301,7 +301,7 @@ var { errorPanel, errorTitle, errorDetails } = errorRefs;
 var { proxySelect, proxyStatus } = proxyRefs;
 var proxyModeStorage = "fb_proxy_mode";
 var defaultWispUrl = "wss://stellite.games/wisp/";
-var proxyRuntimeAssetVersion = "6";
+var proxyRuntimeAssetVersion = "8";
 
 function normalizeProxyMode(value) {
 	var normalized = String(value || "").trim().toLowerCase();
@@ -706,7 +706,7 @@ async function ensureScramjetWasmBootstrap() {
 	if (window.WASM) return window.WASM;
 	if (scramjetWasmBootstrapPromise) return scramjetWasmBootstrapPromise;
 	scramjetWasmBootstrapPromise = (async () => {
-		var response = await fetch(`${appBasePath}scram/scramjet.wasm.wasm`, { cache: "force-cache" });
+		var response = await fetch(withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm.wasm`), { cache: "force-cache" });
 		if (!response.ok) {
 			throw new Error(`Failed to preload Scramjet WASM: ${response.status}`);
 		}
@@ -5164,7 +5164,7 @@ var wallpaperStoreView = "store";
 var wallpaperStoreSort = "name";
 var wallpaperStoreQuery = "";
 var wallpaperStoreSelectedKey = "";
-var winterIslandDefaultStoreKey = "store-winter-island";
+var winterIslandDefaultStoreKey = "store-winter-darkness";
 
 function sanitizeWallpaperStoreKey(raw, fallback = "wallpaper") {
 	var base = String(raw || "").trim().toLowerCase();
@@ -5460,7 +5460,7 @@ function uninstallWallpaperFromStore(entry) {
 	updateExtensionInstallCount();
 	populateWallpaperOptions();
 	if (normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "") === entry.key) {
-		applyWallpaper("skynight");
+		applyWallpaper("store-winter-darkness");
 	}
 	renderWallpaperStoreGrid();
 }
@@ -5661,6 +5661,7 @@ function renderWallpaperStoreGrid() {
 			thumbVideo.playsInline = true;
 			thumbVideo.preload = "none";
 			thumbVideo.disablePictureInPicture = true;
+			thumbVideo.crossOrigin = "anonymous";
 			thumbVideo.dataset.src = entry.file;
 			thumbVideo.dataset.loaded = "false";
 			thumbVideo.title = "Hover to preview";
@@ -5681,6 +5682,7 @@ function renderWallpaperStoreGrid() {
 			var thumbImg = document.createElement("img");
 			thumbImg.src = entry.file;
 			thumbImg.alt = entry.label;
+			thumbImg.crossOrigin = "anonymous";
 			thumbWrap.appendChild(thumbImg);
 		}
 
@@ -5843,7 +5845,7 @@ function normalizeWallpaperKey(value) {
 	var registry = getWallpaperRegistry();
 	if (registry[key]) return key;
 	var compact = key.replace(/[^a-z0-9]/g, "");
-	return registry[compact] ? compact : "skynight";
+	return registry[compact] ? compact : "store-winter-darkness";
 }
 
 function getWallpaperFile(key) {
@@ -5921,6 +5923,7 @@ function ensureWallpaperVideoElement() {
 	videoEl.autoplay = true;
 	videoEl.playsInline = true;
 	videoEl.preload = "auto";
+	videoEl.crossOrigin = "anonymous";
 	videoEl.setAttribute("aria-hidden", "true");
 	videoEl.setAttribute("tabindex", "-1");
 	var firstChild = document.body.firstChild;
@@ -6031,12 +6034,12 @@ function populateWallpaperOptions() {
 }
 
 function loadWallpaper() {
-	var saved = normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "skynight");
+	var saved = normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "store-winter-darkness");
 	applyWallpaper(saved);
 }
 
 function bootstrapWallpaperFromStorage() {
-	var saved = normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "skynight");
+	var saved = normalizeWallpaperKey(localStorage.getItem(wallpaperKey) || "store-winter-darkness");
 	var theme = getWallpaperTheme(saved);
 	if (getWallpaperType(saved) === "video") {
 		showWallpaperVideo(buildWallpaperAssetUrl(saved), getWallpaperFile(saved));

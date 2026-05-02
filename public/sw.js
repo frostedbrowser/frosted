@@ -1,12 +1,12 @@
-importScripts("./scram/scramjet.all.js?v=6");
+importScripts("./scram/scramjet.all.js?v=8");
 if (!self.Ultraviolet) {
-	importScripts("./uv/uv.bundle.js?v=6");
+	importScripts("./uv/uv.bundle.js?v=8");
 }
 if (!self.__uv$config) {
-	importScripts("./uv/uv.config.js?v=6");
+	importScripts("./uv/uv.config.js?v=8");
 }
 if (!self.UVServiceWorker) {
-	importScripts("./uv/uv.sw.js?v=6");
+	importScripts("./uv/uv.sw.js?v=8");
 }
 
 // trying to hard block the new adblock.turtlecute.org scripts (fakeads)
@@ -17,7 +17,7 @@ let scramjet = new ScramjetServiceWorker();
 let scramjetCircuitOpen = false;
 let scramjetReadyPromise = Promise.resolve(null);
 let scramjetUnhandledSchemaMismatchSeen = false;
-const scramjetAssetVersion = "6";
+const scramjetAssetVersion = "8";
 
 self.addEventListener("unhandledrejection", (event) => {
 	const reason = event?.reason;
@@ -92,8 +92,8 @@ function matchesHardBlockedKeyword(rawValue) {
 		try {
 			const twice = decodeURIComponent(once);
 			variants.push(String(twice || "").toLowerCase());
-		} catch {}
-	} catch {}
+		} catch { }
+	} catch { }
 	return variants.some((value) =>
 		hardBlockedAdKeywords.some((keyword) => value.includes(keyword))
 	);
@@ -107,7 +107,7 @@ function isHardBlockedAdRequest(request) {
 		if (matchesHardBlockedKeyword(parsed.href)) return true;
 		if (matchesHardBlockedKeyword(parsed.pathname)) return true;
 		if (matchesHardBlockedKeyword(parsed.search)) return true;
-	} catch {}
+	} catch { }
 	return false;
 }
 
@@ -141,7 +141,7 @@ function isHardAllowedAdRequest(request) {
 		if (parsed.origin === self.location.origin) return false;
 		const href = parsed.href.toLowerCase();
 		return hardAllowedAdUrlPatterns.some((pattern) => pattern.test(href));
-	} catch {}
+	} catch { }
 	return false;
 }
 
@@ -383,7 +383,7 @@ async function notifyClientsOfScramjetFailure(reason) {
 				reason: String(reason || "scramjet_failed"),
 			});
 		}
-	} catch {}
+	} catch { }
 }
 
 function isFatalScramjetTransportError(error) {
@@ -431,6 +431,8 @@ function getSafeGithubAssetRedirect(requestUrl) {
 	try {
 		const parsed = new URL(String(requestUrl || "").trim());
 		if (String(parsed.hostname || "").toLowerCase() !== "raw.githubusercontent.com") return "";
+		const pathLower = String(parsed.pathname || "").toLowerCase();
+		if (pathLower.endsWith(".mp4") || pathLower.endsWith(".webm") || pathLower.endsWith(".mov")) return "";
 		const parts = String(parsed.pathname || "")
 			.split("/")
 			.filter(Boolean);
@@ -480,7 +482,7 @@ async function handleNonNetworkTargetRequest(targetUrl, requestMethod) {
 			});
 		}
 	}
-	// javascript:/about: are not safe/fetchable network resources.
+
 	return new Response("", {
 		status: 204,
 		headers: {
@@ -520,8 +522,7 @@ function deleteIndexedDb(databaseName) {
 }
 
 function validateScramjetDb(db) {
-	// Keep validation strict enough for runtime boot but tolerant of Scramjet schema
-	// changes across versions (optional stores may vary).
+
 	const requiredStores = ["config"];
 	return requiredStores.every((storeName) => db.objectStoreNames.contains(storeName));
 }
@@ -543,11 +544,9 @@ async function ensureScramjetDbReady() {
 	const isValid = validateScramjetDb(db);
 	try {
 		db.close();
-	} catch {}
+	} catch { }
 	if (isValid) return;
-	// Do not force-delete the DB during startup. Scramjet may already hold a
-	// live connection from initial SW evaluation, which can keep delete blocked
-	// and create repeated refresh-time stalls.
+
 }
 
 async function resetScramjetDbWithRetry() {
@@ -561,7 +560,7 @@ async function resetScramjetDbWithRetry() {
 			const recreatedDb = await openScramjetDb();
 			try {
 				recreatedDb.close();
-			} catch {}
+			} catch { }
 			return true;
 		} catch (error) {
 			if (!isDbConnectionClosedError(error)) throw error;
@@ -608,7 +607,7 @@ async function readPersistedScramjetConfig() {
 	} finally {
 		try {
 			db.close();
-		} catch {}
+		} catch { }
 	}
 }
 
@@ -627,7 +626,7 @@ async function persistScramjetConfig(config) {
 	});
 	try {
 		db.close();
-	} catch {}
+	} catch { }
 }
 
 async function repairPersistedScramjetConfig() {
@@ -666,7 +665,6 @@ async function loadScramjetConfigWithRecovery() {
 		}
 	}
 	worker.config = normalizeScramjetConfig(worker.config || repairedConfig);
-	// Reduce false-positive rewrite failures on javascript: URLs in some sites.
 	worker.config.flags = { ...(worker.config.flags || {}), strictRewrites: false };
 	if (!worker.config?.prefix) {
 		worker.config = getDefaultScramjetConfig();
@@ -731,8 +729,6 @@ async function handleRequest(event) {
 
 	const isWasmAssetRequest = isScramjetWasmRequest(event.request.url);
 	if (isScramjetRequest(event.request.url) || isWasmAssetRequest) {
-		// Scramjet runtime WASM should be fetched directly; routing it through
-		// scramjet.fetch can trigger URL parsing/rewrite errors on first load.
 		if (isWasmAssetRequest) {
 			try {
 				return await fetch(event.request);
