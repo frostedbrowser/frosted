@@ -562,9 +562,9 @@ function hintAssetOnce(rel, href, asType, crossOrigin = false) {
 }
 
 function prefetchProxyAssets() {
-	hintAssetOnce("preload", withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`), "script");
-	hintAssetOnce("preload", withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm.wasm`), "fetch", true);
-	hintAssetOnce("prefetch", withRuntimeAssetVersion(`${appBasePath}scram/scramjet.sync.js`), "script");
+	hintAssetOnce("preload", withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`), "script");
+	hintAssetOnce("preload", withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm`), "fetch", true);
+	hintAssetOnce("prefetch", withRuntimeAssetVersion(`${appBasePath}scram/scramjet.js`), "script");
 	hintAssetOnce("preload", withRuntimeAssetVersion(`${appBasePath}uv/uv.bundle.js`), "script");
 	hintAssetOnce("prefetch", withRuntimeAssetVersion(`${appBasePath}uv/uv.config.js`), "script");
 	hintAssetOnce("modulepreload", `${appBasePath}baremux/index.js?v=5`, "script");
@@ -706,7 +706,7 @@ async function ensureScramjetWasmBootstrap() {
 	if (window.WASM) return window.WASM;
 	if (scramjetWasmBootstrapPromise) return scramjetWasmBootstrapPromise;
 	scramjetWasmBootstrapPromise = (async () => {
-		var response = await fetch(withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm.wasm`), { cache: "force-cache" });
+		var response = await fetch(withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm`), { cache: "force-cache" });
 		if (!response.ok) {
 			throw new Error(`Failed to preload Scramjet WASM: ${response.status}`);
 		}
@@ -877,7 +877,7 @@ async function initializeProxyRuntime() {
 	}
 
 	scramjetInitPromise = (async () => {
-		var scramjetAllUrl = withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`);
+		var scramjetAllUrl = withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`);
 		await ensureScramjetWasmBootstrap();
 		if (typeof window.$scramjetLoadController !== "function") {
 			await loadScriptOnce(scramjetAllUrl);
@@ -899,9 +899,9 @@ async function initializeProxyRuntime() {
 					strictRewrites: false,
 				},
 				files: {
-					wasm: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm.wasm`),
-					all: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`),
-					sync: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.sync.js`),
+					wasm: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm`),
+					all: withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`),
+					sync: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.js`),
 				},
 			});
 		scramjet = createScramjet();
@@ -3487,7 +3487,7 @@ function scheduleProxyRuntimePreload() {
 		await Promise.allSettled([
 			ensureUvRuntime(),
 			ensureScramjetWasmBootstrap().then(() =>
-				loadScriptOnce(withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`))
+				loadScriptOnce(withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`))
 			),
 		]);
 
@@ -3501,11 +3501,11 @@ function scheduleProxyRuntimePreload() {
 
 async function warmProxyRuntimeAtStartup() {
 	if (!canUseProxyRuntimeOnThisOrigin()) return;
-	var scramjetAllUrl = withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`);
+	var scramjetAllUrl = withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`);
 	var scramjetAllWarmupPromise = ensureScramjetWasmBootstrap()
 		.then(() => loadScriptOnce(scramjetAllUrl))
 		.catch((error) => {
-			console.warn("[frosted] scramjet.all.js warmup failed.", error);
+			console.warn("[frosted] scramjet_bundled.js warmup failed.", error);
 			throw error;
 		});
 	try {
@@ -5195,7 +5195,16 @@ function normalizeWallpaperAssetFile(file) {
 		var parsed = new URL(raw, window.location.href);
 		var host = String(parsed.hostname || "").toLowerCase();
 		var path = String(parsed.pathname || "");
-		if (host === "raw.githubusercontent.com") {
+		var pathLower = path.toLowerCase();
+		var isMedia =
+			pathLower.endsWith(".mp4") ||
+			pathLower.endsWith(".webm") ||
+			pathLower.endsWith(".mov") ||
+			pathLower.endsWith(".png") ||
+			pathLower.endsWith(".jpg") ||
+			pathLower.endsWith(".jpeg");
+
+		if (!isMedia && host === "raw.githubusercontent.com") {
 			var parts = path.split("/").filter(Boolean);
 			if (parts.length >= 4) {
 				var owner = parts[0];
@@ -5205,7 +5214,7 @@ function normalizeWallpaperAssetFile(file) {
 				return `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${ref}/${assetPath}`;
 			}
 		}
-		if (host === "github.com") {
+		if (!isMedia && host === "github.com") {
 			var githubParts = path.split("/").filter(Boolean);
 			if (githubParts.length >= 5 && githubParts[2] === "raw") {
 				var githubOwner = githubParts[0];

@@ -23,7 +23,7 @@
 		"@ghostery/adblocker": "^2.14.1",
 		"@mercuryworkshop/bare-mux": "^2.1.7",
 		"@mercuryworkshop/libcurl-transport": "^1.5.2",
-		"@mercuryworkshop/scramjet": "^2.1.2",
+		"@mercuryworkshop/scramjet": "2.0.2-alpha",
 		"@mercuryworkshop/wisp-js": "^0.4.1",
 		"fastify": "^5.4.0",
 		"ws": "^8.18.3"

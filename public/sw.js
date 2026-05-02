@@ -1,4 +1,4 @@
-importScripts("./scram/scramjet.all.js?v=8");
+importScripts("./scram/scramjet_bundled.js?v=8");
 if (!self.Ultraviolet) {
 	importScripts("./uv/uv.bundle.js?v=8");
 }
