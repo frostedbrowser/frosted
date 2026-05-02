@@ -1,5 +1,5 @@
 importScripts("scram/scramjet.all.js?v=29");
-console.log("%c[frosted]%c service worker v28 starting...", "color: #00ffa6; font-weight: bold;", "");
+console.log("%c[frosted]%c service worker v29 starting...", "color: #00ffa6; font-weight: bold;", "");
 
 importScripts("uv/uv.bundle.js?v=29");
 importScripts("uv/uv.config.js?v=29");
@@ -124,6 +124,25 @@ async function ensureScramjetDB() {
 	}
 }
 
+async function getTransport() {
+	return new Promise((resolve) => {
+		const channel = new MessageChannel();
+		channel.port1.onmessage = (event) => {
+			if (event.data) resolve(event.data);
+		};
+		self.clients.matchAll().then((clients) => {
+			if (!clients || clients.length === 0) {
+				resolve(null);
+				return;
+			}
+			for (const client of clients) {
+				client.postMessage({ type: "getPort", port: channel.port2 }, [channel.port2]);
+			}
+		});
+		setTimeout(() => resolve(null), 1500);
+	});
+}
+
 async function getScramjet() {
 	if (scramjetInitDone) return scramjet;
 	if (scramjetInitPromise) return scramjetInitPromise;
@@ -147,6 +166,17 @@ async function getScramjet() {
 			scramjet.config = SEED_CONFIG;
 		}
 
+		// Ensure transport is set if possible
+		try {
+			const port = await getTransport();
+			if (port) {
+				scramjet.setTransport(port);
+				console.log("[frosted] SW: obtained transport port from client.");
+			}
+		} catch (e) {
+			console.warn("[frosted] SW: failed to obtain transport port:", e);
+		}
+
 		scramjetInitDone = true;
 		return scramjet;
 	})();
@@ -157,6 +187,12 @@ async function getScramjet() {
 self.addEventListener("message", (event) => {
 	if (event.data && event.data.type === "SKIP_WAITING") {
 		self.skipWaiting();
+	}
+	// Also allow main thread to push a port directly
+	if (event.data && event.data.type === "setPort" && event.data.port) {
+		getScramjet().then(sj => {
+			if (sj) sj.setTransport(event.data.port);
+		});
 	}
 });
 

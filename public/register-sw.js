@@ -1,5 +1,5 @@
 "use strict";
-const stockSW = "sw.js?v=28";
+const stockSW = "sw.js?v=29";
 const swReadyTimeoutMs = 2000;
 const swControllerTimeoutMs = 2000;
 
@@ -142,7 +142,8 @@ async function registerSW() {
 }
 
 if (typeof window !== "undefined") {
-	console.log("%c[frosted]%c registration script v28 loaded", "color: #00ffa6; font-weight: bold;", "");
+	console.log("%c[frosted]%c registration script v29 loaded", "color: #00ffa6; font-weight: bold;", "");
 	bindBareMuxServiceWorkerPortBridge();
 	window.registerSW = registerSW;
+	window.createBareMuxPortForServiceWorker = createBareMuxPortForServiceWorker;
 }

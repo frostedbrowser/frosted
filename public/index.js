@@ -3401,6 +3401,17 @@ async function ensureTransport() {
 					await connection.setTransport(transportLoader.modulePath, transportLoader.argsForWisp(wispUrl));
 				}
 				transportReady = true;
+				try {
+					if (navigator.serviceWorker?.controller && typeof window.createBareMuxPortForServiceWorker === "function") {
+						const port = window.createBareMuxPortForServiceWorker();
+						if (port) {
+							navigator.serviceWorker.controller.postMessage({ type: "setPort", port }, [port]);
+							console.log("[frosted] proactively pushed transport port to SW.");
+						}
+					}
+				} catch (e) {
+					console.warn("[frosted] failed to push transport port to SW:", e);
+				}
 				return;
 			} catch (error) {
 				lastError = error;
