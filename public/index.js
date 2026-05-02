@@ -706,7 +706,7 @@ async function ensureScramjetWasmBootstrap() {
 	if (window.WASM) return window.WASM;
 	if (scramjetWasmBootstrapPromise) return scramjetWasmBootstrapPromise;
 	scramjetWasmBootstrapPromise = (async () => {
-		var response = await fetch(withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm`), { cache: "force-cache" });
+		var response = await fetch(withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm.wasm`), { cache: "force-cache" });
 		if (!response.ok) {
 			throw new Error(`Failed to preload Scramjet WASM: ${response.status}`);
 		}
@@ -3501,11 +3501,11 @@ function scheduleProxyRuntimePreload() {
 
 async function warmProxyRuntimeAtStartup() {
 	if (!canUseProxyRuntimeOnThisOrigin()) return;
-	var scramjetAllUrl = withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`);
+	var scramjetAllUrl = withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`);
 	var scramjetAllWarmupPromise = ensureScramjetWasmBootstrap()
 		.then(() => loadScriptOnce(scramjetAllUrl))
 		.catch((error) => {
-			console.warn("[frosted] scramjet_bundled.js warmup failed.", error);
+			console.warn("[frosted] scramjet.all.js warmup failed.", error);
 			throw error;
 		});
 	try {

@@ -1,4 +1,4 @@
-importScripts("./scram/scramjet_bundled.js?v=8");
+importScripts("./scram/scramjet.all.js?v=8");
 if (!self.Ultraviolet) {
 	importScripts("./uv/uv.bundle.js?v=8");
 }
@@ -9,7 +9,6 @@ if (!self.UVServiceWorker) {
 	importScripts("./uv/uv.sw.js?v=8");
 }
 
-// trying to hard block the new adblock.turtlecute.org scripts (fakeads)
 const { ScramjetServiceWorker } = $scramjetLoadWorker();
 const uvServiceWorker = new UVServiceWorker();
 // Scramjet requires its message handler to be attached during initial SW evaluation.

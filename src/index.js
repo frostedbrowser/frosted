@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import { createServer as createSecureServer } from "node:https";
 import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "url";
+import path from "node:path";
 import { hostname } from "node:os";
 import { server as wisp, logging } from "@mercuryworkshop/wisp-js/server";
 import Fastify from "fastify";
@@ -62,7 +63,7 @@ const fastify = Fastify({
 });
 
 fastify.register(fastifyStatic, {
-	root: scramjetPath,
+	root: path.join(publicPath, "scram"),
 	prefix: "/scram/",
 	decorateReply: false,
 });
