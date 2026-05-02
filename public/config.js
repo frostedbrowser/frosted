@@ -2,7 +2,7 @@ const sameOriginWispUrl =
 	typeof window !== "undefined"
 		? `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/wisp/`
 		: "";
-const preferredWispUrl = "wss://stellite.games/wisp/";
+const preferredWispUrl = "wss://cdn.frostedbrowser.cfd/wisp/";
 
 const defaultConfig = {
 	WISP_URL: preferredWispUrl,
