@@ -563,10 +563,11 @@ function hintAssetOnce(rel, href, asType, crossOrigin = false) {
 
 function prefetchProxyAssets() {
 	hintAssetOnce("preload", withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`), "script");
+	hintAssetOnce("preload", withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm.wasm`), "fetch", true);
 	hintAssetOnce("prefetch", withRuntimeAssetVersion(`${appBasePath}scram/scramjet.sync.js`), "script");
-	hintAssetOnce("prefetch", withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm.wasm`), "fetch", true);
-	hintAssetOnce("modulepreload", withRuntimeAssetVersion(`${appBasePath}uv/uv.bundle.js`), "script");
-	hintAssetOnce("modulepreload", withRuntimeAssetVersion(`${appBasePath}uv/uv.config.js`), "script");
+	hintAssetOnce("preload", withRuntimeAssetVersion(`${appBasePath}uv/uv.bundle.js`), "script");
+	hintAssetOnce("prefetch", withRuntimeAssetVersion(`${appBasePath}uv/uv.config.js`), "script");
+	hintAssetOnce("modulepreload", `${appBasePath}baremux/index.js?v=5`, "script");
 	hintAssetOnce("modulepreload", `${appBasePath}epoxy/index.mjs`, "script");
 	hintAssetOnce("modulepreload", `${appBasePath}libcurl/index.mjs`, "script");
 }
@@ -999,17 +1000,11 @@ function applyfrosteddBarConfig(config = frosteddBarConfig) {
 
 async function init() {
 	applyfrosteddBarConfig();
-	prefetchProxyAssets();
-	void warmProxyRuntimeAtStartup();
 	applyPrivacyDefaults();
 	void ensureMobileSafeProxyMode();
 	updateAdblockToggleLabel();
 	void ensureGhosteryEngine();
 	loadInstalledExtensionWallpapers();
-	await Promise.allSettled([
-		restoreSavedWallpaperFromStoreCatalog(),
-		ensureFirstVisitMp4Wallpaper(),
-	]);
 	bindServiceWorkerProxyFallbackListener();
 
 	if (randomTagline) {
@@ -1028,6 +1023,16 @@ async function init() {
 	loadAiMode();
 	createTab("");
 	loadProxySettings();
+	runWhenIdle(() => {
+		prefetchProxyAssets();
+		void warmProxyRuntimeAtStartup();
+	}, 1200);
+	runWhenIdle(() => {
+		Promise.allSettled([restoreSavedWallpaperFromStoreCatalog(), ensureFirstVisitMp4Wallpaper()]).then(() => {
+			populateWallpaperOptions();
+			loadWallpaper();
+		});
+	}, 700);
 	scheduleProxyRuntimePreload();
 	bindEvents();
 	showUpdatePopupIfNeeded();
@@ -3360,14 +3365,15 @@ function getWispTransportCandidates() {
 		candidates.push(normalized);
 	};
 
-	if (!isLikelyStaticHostForWisp(window.location.hostname)) {
-		addCandidate(`${window.location.origin.replace(/\/+$/, "")}/wisp/`);
-	}
-
 	addCandidate(window?._CONFIG?.WISP_URL);
 	addCandidate(window?.WISP_URL);
 	addCandidate(defaultWispUrl);
 	addCandidate("wss://stellite.games/wisp/");
+	addCandidate(window?._CONFIG?.WISP_FALLBACK_URL);
+
+	if (!isLikelyStaticHostForWisp(window.location.hostname)) {
+		addCandidate(`${window.location.origin.replace(/\/+$/, "")}/wisp/`);
+	}
 
 	return candidates.length ? candidates : [defaultWispUrl];
 }
@@ -3523,7 +3529,7 @@ function scheduleTransportWarmup() {
 	if (!canUseProxyRuntimeOnThisOrigin()) return;
 	if (getProxyMode() !== "scramjet") return;
 	transportWarmupScheduled = true;
-	setTimeout(() => {
+	runWhenIdle(() => {
 		ensureTransport().catch((error) => {
 			if (getProxyMode() !== "scramjet") return;
 			if (!isScramjetTransportCrash(error)) return;
@@ -3532,7 +3538,7 @@ function scheduleTransportWarmup() {
 				proxyStatus.textContent = "Scramjet warmup failed. Try Ultraviolet if browsing fails.";
 			}
 		});
-	}, 120);
+	}, 1800);
 }
 
 var particlesInitScheduled = false;
@@ -5550,7 +5556,7 @@ async function loadWallpaperStoreCatalog() {
 		wallpaperStoreStatus.textContent = "Loading wallpaper store...";
 	}
 	try {
-		var response = await fetch("./wallpaperstore.json", { cache: "no-store" });
+		var response = await fetch("./wallpaperstore.json", { cache: "force-cache" });
 		var raw = await response.json().catch(() => []);
 		if (!response.ok || !Array.isArray(raw)) {
 			wallpaperStoreCatalog = [];

@@ -40,9 +40,14 @@
 			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 		/>
 
-		<link rel="modulepreload" href="./baremux/index.mjs?v=5" />
+		<link rel="modulepreload" href="./baremux/index.js?v=5" />
 		<link rel="modulepreload" href="./libcurl/index.mjs?v=5" />
 		<link rel="modulepreload" href="./epoxy/index.mjs?v=5" />
+		<link rel="preload" href="./scram/scramjet.all.js?v=6" as="script" />
+		<link rel="preload" href="./scram/scramjet.wasm.wasm?v=6" as="fetch" crossorigin="anonymous" />
+		<link rel="prefetch" href="./scram/scramjet.sync.js?v=6" as="script" />
+		<link rel="preload" href="./uv/uv.bundle.js?v=6" as="script" />
+		<link rel="prefetch" href="./uv/uv.config.js?v=6" as="script" />
 		<link rel="stylesheet" href="./index.css?v=12" />
 		<script src="./register-sw.js?v=13" defer></script>
 		<script src="./search.js?v=5" defer></script>

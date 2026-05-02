@@ -2,10 +2,11 @@ const sameOriginWispUrl =
 	typeof window !== "undefined"
 		? `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/wisp/`
 		: "";
+const preferredWispUrl = "wss://stellite.games/wisp/";
 
 const defaultConfig = {
-	WISP_URL: sameOriginWispUrl,
-	WISP_FALLBACK_URL: "wss://stellite.games/wisp/",
+	WISP_URL: preferredWispUrl,
+	WISP_FALLBACK_URL: sameOriginWispUrl,
 };
 
 if (typeof window !== "undefined") {
