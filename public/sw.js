@@ -1,9 +1,9 @@
-importScripts("scram/scramjet.all.js?v=29");
-console.log("%c[frosted]%c service worker v29 starting...", "color: #00ffa6; font-weight: bold;", "");
+importScripts("scram/scramjet.all.js?v=31");
+console.log("%c[frosted]%c service worker v31 starting...", "color: #00ffa6; font-weight: bold;", "");
 
-importScripts("uv/uv.bundle.js?v=29");
-importScripts("uv/uv.config.js?v=29");
-importScripts("uv/uv.sw.js?v=29");
+importScripts("uv/uv.bundle.js?v=31");
+importScripts("uv/uv.config.js?v=31");
+importScripts("uv/uv.sw.js?v=31");
 
 const { ScramjetServiceWorker } = self.$scramjetLoadWorker();
 const uv = new self.UVServiceWorker();
@@ -168,10 +168,13 @@ async function getScramjet() {
 
 		// Ensure transport is set if possible
 		try {
+			console.log("[frosted] SW: requesting transport port from clients...");
 			const port = await getTransport();
 			if (port) {
 				scramjet.setTransport(port);
 				console.log("[frosted] SW: obtained transport port from client.");
+			} else {
+				console.warn("[frosted] SW: no transport port received from clients. proxy might fail.");
 			}
 		} catch (e) {
 			console.warn("[frosted] SW: failed to obtain transport port:", e);

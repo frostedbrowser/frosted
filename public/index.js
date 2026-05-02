@@ -283,7 +283,7 @@ var { errorPanel, errorTitle, errorDetails } = errorRefs;
 var { proxySelect, proxyStatus } = proxyRefs;
 var proxyModeStorage = "fb_proxy_mode";
 var defaultWispUrl = "wss://wisp.mercuryworkshop.me/";
-var proxyRuntimeAssetVersion = "29";
+var proxyRuntimeAssetVersion = "31";
 
 function normalizeProxyMode(value) {
 	var normalized = String(value || "").trim().toLowerCase();
@@ -308,11 +308,19 @@ function getProxyMode() {
 
 function canUseProxyRuntimeOnThisOrigin() {
 	try {
-		if (!("serviceWorker" in navigator)) return false;
+		if (!("serviceWorker" in navigator)) {
+			console.warn("[frosted] serviceWorker not in navigator");
+			return false;
+		}
 		if (window.isSecureContext) return true;
 		var host = String(window.location.hostname || "").trim().toLowerCase();
-		return host === "localhost" || host === "127.0.0.1" || host === "::1" || host === "[::1]";
-	} catch {
+		var isLocal = host === "localhost" || host === "127.0.0.1" || host === "::1" || host === "[::1]";
+		if (!isLocal) {
+			console.warn("[frosted] origin is not a secure context and not local:", window.location.origin);
+		}
+		return isLocal;
+	} catch (e) {
+		console.error("[frosted] error in canUseProxyRuntimeOnThisOrigin:", e);
 		return false;
 	}
 }
@@ -2766,18 +2774,9 @@ async function loadUrl(url, pushHistory = true, allowProxyFallback = true, allow
 	updateNavButtons();
 
 	if (!canUseProxyRuntimeOnThisOrigin()) {
-		var directUrl = String(url || "").trim();
-		if (/^https?:\/\//i.test(directUrl)) {
-			try {
-				window.location.href = directUrl;
-				return;
-			} catch {
-			}
-		}
+		console.error("[frosted] proxy runtime unavailable on this origin. check HTTPS and Service Worker support.");
 		showBlank();
-		if (proxyStatus) {
-			proxyStatus.textContent = "Proxy unavailable on this origin (HTTPS required).";
-		}
+		showError("Proxy Unavailable", "This browser or origin does not support the required Service Worker runtime (requires HTTPS or localhost).");
 		return;
 	}
 
