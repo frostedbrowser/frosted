@@ -429,9 +429,10 @@ async function ensureMobileSafeProxyMode() {
 	if (getProxyMode() !== "scramjet") return;
 	if (isChromebookLikeDevice()) return;
 	if (await canUseScramjetReliably()) return;
-	console.warn("[frosted] SharedWorker is unavailable on this device; keeping Scramjet selected.");
+	console.info("[frosted] SharedWorker is unavailable on this device; switching to Ultraviolet.");
+	setProxyMode("ultraviolet");
 	if (proxyStatus) {
-		proxyStatus.textContent = "SharedWorker unavailable. Scramjet may fail on this device.";
+		proxyStatus.textContent = "SharedWorker unavailable on this device. Switched to Ultraviolet.";
 	}
 }
 
@@ -897,7 +898,7 @@ async function initializeProxyRuntime() {
 					strictRewrites: false,
 				},
 				files: {
-					wasm: `${appBasePath}scram/scramjet.wasm.wasm`,
+					wasm: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm.wasm`),
 					all: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`),
 					sync: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.sync.js`),
 				},
@@ -5181,6 +5182,39 @@ function normalizeStoreWallpaperTheme(theme) {
 	};
 }
 
+function normalizeWallpaperAssetFile(file) {
+	var raw = String(file || "").trim();
+	if (!raw) return "";
+	try {
+		var parsed = new URL(raw, window.location.href);
+		var host = String(parsed.hostname || "").toLowerCase();
+		var path = String(parsed.pathname || "");
+		if (host === "raw.githubusercontent.com") {
+			var parts = path.split("/").filter(Boolean);
+			if (parts.length >= 4) {
+				var owner = parts[0];
+				var repo = parts[1];
+				var ref = parts[2];
+				var assetPath = parts.slice(3).join("/");
+				return `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${ref}/${assetPath}`;
+			}
+		}
+		if (host === "github.com") {
+			var githubParts = path.split("/").filter(Boolean);
+			if (githubParts.length >= 5 && githubParts[2] === "raw") {
+				var githubOwner = githubParts[0];
+				var githubRepo = githubParts[1];
+				var githubRef = githubParts[3];
+				var githubAssetPath = githubParts.slice(4).join("/");
+				return `https://cdn.jsdelivr.net/gh/${githubOwner}/${githubRepo}@${githubRef}/${githubAssetPath}`;
+			}
+		}
+		return parsed.toString();
+	} catch {
+		return raw;
+	}
+}
+
 function normalizeStoreWallpaperEntry(rawEntry, index = 0) {
 	var item = typeof rawEntry === "object" && rawEntry ? rawEntry : {};
 	var keySeed = item.key || item.id || item.slug || item.label || `wallpaper-${index + 1}`;
@@ -5188,7 +5222,7 @@ function normalizeStoreWallpaperEntry(rawEntry, index = 0) {
 	key = key.replace(/^(store-)+/, "store-");
 	if (!key.startsWith("store-")) key = `store-${key}`;
 	var label = String(item.label || item.name || item.title || `Wallpaper ${index + 1}`).trim();
-	var file = String(item.file || item.url || "").trim();
+	var file = normalizeWallpaperAssetFile(item.file || item.url || "");
 	var typeRaw = String(item.type || "video").trim().toLowerCase();
 	var categoryRaw = String(item.category || "animated-wallpapers").trim().toLowerCase();
 	var type = typeRaw === "image" ? "image" : "video";
@@ -5809,7 +5843,7 @@ function normalizeWallpaperKey(value) {
 function getWallpaperFile(key) {
 	var normalized = normalizeWallpaperKey(key);
 	var registry = getWallpaperRegistry();
-	var file = registry[normalized]?.file || wallpapers.skynight.file;
+	var file = normalizeWallpaperAssetFile(registry[normalized]?.file || wallpapers.skynight.file);
 	try {
 		return new URL(file, window.location.href).toString();
 	} catch {
@@ -5892,8 +5926,8 @@ function ensureWallpaperVideoElement() {
 function showWallpaperVideo(videoUrl, fallbackUrl = "") {
 	var videoEl = ensureWallpaperVideoElement();
 	if (!videoUrl) return;
-	var normalizedPrimary = String(videoUrl || "").trim();
-	var normalizedFallback = String(fallbackUrl || "").trim();
+	var normalizedPrimary = normalizeWallpaperAssetFile(videoUrl);
+	var normalizedFallback = normalizeWallpaperAssetFile(fallbackUrl);
 	function tryPlayWallpaperVideo() {
 		var playResult = videoEl.play();
 		if (playResult && typeof playResult.catch === "function") {
@@ -5905,6 +5939,7 @@ function showWallpaperVideo(videoUrl, fallbackUrl = "") {
 	videoEl.onerror = function () {
 		if (!normalizedFallback) return;
 		if (videoEl.dataset.fallbackApplied === "true") return;
+		if (normalizedFallback === normalizedPrimary) return;
 		videoEl.dataset.fallbackApplied = "true";
 		videoEl.src = normalizedFallback;
 		videoEl.dataset.src = normalizedFallback;

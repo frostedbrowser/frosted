@@ -218,7 +218,7 @@ function getDefaultScramjetConfig() {
 			tempunusedid: "$scramjet$tempunused",
 		},
 		files: {
-			wasm: `${appBasePath}scram/scramjet.wasm.wasm`,
+			wasm: withScramjetAssetVersion(`${appBasePath}scram/scramjet.wasm.wasm`),
 			all: withScramjetAssetVersion(`${appBasePath}scram/scramjet.all.js`),
 			sync: withScramjetAssetVersion(`${appBasePath}scram/scramjet.sync.js`),
 		},
@@ -407,9 +407,43 @@ function buildScramjetUvFallbackResponse(requestUrl) {
 	return Response.redirect(uvUrl, 302);
 }
 
+function getEffectiveScramjetClientId(event) {
+	try {
+		const directId = String(event?.clientId || "").trim();
+		if (directId) return directId;
+		const resultingId = String(event?.resultingClientId || "").trim();
+		if (resultingId) return resultingId;
+		return "";
+	} catch {
+		return "";
+	}
+}
+
 function getUrlProtocol(value) {
 	try {
 		return String(new URL(String(value || "").trim(), self.location.href).protocol || "").toLowerCase();
+	} catch {
+		return "";
+	}
+}
+
+function getSafeGithubAssetRedirect(requestUrl) {
+	try {
+		const parsed = new URL(String(requestUrl || "").trim());
+		if (String(parsed.hostname || "").toLowerCase() !== "raw.githubusercontent.com") return "";
+		const parts = String(parsed.pathname || "")
+			.split("/")
+			.filter(Boolean);
+		if (parts.length < 4) return "";
+		const owner = parts[0];
+		const repo = parts[1];
+		const ref = parts[2];
+		const assetPath = parts.slice(3).join("/");
+		const redirected = new URL(`https://cdn.jsdelivr.net/gh/${owner}/${repo}@${ref}/${assetPath}`);
+		parsed.searchParams.forEach((value, key) => {
+			redirected.searchParams.set(key, value);
+		});
+		return redirected.toString();
 	} catch {
 		return "";
 	}
@@ -659,6 +693,11 @@ async function initializeScramjetServiceWorker() {
 }
 
 async function handleRequest(event) {
+	const safeGithubAssetRedirect = getSafeGithubAssetRedirect(event.request.url);
+	if (safeGithubAssetRedirect) {
+		return Response.redirect(safeGithubAssetRedirect, 302);
+	}
+
 	if (isHardAllowedAdRequest(event.request)) {
 		try {
 			return await fetch(event.request);
@@ -742,7 +781,13 @@ async function handleRequest(event) {
 				});
 			}
 			if (worker.route(event)) {
-				return await worker.fetch(event);
+				const effectiveClientId = getEffectiveScramjetClientId(event);
+				if (!effectiveClientId) {
+					const fallback = buildScramjetUvFallbackResponse(event.request.url);
+					if (fallback) return fallback;
+					return await fetch(event.request);
+				}
+				return await worker.fetch({ ...event, clientId: effectiveClientId });
 			}
 		} catch (error) {
 			const detail = String(error?.message || error || "").toLowerCase();
