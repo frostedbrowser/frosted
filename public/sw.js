@@ -9,12 +9,43 @@ if (!self.UVServiceWorker) {
 	importScripts("./uv/uv.sw.js?v=8");
 }
 
-const { ScramjetServiceWorker } = $scramjetLoadWorker();
+function encodeArrayBufferToBase64(buffer) {
+	try {
+		var bytes = new Uint8Array(buffer);
+		var chunkSize = 32768;
+		var binary = "";
+		for (var i = 0; i < bytes.length; i += chunkSize) {
+			var chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
+			binary += String.fromCharCode.apply(null, chunk);
+		}
+		return btoa(binary);
+	} catch (error) {
+		console.error("[frosted-sw] Failed to encode ArrayBuffer to Base64:", error);
+		return "";
+	}
+}
+
+async function ensureScramjetWasmBootstrap() {
+	if (self.WASM) return self.WASM;
+	try {
+		const wasmUrl = `./scram/scramjet.wasm?v=${scramjetAssetVersion}`;
+		const response = await fetch(wasmUrl);
+		if (!response.ok) throw new Error(`Failed to fetch Scramjet WASM: ${response.status} ${response.statusText}`);
+		const buffer = await response.arrayBuffer();
+		const encoded = encodeArrayBufferToBase64(buffer);
+		self.WASM = encoded;
+		return encoded;
+	} catch (error) {
+		console.error("[frosted-sw] Scramjet WASM bootstrap failed:", error);
+		throw error;
+	}
+}
+
 const uvServiceWorker = new UVServiceWorker();
 // Scramjet requires its message handler to be attached during initial SW evaluation.
-let scramjet = new ScramjetServiceWorker();
+let scramjet = null;
 let scramjetCircuitOpen = false;
-let scramjetReadyPromise = Promise.resolve(null);
+let scramjetReadyPromise = initializeScramjetServiceWorker();
 let scramjetUnhandledSchemaMismatchSeen = false;
 const scramjetAssetVersion = "8";
 
@@ -528,8 +559,38 @@ function validateScramjetDb(db) {
 
 function ensureScramjetWorkerInstance() {
 	if (scramjet) return scramjet;
-	scramjet = new ScramjetServiceWorker();
+	const { ScramjetFetchHandler } = self.$scramjet || {};
+	if (typeof ScramjetFetchHandler !== "function") {
+		throw new Error("Scramjet v2 bundle is not loaded or ScramjetFetchHandler is missing.");
+	}
+	scramjet = new ScramjetFetchHandler({
+		prefix: getScramjetPrefixPath(),
+		codec: {
+			encode: (value) => (value ? encodeURIComponent(String(value)) : value),
+			decode: (value) => (value ? decodeURIComponent(String(value)) : value),
+		},
+		flags: {
+			strictRewrites: false,
+		},
+		files: {
+			wasm: `./scram/scramjet.wasm?v=${scramjetAssetVersion}`,
+			all: `./scram/scramjet.all.js?v=${scramjetAssetVersion}`,
+			sync: `./scram/scramjet.js?v=${scramjetAssetVersion}`,
+		},
+	});
 	return scramjet;
+}
+
+async function initializeScramjetServiceWorker() {
+	console.info("[frosted-sw] Initializing Scramjet v2...");
+	try {
+		await ensureScramjetWasmBootstrap();
+		ensureScramjetWorkerInstance();
+		console.info("[frosted-sw] Scramjet v2 initialized successfully.");
+	} catch (error) {
+		console.error("[frosted-sw] Scramjet v2 initialization failed:", error);
+		throw error;
+	}
 }
 
 async function ensureScramjetDbReady() {
@@ -775,15 +836,8 @@ async function handleRequest(event) {
 					},
 				});
 			}
-			if (worker.route(event)) {
-				const effectiveClientId = getEffectiveScramjetClientId(event);
-				if (!effectiveClientId) {
-					const fallback = buildScramjetUvFallbackResponse(event.request.url);
-					if (fallback) return fallback;
-					return await fetch(event.request);
-				}
-				return await worker.fetch({ ...event, clientId: effectiveClientId });
-			}
+			const response = await worker.handleFetch(event);
+			if (response) return response;
 		} catch (error) {
 			const detail = String(error?.message || error || "").toLowerCase();
 			if (detail.includes("prefix")) {
