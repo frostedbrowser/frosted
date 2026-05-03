@@ -1912,7 +1912,11 @@ function getDisplayTitle(url) {
 
 function isSameAppOriginUrl(rawUrl) {
 	try {
-		var parsed = new URL(String(rawUrl || "").trim(), window.location.href);
+		var urlStr = String(rawUrl || "").trim();
+		if (urlStr.startsWith("blob:") || urlStr.startsWith("about:") || urlStr.startsWith("data:")) {
+			return false;
+		}
+		var parsed = new URL(urlStr, window.location.href);
 		if (parsed.origin !== window.location.origin) return false;
 		var path = String(parsed.pathname || "");
 		if (
@@ -2718,38 +2722,96 @@ async function loadUrl(url, pushHistory = true, allowProxyFallback = true, allow
 	resetError();
 	var tab = getActiveTab();
 	if (!tab) return;
+
+	// Handle internal frosted:// routes
+	var internalUrl = normalizeInternalScheme(url);
+	if (isSettingsInternalUrl(internalUrl)) {
+		tab.url = settingsInternalUrl;
+		tab.title = "Settings";
+		setAddressDisplay(tab.url, getProxyMode());
+		showSettingsPage();
+		renderTabs();
+		updateNavButtons();
+		return;
+	}
+	if (isPartnersInternalUrl(internalUrl)) {
+		tab.url = partnersInternalUrl;
+		tab.title = "Partners";
+		setAddressDisplay(tab.url, getProxyMode());
+		showPartnersPage();
+		renderTabs();
+		updateNavButtons();
+		return;
+	}
+	if (isGamesInternalUrl(internalUrl)) {
+		tab.url = gamesInternalUrl;
+		tab.title = "Games";
+		setAddressDisplay(tab.url, getProxyMode());
+		showGamesPage();
+		renderTabs();
+		updateNavButtons();
+		return;
+	}
+	if (isAiInternalUrl(internalUrl)) {
+		tab.url = aiInternalUrl;
+		tab.title = "FrostedAI";
+		setAddressDisplay(tab.url, getProxyMode());
+		showAiPage();
+		renderTabs();
+		updateNavButtons();
+		return;
+	}
+	if (isExtensionInternalUrl(internalUrl) || isExtensionStoreInternalUrl(internalUrl)) {
+		tab.url = wallpapersInternalUrl;
+		tab.title = "Wallpapers";
+		setAddressDisplay(tab.url, getProxyMode());
+		showExtensionStorePage();
+		renderTabs();
+		updateNavButtons();
+		return;
+	}
+	if (isCreditsInternalUrl(internalUrl)) {
+		tab.url = creditsInternalUrl;
+		tab.title = "Credits";
+		setAddressDisplay(tab.url, getProxyMode());
+		showCreditsPage();
+		renderTabs();
+		updateNavButtons();
+		return;
+	}
+
 	url = await decodeAppProxyUrlIfNeeded(url);
 	url = normalizeLikelyMalformedTargetUrl(url);
-	if (isSettingsInternalUrl(url)) {
-		showSettingsPage();
-		return;
-	}
-	if (isPartnersInternalUrl(url)) {
-		showPartnersPage();
-		return;
-	}
-	if (isGamesInternalUrl(url)) {
-		showGamesPage();
-		return;
-	}
-	if (isAiInternalUrl(url)) {
-		showAiPage();
-		return;
-	}
-	if (isExtensionInternalUrl(url) || isExtensionStoreInternalUrl(url)) {
-		showExtensionStorePage();
-		return;
-	}
-	if (isCreditsInternalUrl(url)) {
-		showCreditsPage();
-		return;
-	}
+
 	if (isSameAppOriginUrl(url) && !allowSameOriginNavigation) {
 		showBlank();
 		showError(
 			"Cannot proxy this address.",
 			"Frosted cannot proxy its own app origin. Open this address in the browser directly instead."
 		);
+		return;
+	}
+
+	// Handle direct protocols (bypass proxy)
+	var urlStr = String(url || "").trim();
+	if (urlStr.startsWith("about:") || urlStr.startsWith("blob:") || urlStr.startsWith("data:")) {
+		if (pushHistory && tab.url) {
+			tab.backStack.push(tab.url);
+			tab.forwardStack = [];
+		}
+		tab.url = url;
+		tab.title = getDisplayTitle(url);
+		setAddressDisplay(url, getProxyMode());
+		renderTabs();
+		updateNavButtons();
+
+		hideInternalPages();
+		showLoading(false);
+		var frameEntry = ensureTabFrame(tab.id);
+		if (frameEntry && frameEntry.element) {
+			frameEntry.element.src = url;
+			showFrameForTab(tab.id);
+		}
 		return;
 	}
 	var previousUrl = String(tab.url || "");
