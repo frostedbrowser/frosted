@@ -845,29 +845,74 @@ async function initializeProxyRuntime() {
 	}
 
 	const scramjetDbName = "$scramjet_v32";
+	const scramjetRequiredStores = ["config", "cookies", "redirectTrackers", "referrerPolicies", "publicSuffixList"];
+
+	function buildScramjetSeedConfig() {
+		return {
+			prefix: scramjetPrefix,
+			globals: {
+				wrapfn: "$scramjet$wrap",
+				wrappropertybase: "$scramjet__",
+				wrappropertyfn: "$scramjet$prop",
+				cleanrestfn: "$scramjet$clean",
+				importfn: "$scramjet$import",
+				rewritefn: "$scramjet$rewrite",
+				metafn: "$scramjet$meta",
+				setrealmfn: "$scramjet$setrealm",
+				pushsourcemapfn: "$scramjet$pushsourcemap",
+				trysetfn: "$scramjet$tryset",
+				templocid: "$scramjet$temploc",
+				tempunusedid: "$scramjet$tempunused",
+			},
+			files: {
+				all: `${appBasePath}scram/scramjet.all.js`,
+				sync: `${appBasePath}scram/scramjet.sync.js`,
+			},
+			wasm: `${appBasePath}scram/scramjet.wasm.wasm`,
+			flags: {
+				serviceworkers: false,
+				syncxhr: false,
+				strictRewrites: false,
+				rewriterLogs: false,
+				captureErrors: true,
+				cleanErrors: false,
+				scramitize: false,
+				sourcemaps: true,
+				destructureRewrites: false,
+				interceptDownloads: false,
+				allowInvalidJs: true,
+				allowFailedIntercepts: true,
+			},
+			siteFlags: {},
+			codec: {
+				encode: "e => e ? encodeURIComponent(e) : e",
+				decode: "e => e ? decodeURIComponent(e) : e",
+			},
+		};
+	}
 
 	async function repairScramjetIndexedDB() {
 		try {
-			const requiredStores = ["config", "cookies", "redirectTrackers", "referrerPolicies", "publicSuffixList"];
 			const db = await new Promise((resolve, reject) => {
 				const request = indexedDB.open(scramjetDbName);
 				request.onsuccess = () => resolve(request.result);
 				request.onerror = () => reject(request.error);
 			});
-			const missing = requiredStores.filter((s) => !db.objectStoreNames.contains(s));
+			const missing = scramjetRequiredStores.filter((s) => !db.objectStoreNames.contains(s));
 			db.close();
 
 			if (missing.length > 0) {
 				console.warn(
 					`[frosted] Scramjet IndexedDB is missing stores (${missing.join(", ")}), deleting so scramjet.init() can recreate it...`
 				);
-				await new Promise((resolve, reject) => {
+				await new Promise((resolve) => {
 					const request = indexedDB.deleteDatabase(scramjetDbName);
 					request.onsuccess = resolve;
 					request.onerror = () => resolve();
 					request.onblocked = () => resolve();
 				});
-				console.log("[frosted] Scramjet IndexedDB deleted. scramjet.init() will recreate it.");
+				console.log("[frosted] Scramjet IndexedDB deleted. Rebuilding schema now.");
+				await rebuildScramjetIndexedDB();
 			}
 		} catch (e) {
 			console.warn("[frosted] Failed to repair Scramjet IndexedDB:", e);
@@ -885,6 +930,37 @@ async function initializeProxyRuntime() {
 			console.warn("[frosted] Deleted Scramjet IndexedDB so it can be recreated cleanly.");
 		} catch (e) {
 			console.warn("[frosted] Failed to delete Scramjet IndexedDB:", e);
+		}
+	}
+
+	async function rebuildScramjetIndexedDB() {
+		try {
+			const db = await new Promise((resolve, reject) => {
+				const request = indexedDB.open(scramjetDbName, 1);
+				request.onupgradeneeded = (event) => {
+					const upgradeDb = event.target.result;
+					for (const storeName of scramjetRequiredStores) {
+						if (!upgradeDb.objectStoreNames.contains(storeName)) {
+							upgradeDb.createObjectStore(storeName);
+						}
+					}
+				};
+				request.onsuccess = () => resolve(request.result);
+				request.onerror = () => reject(request.error);
+			});
+
+			await new Promise((resolve, reject) => {
+				const tx = db.transaction("config", "readwrite");
+				tx.objectStore("config").put(buildScramjetSeedConfig(), "config");
+				tx.oncomplete = () => resolve();
+				tx.onerror = () => reject(tx.error || new Error("Failed to seed Scramjet config store."));
+				tx.onabort = () => reject(tx.error || new Error("Seeding Scramjet config store was aborted."));
+			});
+
+			db.close();
+			console.log("[frosted] Rebuilt Scramjet IndexedDB schema and seeded config.");
+		} catch (e) {
+			console.warn("[frosted] Failed to rebuild Scramjet IndexedDB:", e);
 		}
 	}
 
@@ -926,6 +1002,7 @@ async function initializeProxyRuntime() {
 			}
 			console.warn("[frosted] scramjet.init() had a recoverable DB error:", error.message);
 			await deleteScramjetIndexedDB();
+			await rebuildScramjetIndexedDB();
 			scramjet = createScramjet();
 			await scramjet.init();
 		}
