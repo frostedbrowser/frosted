@@ -3334,9 +3334,7 @@ function normalizeWispUrl(rawUrl) {
 		if (parsed.protocol === "http:") parsed.protocol = "ws:";
 		if (parsed.protocol === "https:") parsed.protocol = "wss:";
 		if (parsed.protocol !== "ws:" && parsed.protocol !== "wss:") return "";
-		if (!parsed.pathname || parsed.pathname === "/") {
-			parsed.pathname = "/wisp/";
-		} else if (!parsed.pathname.endsWith("/")) {
+		if (parsed.pathname && !parsed.pathname.endsWith("/")) {
 			parsed.pathname = `${parsed.pathname}/`;
 		}
 		return parsed.toString();
