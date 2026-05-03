@@ -56,6 +56,19 @@ let scramjet = null;
 let scramjetInitDone = false;
 let scramjetInitPromise = null;
 
+function isRecoverableScramjetDbError(error) {
+	const name = String(error?.name || "");
+	const message = String(error?.message || error || "").toLowerCase();
+	return (
+		name === "NotFoundError" ||
+		name === "AbortError" ||
+		name === "VersionError" ||
+		message.includes("object stores was not found") ||
+		message.includes("one of the specified object stores was not found") ||
+		message.includes("database connection is closing")
+	);
+}
+
 async function ensureScramjetDB() {
 	try {
 		const db = await new Promise((resolve, reject) => {
@@ -124,23 +137,43 @@ async function ensureScramjetDB() {
 	}
 }
 
-async function getTransport() {
+async function requestTransportFromClient(client, timeoutMs = 1500) {
 	return new Promise((resolve) => {
 		const channel = new MessageChannel();
-		channel.port1.onmessage = (event) => {
-			if (event.data) resolve(event.data);
+		let settled = false;
+		const finish = (value) => {
+			if (settled) return;
+			settled = true;
+			try {
+				channel.port1.onmessage = null;
+				channel.port1.close();
+			} catch { }
+			resolve(value || null);
 		};
-		self.clients.matchAll().then((clients) => {
-			if (!clients || clients.length === 0) {
-				resolve(null);
-				return;
-			}
-			for (const client of clients) {
-				client.postMessage({ type: "getPort", port: channel.port2 }, [channel.port2]);
-			}
-		});
-		setTimeout(() => resolve(null), 5000);
+		const timer = setTimeout(() => finish(null), timeoutMs);
+		channel.port1.onmessage = (event) => {
+			clearTimeout(timer);
+			finish(event.data || null);
+		};
+		try {
+			client.postMessage({ type: "getPort", port: channel.port2 }, [channel.port2]);
+		} catch {
+			clearTimeout(timer);
+			finish(null);
+		}
 	});
+}
+
+async function getTransport() {
+	const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+	if (!clients || clients.length === 0) {
+		return null;
+	}
+	for (const client of clients) {
+		const port = await requestTransportFromClient(client);
+		if (port) return port;
+	}
+	return null;
 }
 
 async function getScramjet() {
@@ -160,7 +193,19 @@ async function getScramjet() {
 
 		try {
 			await scramjet.loadConfig();
-		} catch (e) { }
+		} catch (e) {
+			if (isRecoverableScramjetDbError(e)) {
+				console.warn("[frosted] SW: scramjet.loadConfig() hit a recoverable DB error. Rebuilding DB once...", e);
+				await ensureScramjetDB();
+				scramjet = new ScramjetServiceWorker();
+				try {
+					await scramjet.loadConfig();
+				} catch (retryError) {
+					if (!isRecoverableScramjetDbError(retryError)) throw retryError;
+					console.warn("[frosted] SW: scramjet.loadConfig() retry still hit a DB error. Falling back to seed config.", retryError);
+				}
+			}
+		}
 
 		if (!scramjet.config || !scramjet.config.prefix) {
 			scramjet.config = SEED_CONFIG;
@@ -204,6 +249,7 @@ self.addEventListener("message", (event) => {
 				} else if (typeof sj.setBareMuxPort === "function") {
 					sj.setBareMuxPort(event.data.port);
 				}
+				console.log("[frosted] SW: transport port received from page.");
 			}
 		});
 	}

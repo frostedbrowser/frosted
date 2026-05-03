@@ -844,12 +844,13 @@ async function initializeProxyRuntime() {
 		return { scramjet, connection };
 	}
 
+	const scramjetDbName = "$scramjet_v32";
+
 	async function repairScramjetIndexedDB() {
 		try {
-			const dbName = "$scramjet_v32";
 			const requiredStores = ["config", "cookies", "redirectTrackers", "referrerPolicies", "publicSuffixList"];
 			const db = await new Promise((resolve, reject) => {
-				const request = indexedDB.open(dbName);
+				const request = indexedDB.open(scramjetDbName);
 				request.onsuccess = () => resolve(request.result);
 				request.onerror = () => reject(request.error);
 			});
@@ -861,7 +862,7 @@ async function initializeProxyRuntime() {
 					`[frosted] Scramjet IndexedDB is missing stores (${missing.join(", ")}), deleting so scramjet.init() can recreate it...`
 				);
 				await new Promise((resolve, reject) => {
-					const request = indexedDB.deleteDatabase(dbName);
+					const request = indexedDB.deleteDatabase(scramjetDbName);
 					request.onsuccess = resolve;
 					request.onerror = () => resolve();
 					request.onblocked = () => resolve();
@@ -870,6 +871,20 @@ async function initializeProxyRuntime() {
 			}
 		} catch (e) {
 			console.warn("[frosted] Failed to repair Scramjet IndexedDB:", e);
+		}
+	}
+
+	async function deleteScramjetIndexedDB() {
+		try {
+			await new Promise((resolve) => {
+				const request = indexedDB.deleteDatabase(scramjetDbName);
+				request.onsuccess = resolve;
+				request.onerror = () => resolve();
+				request.onblocked = () => resolve();
+			});
+			console.warn("[frosted] Deleted Scramjet IndexedDB so it can be recreated cleanly.");
+		} catch (e) {
+			console.warn("[frosted] Failed to delete Scramjet IndexedDB:", e);
 		}
 	}
 
@@ -910,6 +925,9 @@ async function initializeProxyRuntime() {
 				throw error;
 			}
 			console.warn("[frosted] scramjet.init() had a recoverable DB error:", error.message);
+			await deleteScramjetIndexedDB();
+			scramjet = createScramjet();
+			await scramjet.init();
 		}
 		if (!scramjetLoadStatusLogged) {
 			scramjetLoadStatusLogged = true;

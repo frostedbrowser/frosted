@@ -142,7 +142,7 @@ async function registerSW() {
 }
 
 if (typeof window !== "undefined") {
-	console.log("%c[frosted]%c registration script v31 loaded", "color: #00ffa6; font-weight: bold;", "");
+	console.log("%c[frosted]%c registration script v32 loaded", "color: #00ffa6; font-weight: bold;", "");
 	bindBareMuxServiceWorkerPortBridge();
 	window.registerSW = registerSW;
 	window.createBareMuxPortForServiceWorker = createBareMuxPortForServiceWorker;
