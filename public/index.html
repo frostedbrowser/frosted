@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 
 <head>
@@ -38,10 +38,10 @@
 	<link rel="modulepreload" href="./libcurl/index.mjs?v=5" />
 	<link rel="modulepreload" href="./epoxy/index.mjs?v=5" />
 	<link rel="stylesheet" href="./index.css?v=12" />
-	<script src="./register-sw.js?v=31" defer></script>
+	<script src="./register-sw.js?v=32" defer></script>
 	<script src="./search.js?v=5" defer></script>
 	<script src="./config.js?v=6" defer></script>
-	<script src="./index.js?v=31" defer></script>
+	<script src="./index.js?v=32" defer></script>
 </head>
 
 <body>
@@ -172,333 +172,371 @@
 							<div class="home-credits">
 								<a href="frosted://credits" id="creditsLink">Credits</a>
 							</div>
-						</div>
-						<div id="settingsPage" class="internal-page">
-							<div class="settings-page-shell">
-								<div class="settings-page-header">
-									<h2>Settings</h2>
-								</div>
-								<div class="settings-page-body">
-									<div class="settings-section">
-										<label class="settings-label" for="wallpaperSelect">Wallpaper</label>
-										<select class="settings-select" id="wallpaperSelect"></select>
-									</div>
-									<div class="settings-section">
-										<label class="settings-label" for="proxySelect">Proxy Engine</label>
-										<select class="settings-select" id="proxySelect">
-											<option value="scramjet">Scramjet</option>
-											<option value="ultraviolet">Ultraviolet</option>
-										</select>
-										<div class="settings-hint" id="proxy-status">
-											Proxy mode: Scramjet
-										</div>
-									</div>
-									<div class="settings-section">
-										<label class="settings-label">Open in ...</label>
-										<div class="settings-row open-mode-row">
-											<button class="settings-btn open-mode-btn" id="openModeAboutBtn"
-												type="button">
-												Open in about:blank
-											</button>
-											<button class="settings-btn open-mode-btn" id="openModeBlobBtn"
-												type="button">
-												Open in blob:
-											</button>
-										</div>
-									</div>
-									<div class="settings-section">
-										<label class="settings-label">Panic Key</label>
-										<div class="panic-box">
-											<h3 class="panic-title">Current Panic Key:</h3>
-											<div class="settings-row">
-												<span id="current-panic-key" class="panic-key-pill">`</span>
-												<button class="settings-btn" id="change-panic-key-btn" type="button">
-													Change Key
-												</button>
-											</div>
-											<p class="settings-hint" id="listening-status"></p>
-										</div>
-										<label class="settings-label" for="panic-url">Panic URL</label>
-										<div class="settings-row">
-											<input class="settings-input" id="panic-url" type="text"
-												placeholder="https://google.com" />
-											<button class="settings-btn" id="save-panic-btn" type="button">
-												Save URL
-											</button>
-										</div>
-										<div class="settings-row">
-											<button class="settings-btn" id="panic-now-btn" type="button">
-												Open about:blank
-											</button>
-										</div>
-										<div class="settings-hint" id="panic-status">Panic key is active</div>
-									</div>
-									<div class="settings-section">
-										<label class="settings-label" for="cloakEnabledToggle">Cloak</label>
-										<div class="settings-row">
-											<input id="cloakEnabledToggle" type="checkbox" />
-											<label for="cloakEnabledToggle" class="settings-hint">
-												When hidden, Cloak replaces the page's title and favicon with custom
-												ones to
-												help disguise it.
-											</label>
-										</div>
-										<div class="settings-row">
-											<label class="settings-label" for="cloakPresetSelect">Preset</label>
-											<select class="settings-select" id="cloakPresetSelect">
-												<option value="ixl">IXL</option>
-												<option value="google">Google</option>
-												<option value="docs">Google Docs</option>
-												<option value="drive">Google Drive</option>
-												<option value="custom">Custom</option>
-											</select>
-										</div>
-										<div class="settings-row">
-											<input class="settings-input" id="cloak-title" type="text"
-												placeholder="IXL" />
-											<button class="settings-btn" id="save-cloak-title-btn" type="button">
-												Save Title
-											</button>
-										</div>
-										<div class="settings-row">
-											<input class="settings-input" id="cloak-favicon" type="text"
-												placeholder="/ixl.ico" />
-											<button class="settings-btn" id="save-cloak-favicon-btn" type="button">
-												Save Icon
-											</button>
-										</div>
-										<div class="settings-hint" id="cloak-status">
-											Tip: favicon can be a direct raw image URL.
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div id="creditsPage" class="internal-page">
-							<div class="credits-page-shell">
-								<div class="settings-page-header">
-									<h2>Credits</h2>
-								</div>
-								<div class="settings-page-body">
-									<div class="settings-section">
-										<p class="settings-hint">Built with these projects:</p>
-										<p>
-											<a class="credits-link"
-												href="https://github.com/titaniumnetwork-dev/Ultraviolet"
-												target="_blank" rel="noopener noreferrer">UltraViolet by Titanium
-												Network</a>
-										</p>
-										<p>
-											<a class="credits-link" href="https://github.com/MercuryWorkshop/scramjet"
-												target="_blank" rel="noopener noreferrer">Scramjet by Mercury
-												Workshop</a>
-										</p>
-										chudportal (idea for cloaker)
-										<p>
-										<p>
-											GN-MATH / Games
-										</p>
-										<p>
-											groq / AI Chatbot
-										</p>
-										</p>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div id="partnersPage" class="internal-page">
-							<div class="partners-page-shell">
-								<div class="settings-page-header partners-header">
-									<h2>partners</h2>
-								</div>
-								<div class="partners-grid">
-									<article class="partner-card">
-										<div class="partner-logo-wrap">
-											<img class="partner-logo-img"
-												src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/ol.png"
-												alt="OnlyLessons logo" width="56" height="56" loading="lazy"
-												onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
-											<div class="partner-logo">OL</div>
-										</div>
-										<h3>// OnlyLessons</h3>
-										<a class="partner-btn" href="https://discord.gg/cmdkxMgBEm" target="_blank"
-											rel="noopener noreferrer">
-											<i class="fa-brands fa-discord"></i>
-										</a>
-									</article>
-									<article class="partner-card">
-										<div class="partner-logo-wrap">
-											<img class="partner-logo-img"
-												src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/zypher.png"
-												alt="zypher" width="56" height="56" loading="lazy"
-												onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
-											<div class="partner-logo">zy</div>
-										</div>
-										<h3>// Zypher</h3>
-										<a class="partner-btn" href="https://discord.gg/WFvTbse78V" target="_blank"
-											rel="noopener noreferrer">
-											<i class="fa-brands fa-discord"></i>
-										</a>
-									</article>
-									<article class="partner-card">
-										<div class="partner-logo-wrap">
-											<img class="partner-logo-img"
-												src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/nikehub.png"
-												alt="NikeHub logo" width="56" height="56" loading="lazy"
-												onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
-											<div class="partner-logo">NH</div>
-										</div>
-										<h3>// NikeHub</h3>
-										<a class="partner-btn" href="https://discord.gg/Y4uMau4dGy" target="_blank"
-											rel="noopener noreferrer">
-											<i class="fa-brands fa-discord"></i>
-										</a>
-									</article>
-									<article class="partner-card">
-										<div class="partner-logo-wrap">
-											<img class="partner-logo-img"
-												src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/icons/flux.png"
-												alt="flux logo" width="56" height="56" loading="lazy"
-												onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
-											<div class="partner-logo">FL</div>
-										</div>
-										<h3>// Flux</h3>
-										<a class="partner-btn" href="https://discord.gg/uCzkJ3tNa" target="_blank"
-											rel="noopener noreferrer">
-											<i class="fa-brands fa-discord"></i>
-										</a>
-									</article>
-									<article class="partner-card">
-										<div class="partner-logo-wrap">
-											<img class="partner-logo-img"
-												src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/flux2.png"
-												alt="flux2 Logo" width="56" height="56" loading="lazy"
-												onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
-											<div class="partner-logo">fl2</div>
-										</div>
-										<h3>// Flux</h3>
-										<a class="partner-btn" href="https://discord.gg/3fbJG2emb6" target="_blank"
-											rel="noopener noreferrer">
-											<i class="fa-brands fa-discord"></i>
-										</a>
-									</article>
-									<article class="partner-card">
-										<div class="partner-logo-wrap">
-											<img class="partner-logo-img"
-												src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/linkspot.png"
-												alt="Link Spot Logo" width="56" height="56" loading="lazy"
-												onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
-											<div class="partner-logo">LS</div>
-										</div>
-										<h3>// Link Spot</h3>
-										<a class="partner-btn" href="https://discord.gg/6AMD9YzyTM" target="_blank"
-											rel="noopener noreferrer">
-											<i class="fa-brands fa-discord"></i>
-										</a>
-									</article>
-									<article class="partner-card">
-										<div class="partner-logo-wrap">
-											<img class="partner-logo-img"
-												src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/comet.png"
-												alt="Comet Logo" width="56" height="56" loading="lazy"
-												onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
-											<div class="partner-logo">CO</div>
-										</div>
-										<h3>// Comet</h3>
-										<a class="partner-btn" href="https://discord.gg/nRQcnNuzb8" target="_blank"
-											rel="noopener noreferrer">
-											<i class="fa-brands fa-discord"></i>
-										</a>
-									</article>
-								</div>
-							</div>
+							<a class="visitor-badge" href="https://visitorbadge.io/status?path=frostedbrowser.cfd"
+								target="_blank" rel="noopener noreferrer">
+								<img src="https://api.visitorbadge.io/api/visitors?path=frostedbrowser.cfd&countColor=%23697689"
+									alt="Visitor count" referrerpolicy="no-referrer" />
+							</a>
 						</div>
 					</div>
-					<div id="gamesPage" class="internal-page">
-						<div class="games-page-shell">
+					<div id="settingsPage" class="internal-page">
+						<div class="settings-page-shell">
 							<div class="settings-page-header">
-								<h2>Games</h2>
-								<div class="settings-hint" id="gamesCount">Games: 0</div>
+								<h2>Settings</h2>
 							</div>
-							<div class="games-toolbar">
-								<input id="gamesSearchInput" class="settings-input games-search" type="text"
-									placeholder="Search games..." />
-							</div>
-							<div class="games-grid" id="gamesGrid"></div>
-						</div>
-					</div>
-					<div id="aiPage" class="internal-page">
-						<div class="ai-page-shell">
-							<div class="settings-page-header">
-								<h2>FrostedAI V.2</h2>
-							</div>
-							<div class="ai-body">
-								<div class="ai-chat">
-									<div class="ai-speed-row">
-										<label class="settings-label" for="aiModelSelect">Model</label>
-										<select id="aiModelSelect" class="settings-select ai-speed-select">
-											<option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile</option>
-											<option value="llama-3.1-8b-instant">Llama 3.1 8B Instant</option>
-											<option value="mixtral-8x7b-32768">Mixtral 8x7B 32k</option>
-											<option value="gemma2-9b-it">Gemma2 9B IT</option>
+							<div class="settings-page-body">
+								<div class="settings-section">
+									<label class="settings-label" for="proxySelect">Proxy Engine</label>
+									<select class="settings-select" id="proxySelect">
+										<option value="scramjet">Scramjet</option>
+										<option value="ultraviolet">Ultraviolet</option>
+									</select>
+									<div class="settings-hint" id="proxy-status">
+										Proxy mode: Scramjet
+									</div>
+								</div>
+								<div class="settings-section">
+									<label class="settings-label">Open in ...</label>
+									<div class="settings-row open-mode-row">
+										<button class="settings-btn open-mode-btn" id="openModeAboutBtn" type="button">
+											Open in about:blank
+										</button>
+										<button class="settings-btn open-mode-btn" id="openModeBlobBtn" type="button">
+											Open in blob:
+										</button>
+									</div>
+								</div>
+								<div class="settings-section">
+									<label class="settings-label">Panic Key</label>
+									<div class="panic-box">
+										<h3 class="panic-title">Current Panic Key:</h3>
+										<div class="settings-row">
+											<span id="current-panic-key" class="panic-key-pill">`</span>
+											<button class="settings-btn" id="change-panic-key-btn" type="button">
+												Change Key
+											</button>
+										</div>
+										<p class="settings-hint" id="listening-status"></p>
+									</div>
+									<label class="settings-label" for="panic-url">Panic URL</label>
+									<div class="settings-row">
+										<input class="settings-input" id="panic-url" type="text"
+											placeholder="https://google.com" />
+										<button class="settings-btn" id="save-panic-btn" type="button">
+											Save URL
+										</button>
+									</div>
+									<div class="settings-row">
+										<button class="settings-btn" id="panic-now-btn" type="button">
+											Open about:blank
+										</button>
+									</div>
+									<div class="settings-hint" id="panic-status">Panic key is active</div>
+								</div>
+								<div class="settings-section">
+									<label class="settings-label" for="cloakEnabledToggle">Cloak</label>
+									<div class="settings-row">
+										<input id="cloakEnabledToggle" type="checkbox" />
+										<label for="cloakEnabledToggle" class="settings-hint">
+											When hidden, Cloak replaces the page's title and favicon with custom
+											ones to
+											help disguise it.
+										</label>
+									</div>
+									<div class="settings-row">
+										<label class="settings-label" for="cloakPresetSelect">Preset</label>
+										<select class="settings-select" id="cloakPresetSelect">
+											<option value="ixl">IXL</option>
+											<option value="google">Google</option>
+											<option value="docs">Google Docs</option>
+											<option value="drive">Google Drive</option>
+											<option value="custom">Custom</option>
 										</select>
 									</div>
-									<div id="aiResult" class="ai-result">Ask FrostedAI anything.</div>
-									<div class="ai-prompt-wrap">
-										<input id="aiPromptInput" class="settings-input ai-prompt" type="text"
-											autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-											placeholder="Ask FrostedAI..." />
-										<button id="aiSolveBtn" class="settings-btn" type="button">Send</button>
+									<div class="settings-row">
+										<input class="settings-input" id="cloak-title" type="text" placeholder="IXL" />
+										<button class="settings-btn" id="save-cloak-title-btn" type="button">
+											Save Title
+										</button>
+									</div>
+									<div class="settings-row">
+										<input class="settings-input" id="cloak-favicon" type="text"
+											placeholder="/ixl.ico" />
+										<button class="settings-btn" id="save-cloak-favicon-btn" type="button">
+											Save Icon
+										</button>
+									</div>
+									<div class="settings-hint" id="cloak-status">
+										Tip: favicon can be a direct raw image URL.
 									</div>
 								</div>
 							</div>
 						</div>
 					</div>
-					<div id="extensionStorePage" class="internal-page">
-						<div class="settings-page-shell extension-store-page-shell">
-							<div class="settings-page-header extension-store-page-header">
-								<h2>Wallpapers</h2>
-								<p class="settings-hint extension-store-copy">Browse and apply wallpaper packs.</p>
+					<div id="creditsPage" class="internal-page">
+						<div class="credits-page-shell">
+							<div class="settings-page-header">
+								<h2>Credits</h2>
 							</div>
-							<div class="settings-page-body extension-store-page-body">
-								<div class="wallpaper-store-shell wallpaper-store-shell-v2">
-									<div class="wallpaper-store-stage">
-										<section class="wallpaper-store-rail">
-											<div class="wallpaper-store-tabs">
-												<button class="wallpaper-store-tab" id="wallpaperStoreTabInstalled"
-													type="button">Installed</button>
-												<button class="wallpaper-store-tab" id="wallpaperStoreTabStore"
-													type="button">Store</button>
-											</div>
-											<div class="wallpaper-store-filters">
-												<input id="wallpaperStoreSearchInput" class="settings-input" type="text"
-													placeholder="Search wallpapers..." />
-												<button id="wallpaperStoreExitBtn" class="settings-btn"
-													type="button">Close</button>
-											</div>
-										</section>
-										<section class="wallpaper-store-content">
-											<div class="extension-store-grid" id="wallpaperStoreGrid"></div>
-										</section>
-										<aside class="wallpaper-store-preview" id="wallpaperStorePreview">
-											<div class="wallpaper-preview-media" id="wallpaperStorePreviewMedia"></div>
-											<h3 id="wallpaperStorePreviewTitle">Select a wallpaper</h3>
-											<div class="settings-hint" id="wallpaperStorePreviewMeta">No wallpaper
-												selected.
-											</div>
-											<div class="settings-row wallpaper-store-actions">
-												<button id="wallpaperStoreInstallBtn"
-													class="settings-btn wallpaper-store-btn"
-													type="button">Install</button>
-												<button id="wallpaperStoreUninstallBtn"
-													class="settings-btn wallpaper-store-btn"
-													type="button">Uninstall</button>
-												<button id="wallpaperStoreApplyBtn"
-													class="settings-btn wallpaper-store-btn"
-													type="button">Apply</button>
-											</div>
-										</aside>
+							<div class="settings-page-body">
+								<div class="settings-section">
+									<p class="settings-hint">Built with these projects:</p>
+									<p>
+										<a class="credits-link"
+											href="https://github.com/titaniumnetwork-dev/Ultraviolet" target="_blank"
+											rel="noopener noreferrer">UltraViolet by Titanium
+											Network</a>
+									</p>
+									<p>
+										<a class="credits-link" href="https://github.com/MercuryWorkshop/scramjet"
+											target="_blank" rel="noopener noreferrer">Scramjet by Mercury
+											Workshop</a>
+									</p>
+									chudportal (idea for cloaker)
+									<p>
+									<p>
+										GN-MATH / Games
+									</p>
+									<p>
+										groq / AI Chatbot
+									</p>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="partnersPage" class="internal-page">
+						<div class="partners-page-shell">
+							<div class="settings-page-header partners-header">
+								<h2>partners</h2>
+							</div>
+							<div class="partners-grid">
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/ol.png"
+											alt="OnlyLessons logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">OL</div>
 									</div>
+									<h3>// OnlyLessons</h3>
+									<a class="partner-btn" href="https://discord.gg/cmdkxMgBEm" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/zypher.png"
+											alt="zypher" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">zy</div>
+									</div>
+									<h3>// Zypher</h3>
+									<a class="partner-btn" href="https://discord.gg/WFvTbse78V" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/nikehub.png"
+											alt="NikeHub logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">NH</div>
+									</div>
+									<h3>// NikeHub</h3>
+									<a class="partner-btn" href="https://discord.gg/Y4uMau4dGy" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/icons/flux.png"
+											alt="flux logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">FL</div>
+									</div>
+									<h3>// Flux</h3>
+									<a class="partner-btn" href="https://discord.gg/uCzkJ3tNa" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/flux2.png"
+											alt="flux2 Logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">fl2</div>
+									</div>
+									<h3>// Flux</h3>
+									<a class="partner-btn" href="https://discord.gg/3fbJG2emb6" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/linkspot.png"
+											alt="Link Spot Logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">LS</div>
+									</div>
+									<h3>// Link Spot</h3>
+									<a class="partner-btn" href="https://discord.gg/6AMD9YzyTM" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/xylora.png"
+											alt="Xylora Logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">XY</div>
+									</div>
+									<h3>// Xylora</h3>
+									<a class="partner-btn" href="https://discord.gg/3Yn5Fk4h2Z" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/mk.png"
+											alt="MK Logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">MK</div>
+									</div>
+									<h3>// Medieval Kingdom</h3>
+									<a class="partner-btn" href="https://discord.gg/QkMqmwypEC" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/kapi.png"
+											alt="Kapix Logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">KI</div>
+									</div>
+									<h3>// Kapi</h3>
+									<a class="partner-btn" href="https://discord.gg/VrpcTtftB" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/best.png"
+											alt="BestSpark's Games Logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">BSG</div>
+									</div>
+									<h3>// BestSpark's Games</h3>
+									<a class="partner-btn" href="https://discord.gg/bestspark" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="gamesPage" class="internal-page">
+					<div class="games-page-shell">
+						<div class="settings-page-header">
+							<h2>Games</h2>
+							<div class="settings-hint" id="gamesCount">Games: 0</div>
+						</div>
+						<div class="games-toolbar">
+							<input id="gamesSearchInput" class="settings-input games-search" type="text"
+								placeholder="Search games..." />
+						</div>
+						<div class="games-grid" id="gamesGrid"></div>
+					</div>
+				</div>
+				<div id="aiPage" class="internal-page">
+					<div class="ai-page-shell">
+						<div class="settings-page-header">
+							<h2>FrostedAI V.2</h2>
+						</div>
+						<div class="ai-body">
+							<div class="ai-chat">
+								<div class="ai-speed-row">
+									<label class="settings-label" for="aiModelSelect">Model</label>
+									<select id="aiModelSelect" class="settings-select ai-speed-select">
+										<option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile</option>
+										<option value="llama-3.1-8b-instant">Llama 3.1 8B Instant</option>
+										<option value="mixtral-8x7b-32768">Mixtral 8x7B 32k</option>
+										<option value="gemma2-9b-it">Gemma2 9B IT</option>
+									</select>
+								</div>
+								<div id="aiResult" class="ai-result">Ask FrostedAI anything.</div>
+								<div class="ai-prompt-wrap">
+									<input id="aiPromptInput" class="settings-input ai-prompt" type="text"
+										autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+										placeholder="Ask FrostedAI..." />
+									<button id="aiSolveBtn" class="settings-btn" type="button">Send</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="extensionStorePage" class="internal-page">
+					<div class="settings-page-shell extension-store-page-shell">
+						<div class="settings-page-header extension-store-page-header">
+							<h2>Wallpapers</h2>
+							<p class="settings-hint extension-store-copy">Browse and apply wallpaper packs.</p>
+						</div>
+						<div class="settings-page-body extension-store-page-body">
+							<div class="wallpaper-store-shell wallpaper-store-shell-v2">
+								<div class="wallpaper-store-stage">
+									<section class="wallpaper-store-rail">
+										<div class="wallpaper-store-tabs">
+											<button class="wallpaper-store-tab" id="wallpaperStoreTabInstalled"
+												type="button">Installed</button>
+											<button class="wallpaper-store-tab" id="wallpaperStoreTabStore"
+												type="button">Store</button>
+										</div>
+										<div class="wallpaper-store-filters">
+											<input id="wallpaperStoreSearchInput" class="settings-input" type="text"
+												placeholder="Search wallpapers..." />
+											<button id="wallpaperStoreExitBtn" class="settings-btn"
+												type="button">Close</button>
+										</div>
+									</section>
+									<section class="wallpaper-store-content">
+										<div class="extension-store-grid" id="wallpaperStoreGrid"></div>
+									</section>
+									<aside class="wallpaper-store-preview" id="wallpaperStorePreview">
+										<div class="wallpaper-preview-media" id="wallpaperStorePreviewMedia"></div>
+										<h3 id="wallpaperStorePreviewTitle">Select a wallpaper</h3>
+										<div class="settings-hint" id="wallpaperStorePreviewMeta">No wallpaper
+											selected.
+										</div>
+										<div class="settings-row wallpaper-store-actions">
+											<button id="wallpaperStoreInstallBtn"
+												class="settings-btn wallpaper-store-btn" type="button">Install</button>
+											<button id="wallpaperStoreUninstallBtn"
+												class="settings-btn wallpaper-store-btn"
+												type="button">Uninstall</button>
+											<button id="wallpaperStoreApplyBtn" class="settings-btn wallpaper-store-btn"
+												type="button">Apply</button>
+										</div>
+									</aside>
 								</div>
 							</div>
 						</div>
@@ -506,6 +544,7 @@
 				</div>
 			</div>
 		</div>
+	</div>
 	</div>
 
 	<input id="sj-search-engine" type="hidden" value="https://search.brave.com/search?q=%s" />

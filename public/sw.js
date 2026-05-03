@@ -1,9 +1,9 @@
-importScripts("scram/scramjet.all.js?v=31");
-console.log("%c[frosted]%c service worker v31 starting...", "color: #00ffa6; font-weight: bold;", "");
+importScripts("scram/scramjet.all.js?v=32");
+console.log("%c[frosted]%c service worker v32 starting...", "color: #00ffa6; font-weight: bold;", "");
 
-importScripts("uv/uv.bundle.js?v=31");
-importScripts("uv/uv.config.js?v=31");
-importScripts("uv/uv.sw.js?v=31");
+importScripts("uv/uv.bundle.js?v=32");
+importScripts("uv/uv.config.js?v=32");
+importScripts("uv/uv.sw.js?v=32");
 
 const { ScramjetServiceWorker } = self.$scramjetLoadWorker();
 const uv = new self.UVServiceWorker();
@@ -25,10 +25,10 @@ const SEED_CONFIG = {
 		tempunusedid: "$scramjet$tempunused"
 	},
 	files: {
-		wasm: "/scram/scramjet.wasm.wasm",
 		all: "/scram/scramjet.all.js",
 		sync: "/scram/scramjet.sync.js"
 	},
+	wasm: "/scram/scramjet.wasm.wasm",
 	flags: {
 		serviceworkers: false,
 		syncxhr: false,
@@ -59,7 +59,7 @@ let scramjetInitPromise = null;
 async function ensureScramjetDB() {
 	try {
 		const db = await new Promise((resolve, reject) => {
-			const req = indexedDB.open("$scramjet");
+			const req = indexedDB.open("$scramjet_v32");
 			req.onsuccess = () => resolve(req.result);
 			req.onerror = () => reject(req.error);
 		});
@@ -92,14 +92,14 @@ async function ensureScramjetDB() {
 		db.close();
 
 		await new Promise(resolve => {
-			const req = indexedDB.deleteDatabase("$scramjet");
+			const req = indexedDB.deleteDatabase("$scramjet_v32");
 			req.onsuccess = resolve;
 			req.onerror = resolve;
 			req.onblocked = resolve;
 		});
 
 		const newDb = await new Promise((resolve, reject) => {
-			const req = indexedDB.open("$scramjet", 1);
+			const req = indexedDB.open("$scramjet_v32", 1);
 			req.onupgradeneeded = (event) => {
 				const db = event.target.result;
 				for (const store of REQUIRED_STORES) {
@@ -117,7 +117,7 @@ async function ensureScramjetDB() {
 			const store = tx.objectStore("config");
 			store.put(SEED_CONFIG, "config");
 			await new Promise(res => { tx.oncomplete = res; tx.onerror = res; });
-			console.log("[frosted] SW: created $scramjet DB with stores and seed config.");
+			console.log("[frosted] SW: created $scramjet_v32 DB with stores and seed config.");
 		} catch (e) { }
 		newDb.close();
 	} catch (e) {
@@ -171,7 +171,11 @@ async function getScramjet() {
 			console.log("[frosted] SW: requesting transport port from clients...");
 			const port = await getTransport();
 			if (port) {
-				scramjet.setTransport(port);
+				if (typeof scramjet.setTransport === "function") {
+					scramjet.setTransport(port);
+				} else if (typeof scramjet.setBareMuxPort === "function") {
+					scramjet.setBareMuxPort(port);
+				}
 				console.log("[frosted] SW: obtained transport port from client.");
 			} else {
 				console.warn("[frosted] SW: no transport port received from clients. proxy might fail.");
@@ -194,7 +198,13 @@ self.addEventListener("message", (event) => {
 	// Also allow main thread to push a port directly
 	if (event.data && event.data.type === "setPort" && event.data.port) {
 		getScramjet().then(sj => {
-			if (sj) sj.setTransport(event.data.port);
+			if (sj) {
+				if (typeof sj.setTransport === "function") {
+					sj.setTransport(event.data.port);
+				} else if (typeof sj.setBareMuxPort === "function") {
+					sj.setBareMuxPort(event.data.port);
+				}
+			}
 		});
 	}
 });
