@@ -844,7 +844,7 @@ async function initializeProxyRuntime() {
 		return { scramjet, connection };
 	}
 
-	const scramjetDbName = "$scramjet_v32";
+	const scramjetDbName = "$scramjet";
 	const scramjetRequiredStores = ["config", "cookies", "redirectTrackers", "referrerPolicies", "publicSuffixList"];
 
 	function buildScramjetSeedConfig() {

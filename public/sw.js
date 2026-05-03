@@ -72,7 +72,7 @@ function isRecoverableScramjetDbError(error) {
 async function ensureScramjetDB() {
 	try {
 		const db = await new Promise((resolve, reject) => {
-			const req = indexedDB.open("$scramjet_v32");
+			const req = indexedDB.open("$scramjet");
 			req.onsuccess = () => resolve(req.result);
 			req.onerror = () => reject(req.error);
 		});
@@ -105,14 +105,14 @@ async function ensureScramjetDB() {
 		db.close();
 
 		await new Promise(resolve => {
-			const req = indexedDB.deleteDatabase("$scramjet_v32");
+			const req = indexedDB.deleteDatabase("$scramjet");
 			req.onsuccess = resolve;
 			req.onerror = resolve;
 			req.onblocked = resolve;
 		});
 
 		const newDb = await new Promise((resolve, reject) => {
-			const req = indexedDB.open("$scramjet_v32", 1);
+			const req = indexedDB.open("$scramjet", 1);
 			req.onupgradeneeded = (event) => {
 				const db = event.target.result;
 				for (const store of REQUIRED_STORES) {
@@ -130,7 +130,7 @@ async function ensureScramjetDB() {
 			const store = tx.objectStore("config");
 			store.put(SEED_CONFIG, "config");
 			await new Promise(res => { tx.oncomplete = res; tx.onerror = res; });
-			console.log("[frosted] SW: created $scramjet_v32 DB with stores and seed config.");
+			console.log("[frosted] SW: created $scramjet DB with stores and seed config.");
 		} catch (e) { }
 		newDb.close();
 	} catch (e) {
