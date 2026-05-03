@@ -139,7 +139,7 @@ async function getTransport() {
 				client.postMessage({ type: "getPort", port: channel.port2 }, [channel.port2]);
 			}
 		});
-		setTimeout(() => resolve(null), 1500);
+		setTimeout(() => resolve(null), 5000);
 	});
 }
 

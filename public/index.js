@@ -2936,7 +2936,19 @@ function ensureTabFrame(tabId) {
 					created.frame.src = window.location.origin + prefix + window.__uv$config.encodeUrl(normalizedUrl);
 				},
 			}
-			: scramjet.createFrame();
+			: (() => {
+					var sj = scramjet.createFrame();
+					var originalGo = sj.go;
+					sj.go = (url) => {
+						var normalizedUrl = normalizeLikelyMalformedTargetUrl(url);
+						if (typeof originalGo === "function") {
+							originalGo.call(sj, normalizedUrl);
+						} else {
+							sj.frame.src = scramjetPrefix + encodeURIComponent(normalizedUrl);
+						}
+					};
+					return sj;
+				})();
 	created.frame.className = "proxy-frame";
 	created.frame.dataset.proxyMode = proxyMode;
 	created.frame.style.display = "none";
