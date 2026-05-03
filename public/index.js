@@ -114,6 +114,7 @@ var shellRefs = {
 	randomTagline: qs("#randomTagline"),
 	historyContainer: qs("#historyContainer"),
 	particlesLayer: qs("#particles-js"),
+	visitorBadgeImage: qs("#visitorBadgeImage"),
 };
 
 var pageRefs = {
@@ -214,7 +215,18 @@ var {
 	randomTagline,
 	historyContainer,
 	particlesLayer,
+	visitorBadgeImage,
 } = shellRefs;
+
+function refreshVisitorBadge() {
+	if (!visitorBadgeImage) return;
+	var baseSrc =
+		String(visitorBadgeImage.dataset.baseSrc || visitorBadgeImage.getAttribute("src") || "").trim();
+	if (!baseSrc) return;
+	visitorBadgeImage.dataset.baseSrc = baseSrc;
+	var separator = baseSrc.includes("?") ? "&" : "?";
+	visitorBadgeImage.src = `${baseSrc}${separator}refresh=${Date.now()}`;
+}
 
 var {
 	settingsPage,
@@ -3163,6 +3175,7 @@ function showBlank() {
 	hideInternalPages();
 	blankState.style.display = "flex";
 	animateViewIn(blankState);
+	refreshVisitorBadge();
 	tabFrames.forEach((item) => {
 		item.element.style.display = "none";
 	});
