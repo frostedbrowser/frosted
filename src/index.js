@@ -4,14 +4,11 @@ import { hostname } from "node:os";
 import { server as wisp, logging } from "@mercuryworkshop/wisp-js/server";
 import Fastify from "fastify";
 import fastifyStatic from "@fastify/static";
-
 import { scramjetPath } from "@mercuryworkshop/scramjet/path";
 import { libcurlPath } from "@mercuryworkshop/libcurl-transport";
 import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
 
 const publicPath = fileURLToPath(new URL("../public/", import.meta.url));
-
-// Wisp Configuration: Refer to the documentation at https://www.npmjs.com/package/@mercuryworkshop/wisp-js
 
 logging.set_level(logging.NONE);
 Object.assign(wisp.options, {
@@ -24,8 +21,6 @@ const fastify = Fastify({
 	serverFactory: (handler) => {
 		return createServer()
 			.on("request", (req, res) => {
-				// res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-				// res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
 				handler(req, res);
 			})
 			.on("upgrade", (req, socket, head) => {
@@ -42,23 +37,24 @@ fastify.register(fastifyStatic, {
 	root: publicPath,
 	decorateReply: true,
 });
-
 fastify.register(fastifyStatic, {
 	root: scramjetPath,
 	prefix: "/scram/",
 	decorateReply: false,
 });
-
 fastify.register(fastifyStatic, {
 	root: libcurlPath,
 	prefix: "/libcurl/",
 	decorateReply: false,
 });
-
 fastify.register(fastifyStatic, {
 	root: baremuxPath,
 	prefix: "/baremux/",
 	decorateReply: false,
+});
+
+fastify.get('/check', (req, reply) => {
+	reply.code(200).send();
 });
 
 fastify.setNotFoundHandler((res, reply) => {
@@ -67,9 +63,6 @@ fastify.setNotFoundHandler((res, reply) => {
 
 fastify.server.on("listening", () => {
 	const address = fastify.server.address();
-
-	// by default we are listening on 0.0.0.0 (every interface)
-	// we just need to list a few
 	console.log("Listening on:");
 	console.log(`\thttp://localhost:${address.port}`);
 	console.log(`\thttp://${hostname()}:${address.port}`);
@@ -90,7 +83,6 @@ function shutdown() {
 }
 
 let port = parseInt(process.env.PORT || "");
-
 if (isNaN(port)) port = 8080;
 
 fastify.listen({
