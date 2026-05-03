@@ -280,7 +280,7 @@ var { errorPanel, errorTitle, errorDetails } = errorRefs;
 
 var { proxySelect, proxyStatus } = proxyRefs;
 var proxyModeStorage = "fb_proxy_mode";
-var defaultWispUrl = "wss://wisp.mercuryworkshop.me/";
+var defaultWispUrl = (location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/wisp/";
 var proxyRuntimeAssetVersion = "32";
 
 function normalizeProxyMode(value) {
@@ -3358,9 +3358,6 @@ function getWispTransportCandidates() {
 	addCandidate(window?._CONFIG?.WISP_URL);
 	addCandidate(window?.WISP_URL);
 	addCandidate(defaultWispUrl);
-	addCandidate("wss://wisp.mercuryworkshop.me/");
-	addCandidate("wss://stellite.games/wisp/");
-	addCandidate("wss://shuttle.proxy.sh/wisp/");
 
 	if (!isLikelyStaticHostForWisp(window.location.hostname)) {
 		addCandidate(`${window.location.origin.replace(/\/+$/, "")}/wisp/`);
