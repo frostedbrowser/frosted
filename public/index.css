@@ -11,7 +11,7 @@
 	--glow-color-1: rgba(136, 192, 208, 0.35);
 	--glow-color-2: rgba(129, 161, 193, 0.2);
 	--accent-soft: rgba(136, 192, 208, 0.45);
-	--wallpaper-image: url("wallpapers/skynight.png");
+	--wallpaper-image: none;
 	--surface-1: rgba(10, 15, 20, 0.92);
 	--surface-2: rgba(20, 28, 36, 0.84);
 	--surface-3: rgba(20, 28, 36, 0.64);
