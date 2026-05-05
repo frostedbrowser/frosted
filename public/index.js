@@ -217,7 +217,7 @@ var {
 	particlesLayer,
 	visitorBadgeImage,
 } = shellRefs;
-
+// temu free refreshes
 function refreshVisitorBadge() {
 	if (!visitorBadgeImage) return;
 	var baseSrc =
