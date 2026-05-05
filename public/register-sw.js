@@ -1,5 +1,5 @@
 "use strict";
-const stockSW = "sw.js?v=33";
+const stockSW = "sw.js?v=34";
 const swReadyTimeoutMs = 2000;
 const swControllerTimeoutMs = 2000;
 

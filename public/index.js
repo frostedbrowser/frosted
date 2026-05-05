@@ -293,7 +293,7 @@ var { errorPanel, errorTitle, errorDetails } = errorRefs;
 var { proxySelect, proxyStatus } = proxyRefs;
 var proxyModeStorage = "fb_proxy_mode";
 var defaultWispUrl = (location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/wisp/";
-var proxyRuntimeAssetVersion = "33";
+var proxyRuntimeAssetVersion = "34";
 
 function normalizeProxyMode(value) {
 	var normalized = String(value || "").trim().toLowerCase();
@@ -526,7 +526,7 @@ var appBasePath = resolveAppBasePath();
 var appAssetBaseUrl = resolveAppAssetBaseUrl();
 
 var scramjetPrefix = (() => {
-	return `${appBasePath}scram/`.replace(/\/{2,}/g, "/");
+	return `${appBasePath}sj/`.replace(/\/{2,}/g, "/");
 })();
 
 var uvPrefix = (() => {
@@ -880,8 +880,8 @@ async function initializeProxyRuntime() {
 				tempunusedid: "$scramjet$tempunused",
 			},
 			files: {
-				all: `${appBasePath}scram/scramjet_bundled.js`,
-				wasm: `${appBasePath}scram/scramjet.wasm`,
+				all: `${appBasePath}sj/scramjet_bundled.js`,
+				wasm: `${appBasePath}sj/scramjet.wasm`,
 			},
 			flags: {
 				serviceworkers: false,
@@ -1047,13 +1047,14 @@ var taglines = [
 	"Are you still you In a different time In a different place With the same memories? -crusader",
 	"check out our partners",
 	"star github if you want.. its not like im forcing you or anything",
-	"frostedOS comming soon..",
-	"stop joining goon servers yall some gooners ?? - mrdavidss",
 	"orange",
 	"1+2=3 now dont block my site",
 	"vscode autofill is straight up ass 😔",
 	"atleast this build is more stable than the other versions...",
-	"i was supposed to release this build 2 hours ago.."
+	"ok",
+	"claude code",
+	"state testing 😔😔",
+	"3-1=2"
 ];
 
 var frosteddBarConfig = {
@@ -1899,6 +1900,7 @@ function setActiveTab(id, keepView) {
 function updateAppVisualState() {
 	var tab = getActiveTab();
 	var url = tab ? String(tab.url || "").trim() : "";
+	// Internal if no URL, starts with frosted://, about:, blob:, or data:
 	var isInternal = !url ||
 		url.startsWith("frosted://") ||
 		url.startsWith("about:") ||
@@ -2853,6 +2855,7 @@ function injectAdblockIntoFrame(frameElement) {
 				: new OriginalWebSocket(url, protocols);
 		};
 		frameWindow.WebSocket.prototype = OriginalWebSocket.prototype;
+	// Prevent unauthorized redirects via window.open
 	var originalOpen = frameWindow.open;
 	frameWindow.open = function(url, name, features) {
 		if (shouldBlock(url, "navigation", frameWindow.location?.href)) {
@@ -2867,6 +2870,7 @@ function injectAdblockIntoFrame(frameElement) {
 		}
 	};
 
+	// Block dynamic script/image/iframe injections
 	var originalCreateElement = frameWindow.document.createElement;
 	frameWindow.document.createElement = function(tagName, ...args) {
 		var el = originalCreateElement.call(frameWindow.document, tagName, ...args);
@@ -2889,6 +2893,7 @@ function injectAdblockIntoFrame(frameElement) {
 		return el;
 	};
 
+	// Block Image constructor
 	var OriginalImage = frameWindow.Image;
 	frameWindow.Image = function(...args) {
 		var img = new OriginalImage(...args);
@@ -3691,7 +3696,7 @@ function scheduleProxyRuntimePreload() {
 
 		await Promise.allSettled([
 			ensureUvRuntime(),
-			loadScriptOnce(withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`)),
+			loadScriptOnce(withRuntimeAssetVersion(`${appBasePath}sj/scramjet_bundled.js`)),
 		]);
 
 		if (getProxyMode() === "scramjet") {
