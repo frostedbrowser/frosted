@@ -1,8 +1,10 @@
 importScripts("scram/scramjet.all.js?v=32");
-console.log("%c[frosted]%c service worker v32 starting...", "color: #00ffa6; font-weight: bold;", "");
+console.log("%c[frosted]%c service worker v33 starting...", "color: #00ffa6; font-weight: bold;", "");
 
 importScripts("uv/uv.bundle.js?v=32");
 importScripts("uv/uv.config.js?v=32");
+importScripts("baremux/index.js?v=5");
+self.Ultraviolet.BareClient = self.BareMux.BareClient;
 importScripts("uv/uv.sw.js?v=32");
 
 const { ScramjetServiceWorker } = self.$scramjetLoadWorker();
@@ -56,6 +58,34 @@ let scramjet = null;
 let scramjetInitDone = false;
 let scramjetInitPromise = null;
 
+function pathStartsWith(pathname, prefix) {
+	if (!prefix) return false;
+	try {
+		return String(pathname || "").startsWith(String(prefix));
+	} catch {
+		return false;
+	}
+}
+
+function shouldBypassProxyForRequest(request) {
+	try {
+		const url = new URL(request.url);
+		if (url.origin !== self.location.origin) return false;
+
+		const scramjetPrefix = SEED_CONFIG?.prefix || "/scram/";
+		const uvServicePrefix = self.__uv$config?.prefix || "/uv/service/";
+
+		if (pathStartsWith(url.pathname, scramjetPrefix)) return false;
+		if (pathStartsWith(url.pathname, uvServicePrefix)) return false;
+
+		// Same-origin app shell assets and ordinary site requests should go to the
+		// network directly instead of being inspected by proxy runtimes.
+		return true;
+	} catch {
+		return false;
+	}
+}
+
 function isRecoverableScramjetDbError(error) {
 	const name = String(error?.name || "");
 	const message = String(error?.message || error || "").toLowerCase();
@@ -72,7 +102,7 @@ function isRecoverableScramjetDbError(error) {
 async function ensureScramjetDB() {
 	try {
 		const db = await new Promise((resolve, reject) => {
-			const req = indexedDB.open("$scramjet_v32");
+			const req = indexedDB.open("$scramjet");
 			req.onsuccess = () => resolve(req.result);
 			req.onerror = () => reject(req.error);
 		});
@@ -105,14 +135,14 @@ async function ensureScramjetDB() {
 		db.close();
 
 		await new Promise(resolve => {
-			const req = indexedDB.deleteDatabase("$scramjet_v32");
+			const req = indexedDB.deleteDatabase("$scramjet");
 			req.onsuccess = resolve;
 			req.onerror = resolve;
 			req.onblocked = resolve;
 		});
 
 		const newDb = await new Promise((resolve, reject) => {
-			const req = indexedDB.open("$scramjet_v32", 1);
+			const req = indexedDB.open("$scramjet", 1);
 			req.onupgradeneeded = (event) => {
 				const db = event.target.result;
 				for (const store of REQUIRED_STORES) {
@@ -130,7 +160,7 @@ async function ensureScramjetDB() {
 			const store = tx.objectStore("config");
 			store.put(SEED_CONFIG, "config");
 			await new Promise(res => { tx.oncomplete = res; tx.onerror = res; });
-			console.log("[frosted] SW: created $scramjet_v32 DB with stores and seed config.");
+			console.log("[frosted] SW: created $scramjet DB with stores and seed config.");
 		} catch (e) { }
 		newDb.close();
 	} catch (e) {
@@ -257,6 +287,15 @@ self.addEventListener("message", (event) => {
 
 self.addEventListener("fetch", (event) => {
 	event.respondWith((async () => {
+		if (shouldBypassProxyForRequest(event.request)) {
+			try {
+				return await fetch(event.request);
+			} catch (error) {
+				console.warn("[frosted] SW direct fetch failed:", event.request.url, error);
+				return Response.error();
+			}
+		}
+
 		try {
 			const sj = await getScramjet();
 			if (sj && sj.route(event)) {
@@ -287,7 +326,12 @@ self.addEventListener("fetch", (event) => {
 			console.error("[frosted] UV SW fetch error:", e);
 		}
 
-		return fetch(event.request);
+		try {
+			return await fetch(event.request);
+		} catch (error) {
+			console.warn("[frosted] SW network fallback failed:", event.request.url, error);
+			return Response.error();
+		}
 	})());
 });
 

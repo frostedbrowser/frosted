@@ -1,5 +1,5 @@
 "use strict";
-const stockSW = "sw.js?v=32";
+const stockSW = "sw.js?v=33";
 const swReadyTimeoutMs = 2000;
 const swControllerTimeoutMs = 2000;
 
@@ -86,6 +86,7 @@ function bindBareMuxServiceWorkerPortBridge() {
 	if (window.__frostedBareMuxPortBridgeBound) return;
 	window.__frostedBareMuxPortBridgeBound = true;
 	navigator.serviceWorker.addEventListener("message", (event) => {
+		if (window.BareMux?.BareMuxConnection || window.BareMuxConnection) return;
 		var data = event?.data || {};
 		if (String(data.type || "") !== "getPort") return;
 		var replyPort = data.port;
@@ -142,7 +143,7 @@ async function registerSW() {
 }
 
 if (typeof window !== "undefined") {
-	console.log("%c[frosted]%c registration script v32 loaded", "color: #00ffa6; font-weight: bold;", "");
+	console.log("%c[frosted]%c registration script v33 loaded", "color: #00ffa6; font-weight: bold;", "");
 	bindBareMuxServiceWorkerPortBridge();
 	window.registerSW = registerSW;
 	window.createBareMuxPortForServiceWorker = createBareMuxPortForServiceWorker;

@@ -217,7 +217,7 @@ var {
 	particlesLayer,
 	visitorBadgeImage,
 } = shellRefs;
-
+// temu free refreshes
 function refreshVisitorBadge() {
 	if (!visitorBadgeImage) return;
 	var baseSrc =
@@ -844,7 +844,7 @@ async function initializeProxyRuntime() {
 		return { scramjet, connection };
 	}
 
-	const scramjetDbName = "$scramjet_v32";
+	const scramjetDbName = "$scramjet";
 	const scramjetRequiredStores = ["config", "cookies", "redirectTrackers", "referrerPolicies", "publicSuffixList"];
 
 	function buildScramjetSeedConfig() {
@@ -936,7 +936,7 @@ async function initializeProxyRuntime() {
 	async function rebuildScramjetIndexedDB() {
 		try {
 			const db = await new Promise((resolve, reject) => {
-				const request = indexedDB.open(scramjetDbName, 1);
+				const request = indexedDB.open(scramjetDbName, 2);
 				request.onupgradeneeded = (event) => {
 					const upgradeDb = event.target.result;
 					for (const storeName of scramjetRequiredStores) {
@@ -1979,8 +1979,6 @@ function getTabFaviconCandidates(url) {
 			faviconOrigin = `${faviconOrigin}:${parsed.port}`;
 		}
 		return [
-			`${faviconOrigin}/favicon.ico`,
-			`https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`,
 			`https://icons.duckduckgo.com/ip3/${encodeURIComponent(host)}.ico`,
 			defaultAppIconHref,
 		];
@@ -2107,6 +2105,7 @@ function setAddressDisplay(rawUrl, mode) {
 async function navigateFromInput(input, pushHistory = true) {
 	var target = normalizeInput(input);
 	if (!target) return;
+	refreshVisitorBadge();
 	await loadUrl(target, pushHistory);
 }
 
