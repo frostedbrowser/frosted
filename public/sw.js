@@ -10,23 +10,23 @@ function getAppBasePath() {
 }
 
 var appBasePath = getAppBasePath();
-var scramjetAssetPrefix = `${appBasePath}scram/`.replace(/\/{2,}/g, "/");
+var scramjetAssetPrefix = `${appBasePath}sj/`.replace(/\/{2,}/g, "/");
 var uvAssetPrefix = `${appBasePath}uv/`.replace(/\/{2,}/g, "/");
 var defaultUvServicePrefix = `${uvAssetPrefix}service/`.replace(/\/{2,}/g, "/");
 var bareMuxAssetPrefix = `${appBasePath}baremux/`.replace(/\/{2,}/g, "/");
 
-importScripts(`${scramjetAssetPrefix}scramjet_bundled.js?v=33`);
+importScripts(`${scramjetAssetPrefix}scramjet_bundled.js?v=34`);
 console.log(
-	"%c[frosted]%c service worker v33 starting...",
+	"%c[frosted]%c service worker v34 starting...",
 	"background-color: #e2f9e2; color: #0a5c0a; padding: 4px 6px; border-radius: 4px; font-weight: bold; font-family: monospace; font-size: 0.9em;",
 	""
 );
 
-importScripts(`${uvAssetPrefix}uv.bundle.js?v=33`);
-importScripts(`${uvAssetPrefix}uv.config.js?v=33`);
+importScripts(`${uvAssetPrefix}uv.bundle.js?v=34`);
+importScripts(`${uvAssetPrefix}uv.config.js?v=34`);
 importScripts(`${bareMuxAssetPrefix}index.js?v=5`);
 self.Ultraviolet.BareClient = self.BareMux.BareClient;
-importScripts(`${uvAssetPrefix}uv.sw.js?v=33`);
+importScripts(`${uvAssetPrefix}uv.sw.js?v=34`);
 
 const uv = new self.UVServiceWorker();
 
@@ -250,7 +250,6 @@ self.addEventListener("message", (event) => {
 	if (event.data && event.data.type === "SKIP_WAITING") {
 		self.skipWaiting();
 	}
-	// Also allow main thread to push a port directly
 	if (event.data && event.data.type === "setPort" && event.data.port) {
 		getScramjet().then(sj => {
 			if (sj) {
