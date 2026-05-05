@@ -74,8 +74,19 @@ function shouldBypassProxyForRequest(request) {
 		const scramjetPrefix = SEED_CONFIG?.prefix || "/scram/";
 		const uvServicePrefix = self.__uv$config?.prefix || "/uv/service/";
 
-		if (pathStartsWith(url.pathname, scramjetPrefix)) return false;
-		if (pathStartsWith(url.pathname, uvServicePrefix)) return false;
+		if (pathStartsWith(url.pathname, scramjetPrefix)) {
+			// Bypass for Scramjet's own library assets to avoid circular dependencies
+			const filename = url.pathname.split("/").pop();
+			if (filename.endsWith(".js") || filename.endsWith(".wasm") || filename.endsWith(".mjs") || filename === "") {
+				return true;
+			}
+			// If it's the prefix itself without an encoded URL, it's not a proxy request
+			if (url.pathname === scramjetPrefix || url.pathname === scramjetPrefix + "/") {
+				return true;
+			}
+			return false;
+		}
+		if (pathStartsWith(url.pathname, uvServicePrefix)) return true;
 
 		// Same-origin app shell assets and ordinary site requests should go to the
 		// network directly instead of being inspected by proxy runtimes.

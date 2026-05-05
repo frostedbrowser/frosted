@@ -974,7 +974,11 @@ async function initializeProxyRuntime() {
 		if (typeof loadController !== "function") {
 			throw new Error("Scramjet controller loader is unavailable.");
 		}
-		var { ScramjetClient } = loadController();
+		const controllerObj = loadController();
+		const ScramjetClient = controllerObj.ScramjetClient || controllerObj.ScramjetController;
+		if (!ScramjetClient) {
+			throw new Error("Scramjet classes (ScramjetClient/ScramjetController) not found in controller object.");
+		}
 		var createScramjet = () =>
 			new ScramjetClient({
 				prefix: scramjetPrefix,
