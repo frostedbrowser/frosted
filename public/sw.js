@@ -1,11 +1,11 @@
-importScripts("scram/scramjet_bundled.js?v=34");
-console.log("%c[frosted]%c service worker v34 starting...", "color: #00ffa6; font-weight: bold;", "");
+importScripts("scram/scramjet_bundled.js?v=33");
+console.log("%c[frosted]%c service worker v33 starting...", "color: #00ffa6; font-weight: bold;", "");
 
-importScripts("uv/uv.bundle.js?v=34");
-importScripts("uv/uv.config.js?v=34");
+importScripts("uv/uv.bundle.js?v=33");
+importScripts("uv/uv.config.js?v=33");
 importScripts("baremux/index.js?v=5");
 self.Ultraviolet.BareClient = self.BareMux.BareClient;
-importScripts("uv/uv.sw.js?v=34");
+importScripts("uv/uv.sw.js?v=33");
 
 const { ScramjetServiceWorker } = self.$scramjetLoadWorker();
 const uv = new self.UVServiceWorker();
