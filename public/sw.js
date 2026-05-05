@@ -1,11 +1,11 @@
-importScripts("scram/scramjet.all.js?v=32");
+importScripts("scram/scramjet.all.js?v=33");
 console.log("%c[frosted]%c service worker v33 starting...", "color: #00ffa6; font-weight: bold;", "");
 
-importScripts("uv/uv.bundle.js?v=32");
-importScripts("uv/uv.config.js?v=32");
+importScripts("uv/uv.bundle.js?v=33");
+importScripts("uv/uv.config.js?v=33");
 importScripts("baremux/index.js?v=5");
 self.Ultraviolet.BareClient = self.BareMux.BareClient;
-importScripts("uv/uv.sw.js?v=32");
+importScripts("uv/uv.sw.js?v=33");
 
 const { ScramjetServiceWorker } = self.$scramjetLoadWorker();
 const uv = new self.UVServiceWorker();
@@ -142,7 +142,7 @@ async function ensureScramjetDB() {
 		});
 
 		const newDb = await new Promise((resolve, reject) => {
-			const req = indexedDB.open("$scramjet", 1);
+			const req = indexedDB.open("$scramjet", 2);
 			req.onupgradeneeded = (event) => {
 				const db = event.target.result;
 				for (const store of REQUIRED_STORES) {

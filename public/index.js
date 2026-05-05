@@ -293,7 +293,7 @@ var { errorPanel, errorTitle, errorDetails } = errorRefs;
 var { proxySelect, proxyStatus } = proxyRefs;
 var proxyModeStorage = "fb_proxy_mode";
 var defaultWispUrl = (location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/wisp/";
-var proxyRuntimeAssetVersion = "32";
+var proxyRuntimeAssetVersion = "33";
 
 function normalizeProxyMode(value) {
 	var normalized = String(value || "").trim().toLowerCase();
