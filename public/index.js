@@ -948,6 +948,29 @@ async function initializeProxyRuntime() {
 				request.onerror = () => reject(request.error);
 			});
 
+			// Force repair if old version detected
+			const current = await new Promise((resolve) => {
+				const tx = db.transaction("config", "readonly");
+				const req = tx.objectStore("config").get("config");
+				req.onsuccess = () => resolve(req.result);
+				req.onerror = () => resolve(null);
+			});
+			if (current && current.files && (current.files.all || "").includes("scramjet.all.js")) {
+				console.warn("[frosted] Old Scramjet v1 config detected in DB. Forcing repair...");
+				db.close();
+				await new Promise((resolve, reject) => {
+					const req = indexedDB.deleteDatabase("scramjet");
+					req.onsuccess = () => resolve();
+					req.onerror = () => reject(req.error);
+				});
+				db = await idb.openDB("scramjet", 2, {
+					upgrade(db) {
+						db.createObjectStore("config");
+						db.createObjectStore("cookie");
+					},
+				});
+			}
+
 			await new Promise((resolve, reject) => {
 				const tx = db.transaction("config", "readwrite");
 				tx.objectStore("config").put(buildScramjetSeedConfig(), "config");
