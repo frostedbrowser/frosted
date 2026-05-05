@@ -865,7 +865,7 @@ async function initializeProxyRuntime() {
 				tempunusedid: "$scramjet$tempunused",
 			},
 			files: {
-				all: `${appBasePath}scram/scramjet.all.js`,
+				all: `${appBasePath}scram/scramjet_bundled.js`,
 				wasm: `${appBasePath}scram/scramjet.wasm`,
 			},
 			flags: {
@@ -965,7 +965,7 @@ async function initializeProxyRuntime() {
 
 	scramjetInitPromise = (async () => {
 		await repairScramjetIndexedDB();
-		var scramjetAllUrl = withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`);
+		var scramjetAllUrl = withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`);
 		if (typeof window.$scramjetLoadController !== "function") {
 			await loadScriptOnce(scramjetAllUrl);
 		}
@@ -974,9 +974,9 @@ async function initializeProxyRuntime() {
 		if (typeof loadController !== "function") {
 			throw new Error("Scramjet controller loader is unavailable.");
 		}
-		var { ScramjetController } = loadController();
+		var { ScramjetClient } = loadController();
 		var createScramjet = () =>
-			new ScramjetController({
+			new ScramjetClient({
 				prefix: scramjetPrefix,
 				codec: {
 					encode: (value) => (value ? encodeURIComponent(String(value)) : value),
@@ -987,8 +987,8 @@ async function initializeProxyRuntime() {
 				},
 				files: {
 					wasm: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm`),
-					all: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`),
-					sync: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`),
+					all: withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`),
+					sync: withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`),
 				},
 			});
 		scramjet = createScramjet();

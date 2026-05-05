@@ -1,4 +1,4 @@
-importScripts("scram/scramjet.all.js?v=33");
+importScripts("scram/scramjet_bundled.js?v=33");
 console.log("%c[frosted]%c service worker v33 starting...", "color: #00ffa6; font-weight: bold;", "");
 
 importScripts("uv/uv.bundle.js?v=33");
@@ -27,7 +27,7 @@ const SEED_CONFIG = {
 		tempunusedid: "$scramjet$tempunused"
 	},
 	files: {
-		all: "/scram/scramjet.all.js",
+		all: "/scram/scramjet_bundled.js",
 		wasm: "/scram/scramjet.wasm"
 	},
 	flags: {
@@ -213,7 +213,7 @@ async function getScramjet() {
 		await ensureScramjetDB();
 
 		try {
-			scramjet = new ScramjetServiceWorker();
+			scramjet = new ScramjetServiceWorker(SEED_CONFIG);
 		} catch (e) {
 			console.error("[frosted] ScramjetServiceWorker instantiation failed:", e);
 			scramjetInitDone = true;
@@ -223,23 +223,11 @@ async function getScramjet() {
 		try {
 			await scramjet.loadConfig();
 		} catch (e) {
-			if (isRecoverableScramjetDbError(e)) {
-				console.warn("[frosted] SW: scramjet.loadConfig() hit a recoverable DB error. Rebuilding DB once...", e);
-				await ensureScramjetDB();
-				scramjet = new ScramjetServiceWorker();
-				try {
-					await scramjet.loadConfig();
-				} catch (retryError) {
-					if (!isRecoverableScramjetDbError(retryError)) throw retryError;
-					console.warn("[frosted] SW: scramjet.loadConfig() retry still hit a DB error. Falling back to seed config.", retryError);
-				}
-			}
+			console.warn("[frosted] SW: scramjet.loadConfig() failed, using SEED_CONFIG.", e);
 		}
 
-		if (!scramjet.config || !scramjet.config.prefix) {
-			scramjet.config = SEED_CONFIG;
-		}
-
+		scramjetInitDone = true;
+		console.log("[frosted] Scramjet SW initialized.");
 		// Ensure transport is set if possible
 		try {
 			console.log("[frosted] SW: requesting transport port from clients...");
