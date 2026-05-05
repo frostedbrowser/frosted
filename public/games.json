@@ -274,7 +274,10 @@
     "cover": "https://cdn.jsdelivr.net/gh/freebuisness/covers@main/33.png",
     "url": "https://amhooman.github.io/website/games/retrobowl/game.html",
     "author": "New Star Games",
-    "authorLink": "https://www.newstargames.com/"
+    "authorLink": "https://www.newstargames.com/",
+    "special": [
+      "direct-html"
+    ]
   },
   {
     "id": 34,

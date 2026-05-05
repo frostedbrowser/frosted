@@ -1,21 +1,37 @@
-importScripts("scram/scramjet_bundled.js?v=33");
-console.log("%c[frosted]%c service worker v33 starting...", "color: #00ffa6; font-weight: bold;", "");
-
-importScripts("uv/uv.bundle.js?v=33");
-importScripts("uv/uv.config.js?v=33");
-importScripts("baremux/index.js?v=5");
-self.Ultraviolet.BareClient = self.BareMux.BareClient;
-importScripts("uv/uv.sw.js?v=33");
-
-const { ScramjetServiceWorker, ScramjetFetchHandler } = (typeof self.$scramjetLoadWorker === 'function' ? self.$scramjetLoadWorker() : (self.$scramjet || {}));
-const ScramjetSW = ScramjetServiceWorker || ScramjetFetchHandler;
-if (!ScramjetSW) {
-	console.error("[frosted] Scramjet Service Worker classes not found in global scope.");
+function getAppBasePath() {
+	try {
+		var scopePath = new URL(self.registration?.scope || self.location.href).pathname || "/";
+		var normalized = String(scopePath || "/");
+		if (!normalized.endsWith("/")) normalized += "/";
+		return normalized.replace(/\/{2,}/g, "/");
+	} catch {
+		return "/";
+	}
 }
+
+var appBasePath = getAppBasePath();
+var scramjetAssetPrefix = `${appBasePath}scram/`.replace(/\/{2,}/g, "/");
+var uvAssetPrefix = `${appBasePath}uv/`.replace(/\/{2,}/g, "/");
+var defaultUvServicePrefix = `${uvAssetPrefix}service/`.replace(/\/{2,}/g, "/");
+var bareMuxAssetPrefix = `${appBasePath}baremux/`.replace(/\/{2,}/g, "/");
+
+importScripts(`${scramjetAssetPrefix}scramjet_bundled.js?v=33`);
+console.log(
+	"%c[frosted]%c service worker v33 starting...",
+	"background-color: #e2f9e2; color: #0a5c0a; padding: 4px 6px; border-radius: 4px; font-weight: bold; font-family: monospace; font-size: 0.9em;",
+	""
+);
+
+importScripts(`${uvAssetPrefix}uv.bundle.js?v=33`);
+importScripts(`${uvAssetPrefix}uv.config.js?v=33`);
+importScripts(`${bareMuxAssetPrefix}index.js?v=5`);
+self.Ultraviolet.BareClient = self.BareMux.BareClient;
+importScripts(`${uvAssetPrefix}uv.sw.js?v=33`);
+
 const uv = new self.UVServiceWorker();
 
 const SEED_CONFIG = {
-	prefix: "/scram/",
+	prefix: scramjetAssetPrefix,
 	globals: {
 		wrapfn: "$scramjet$wrap",
 		wrappropertybase: "$scramjet__",
@@ -31,8 +47,8 @@ const SEED_CONFIG = {
 		tempunusedid: "$scramjet$tempunused"
 	},
 	files: {
-		all: "/scram/scramjet_bundled.js",
-		wasm: "/scram/scramjet.wasm"
+		all: `${scramjetAssetPrefix}scramjet_bundled.js`,
+		wasm: `${scramjetAssetPrefix}scramjet.wasm`
 	},
 	flags: {
 		serviceworkers: false,
@@ -75,25 +91,21 @@ function shouldBypassProxyForRequest(request) {
 		const url = new URL(request.url);
 		if (url.origin !== self.location.origin) return false;
 
-		const scramjetPrefix = SEED_CONFIG?.prefix || "/scram/";
-		const uvServicePrefix = self.__uv$config?.prefix || "/uv/service/";
+		const scramjetPrefix = SEED_CONFIG?.prefix || scramjetAssetPrefix;
+		const activeUvServicePrefix = self.__uv$config?.prefix || defaultUvServicePrefix;
 
 		if (pathStartsWith(url.pathname, scramjetPrefix)) {
-			// Bypass for Scramjet's own library assets to avoid circular dependencies
 			const filename = url.pathname.split("/").pop();
 			if (filename.endsWith(".js") || filename.endsWith(".wasm") || filename.endsWith(".mjs") || filename === "") {
 				return true;
 			}
-			// If it's the prefix itself without an encoded URL, it's not a proxy request
 			if (url.pathname === scramjetPrefix || url.pathname === scramjetPrefix + "/") {
 				return true;
 			}
 			return false;
 		}
-		if (pathStartsWith(url.pathname, uvServicePrefix)) return true;
+		if (pathStartsWith(url.pathname, activeUvServicePrefix)) return false;
 
-		// Same-origin app shell assets and ordinary site requests should go to the
-		// network directly instead of being inspected by proxy runtimes.
 		return true;
 	} catch {
 		return false;
@@ -226,43 +238,9 @@ async function getScramjet() {
 
 	scramjetInitPromise = (async () => {
 		await ensureScramjetDB();
-
-		try {
-			scramjet = new ScramjetSW(SEED_CONFIG);
-		} catch (e) {
-			console.error("[frosted] ScramjetSW instantiation failed:", e);
-			scramjetInitDone = true;
-			return null;
-		}
-
-		try {
-			await scramjet.loadConfig();
-		} catch (e) {
-			console.warn("[frosted] SW: scramjet.loadConfig() failed, using SEED_CONFIG.", e);
-		}
-
 		scramjetInitDone = true;
-		console.log("[frosted] Scramjet SW initialized.");
-		// Ensure transport is set if possible
-		try {
-			console.log("[frosted] SW: requesting transport port from clients...");
-			const port = await getTransport();
-			if (port) {
-				if (typeof scramjet.setTransport === "function") {
-					scramjet.setTransport(port);
-				} else if (typeof scramjet.setBareMuxPort === "function") {
-					scramjet.setBareMuxPort(port);
-				}
-				console.log("[frosted] SW: obtained transport port from client.");
-			} else {
-				console.warn("[frosted] SW: no transport port received from clients. proxy might fail.");
-			}
-		} catch (e) {
-			console.warn("[frosted] SW: failed to obtain transport port:", e);
-		}
-
-		scramjetInitDone = true;
-		return scramjet;
+		console.log("[frosted] Scramjet SW ready (prefix-based routing).");
+		return true;
 	})();
 
 	return scramjetInitPromise;
@@ -299,22 +277,32 @@ self.addEventListener("fetch", (event) => {
 		}
 
 		try {
-			const sj = await getScramjet();
-			if (sj && sj.route(event)) {
-				const requestUrl = event.request.url;
-				const files = (sj.config && sj.config.files) || {};
-				const internalAssets = [files.all, files.sync, files.wasm].filter(Boolean);
-
-				const isInternal = internalAssets.some(assetPath => {
-					try { return requestUrl.includes(assetPath.split("?")[0]); }
-					catch { return false; }
-				});
-
-				if (isInternal) {
-					return await fetch(event.request);
+			await getScramjet();
+			const prefix = SEED_CONFIG.prefix || scramjetAssetPrefix;
+			const url = new URL(event.request.url);
+			if (url.pathname.startsWith(prefix) && url.pathname !== prefix && url.pathname !== prefix.slice(0, -1)) {
+				try {
+					const encoded = url.pathname.slice(prefix.length).split("?")[0];
+					const decodedUrl = decodeURIComponent(encoded);
+					const routedUvPrefix = (self.__uv$config && self.__uv$config.prefix) || defaultUvServicePrefix;
+					const uvEncoded = self.Ultraviolet
+						? self.Ultraviolet.codec.xor.encode(decodedUrl)
+						: encodeURIComponent(decodedUrl);
+					const uvUrl = new URL(routedUvPrefix + uvEncoded, self.location.origin);
+					const newRequest = new Request(uvUrl.href, {
+						method: event.request.method,
+						headers: event.request.headers,
+						body: ["GET", "HEAD"].includes(event.request.method) ? undefined : event.request.body,
+						mode: "same-origin",
+						credentials: "omit",
+					});
+					const fakeEvent = { request: newRequest };
+					if (uv.route(fakeEvent)) {
+						return await uv.fetch(fakeEvent);
+					}
+				} catch (e) {
+					console.warn("[frosted] Scramjet→UV fallback failed:", e);
 				}
-
-				return await sj.fetch(event);
 			}
 		} catch (e) {
 			console.error("[frosted] Scramjet SW fetch error:", e);

@@ -143,8 +143,17 @@ async function registerSW() {
 }
 
 if (typeof window !== "undefined") {
-	console.log("%c[frosted]%c registration script v33 loaded", "color: #00ffa6; font-weight: bold;", "");
+	console.log(
+		"%c[frosted]%c registration script v33 loaded",
+		"background-color: #e2f9e2; color: #0a5c0a; padding: 4px 6px; border-radius: 4px; font-weight: bold; font-family: monospace; font-size: 0.9em;",
+		""
+	);
 	bindBareMuxServiceWorkerPortBridge();
 	window.registerSW = registerSW;
+if (!navigator.serviceWorker.controller && !sessionStorage.getItem('swReloaded')) {
+  console.log('%c[frosted]%c Service worker not controlling page, reloading...', 'color: #00ffa6; font-weight: bold;', '');
+  sessionStorage.setItem('swReloaded', '1');
+  window.location.reload();
+}
 	window.createBareMuxPortForServiceWorker = createBareMuxPortForServiceWorker;
 }

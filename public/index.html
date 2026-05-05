@@ -5,15 +5,11 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Frosted</title>
-	<!-- Google tag (gtag.js) -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=G-5DPHJM6D6T"></script>
-	<script>
-		window.dataLayer = window.dataLayer || [];
-		function gtag() { dataLayer.push(arguments); }
-		gtag('js', new Date());
-
-		gtag('config', 'G-5DPHJM6D6T');
-	</script>
+	<!-- v1.5.3 
+	- fixed games 
+	- fixed ultraviolet and scramjet
+	- stablized adblocking with claude
+	-->
 	<meta name="theme-color" content="#0a0f14" />
 	<meta property="og:title" content="IXL | Math, Language Arts, Science, Social Studies, and Spanish">
 	<meta property="og:site_name" content="IXL Learning" />
@@ -169,15 +165,6 @@
 									<div class="tile-label">Movies (frostedmovies)</div>
 								</button>
 							</div>
-							<div class="home-credits">
-								<a href="frosted://credits" id="creditsLink">Credits</a>
-							</div>
-							<a class="visitor-badge" href="https://visitorbadge.io/status?path=frostedbrowser.cfd"
-								target="_blank" rel="noopener noreferrer">
-								<img id="visitorBadgeImage"
-									src="https://api.visitorbadge.io/api/visitors?path=frostedbrowser.cfd&countColor=%23697689"
-									alt="Visitor count" referrerpolicy="no-referrer" />
-							</a>
 						</div>
 					</div>
 					<div id="settingsPage" class="internal-page">
@@ -269,6 +256,15 @@
 									</div>
 									<div class="settings-hint" id="cloak-status">
 										Tip: favicon can be a direct raw image URL.
+									</div>
+								</div>
+								<div class="settings-section">
+									<label class="settings-label" for="lowPowerModeToggle">Low Power Mode</label>
+									<div class="settings-row">
+										<input id="lowPowerModeToggle" type="checkbox" />
+										<label for="lowPowerModeToggle" class="settings-hint">
+											Disable particles and moving wallpapers for better performance.
+										</label>
 									</div>
 								</div>
 							</div>
@@ -547,6 +543,17 @@
 		</div>
 	</div>
 	</div>
+
+	<div class="home-credits">
+		<a href="frosted://credits" id="creditsLink">Credits</a>
+	</div>
+
+	<a class="visitor-badge" href="https://visitorbadge.io/status?path=frostedbrowser.cfd"
+		target="_blank" rel="noopener noreferrer">
+		<img id="visitorBadgeImage"
+			src="https://api.visitorbadge.io/api/visitors?path=frostedbrowser.cfd&countColor=%23697689"
+			alt="Visitor count" referrerpolicy="no-referrer" />
+	</a>
 
 	<input id="sj-search-engine" type="hidden" value="https://search.brave.com/search?q=%s" />
 </body>

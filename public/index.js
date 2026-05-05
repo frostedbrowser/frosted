@@ -43,8 +43,8 @@ function logFrostedBox(message, mode, isProxied = true) {
 	console.log(
 		`%c${getFrostedPrefixForMode(mode, isProxied)}%c ${message}`,
 		[
-			"background-color: #c8f3ff",
-			"color: #0b6e99",
+			"background-color: #e2f9e2",
+			"color: #0a5c0a",
 			"padding: 4px 6px",
 			"border-radius: 4px",
 			"font-weight: bold",
@@ -621,6 +621,26 @@ function withRuntimeAssetVersion(path) {
 	return `${basePath}${separator}v=${proxyRuntimeAssetVersion}`;
 }
 
+function buildUvProxyUrl(rawUrl) {
+	var target = normalizeLikelyMalformedTargetUrl(rawUrl);
+	if (!target) return "";
+	var encodeFn =
+		typeof window.__uv$config?.encodeUrl === "function"
+			? window.__uv$config.encodeUrl
+			: (value) => encodeURIComponent(value);
+	var prefix = window.__uv$config?.prefix || uvPrefix;
+	return window.location.origin + prefix + encodeFn(target);
+}
+
+function buildScramjetFrameUrl(rawUrl) {
+	var target = normalizeLikelyMalformedTargetUrl(rawUrl);
+	if (!target) return "";
+	if (typeof window.__uv$config?.encodeUrl === "function") {
+		return buildUvProxyUrl(target);
+	}
+	return window.location.origin + scramjetPrefix + encodeURIComponent(target);
+}
+
 function deleteIndexedDb(databaseName) {
 	return new Promise((resolve, reject) => {
 		if (!globalThis.indexedDB) {
@@ -761,19 +781,16 @@ function hasMatchingActiveServiceWorkerController() {
 
 function maybeReloadForServiceWorkerControl() {
 	try {
-		if (typeof window === "undefined" || !window.location || !window.sessionStorage) return false;
-		var lastReload = window.sessionStorage.getItem(swControlReloadMarkerKey);
-		if (lastReload) {
-			var elapsed = Date.now() - Number(lastReload);
-			if (elapsed < 10000) {
-				console.log("[frosted] service worker reload loop prevented; already reloaded recently.");
-				return false;
-			}
+		if (typeof window === "undefined" || !window.sessionStorage) return false;
+		var warnedAt = window.sessionStorage.getItem(swControlReloadMarkerKey);
+		if (!warnedAt) {
+			window.sessionStorage.setItem(swControlReloadMarkerKey, String(Date.now()));
+			console.warn("[frosted] service worker is not controlling the page yet; skipping automatic reload.");
 		}
-		console.warn("[frosted] service worker is not controlling the page; reloading once to gain control.");
-		window.sessionStorage.setItem(swControlReloadMarkerKey, String(Date.now()));
-		window.location.reload();
-		return true;
+		if (proxyStatus) {
+			proxyStatus.textContent = "Proxy runtime is still attaching. Try reload if a page does not open.";
+		}
+		return false;
 	} catch {
 		return false;
 	}
@@ -819,10 +836,7 @@ async function initializeProxyRuntime() {
 			connection = createBareMuxConnection(bareMuxModule);
 			var hasController = await ensureServiceWorkerRuntimeReady();
 			if (!hasController) {
-				if (maybeReloadForServiceWorkerControl()) {
-					showLoading(true);
-					throw new Error("Service worker is activating; reloading page once to gain control.");
-				}
+				maybeReloadForServiceWorkerControl();
 				throw new Error("Service worker is installed but not controlling this page yet. Reload once and retry.");
 			}
 			return { connection };
@@ -837,6 +851,7 @@ async function initializeProxyRuntime() {
 	if (getProxyMode() !== "scramjet") {
 		return { scramjet: null, connection };
 	}
+	await ensureUvRuntime();
 	if (scramjet && connection) return { scramjet, connection };
 
 	if (scramjetInitPromise) {
@@ -965,54 +980,25 @@ async function initializeProxyRuntime() {
 
 	scramjetInitPromise = (async () => {
 		await repairScramjetIndexedDB();
-		var scramjetAllUrl = withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`);
-		if (typeof window.$scramjetLoadController !== "function") {
-			await loadScriptOnce(scramjetAllUrl);
-		}
-		var loadController =
-			typeof window.$scramjetLoadController === "function"
-				? window.$scramjetLoadController
-				: typeof window.$scramjet !== "undefined"
-				? () => window.$scramjet
-				: null;
-		if (typeof loadController !== "function") {
-			throw new Error("Scramjet controller loader is unavailable.");
-		}
-		const controllerObj = loadController();
-		const ScramjetClient = controllerObj.ScramjetClient || controllerObj.ScramjetController || controllerObj.ScramjetFetchHandler;
-		if (!ScramjetClient) {
-			throw new Error("Scramjet classes (ScramjetClient/ScramjetController) not found in controller object.");
-		}
-		var createScramjet = () =>
-			new ScramjetClient({
-				prefix: scramjetPrefix,
-				codec: {
-					encode: (value) => (value ? encodeURIComponent(String(value)) : value),
-					decode: (value) => (value ? decodeURIComponent(String(value)) : value),
-				},
-				flags: {
-					strictRewrites: false,
-				},
-				files: {
-					wasm: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm`),
-					all: withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`),
-					sync: withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`),
-				},
-			});
-		scramjet = createScramjet();
-		try {
-			await scramjet.init();
-		} catch (error) {
-			var eName = String(error?.name || "");
-			if (eName !== "NotFoundError" && eName !== "AbortError" && eName !== "VersionError" && !isDbConnectionClosedError(error)) {
-				throw error;
-			}
-			console.warn("[frosted] scramjet.init() had a recoverable DB error:", error.message);
-			await deleteScramjetIndexedDB();
-			await rebuildScramjetIndexedDB();
-			scramjet = createScramjet();
-			await scramjet.init();
-		}
+
+		const encode = (url) => (url ? encodeURIComponent(String(url)) : url);
+		scramjet = {
+			prefix: scramjetPrefix,
+			encode,
+			init: async () => {
+				await repairScramjetIndexedDB();
+			},
+			createFrame: () => {
+				const frame = document.createElement("iframe");
+				return {
+					frame,
+					go: (url) => {
+						frame.src = buildScramjetFrameUrl(url);
+					},
+				};
+			},
+		};
+
 		if (!scramjetLoadStatusLogged) {
 			scramjetLoadStatusLogged = true;
 			logFrostedBox("scramjet loaded", "scramjet");
@@ -1121,7 +1107,6 @@ async function init() {
 	}
 
 	loadWallpaper();
-	scheduleParticlesInit();
 	loadPanicSettings();
 	loadOpenModeSettings();
 	loadCloakSettings();
@@ -1129,6 +1114,7 @@ async function init() {
 	runStartupBrandSequence();
 	loadAiChatHistory();
 	loadAiMode();
+	loadLowPowerModeSettings();
 	createTab("");
 	loadProxySettings();
 	scheduleProxyRuntimePreload();
@@ -1537,6 +1523,13 @@ function bindEvents() {
 		},
 		true
 	);
+
+	var lowPowerModeToggle = qs("#lowPowerModeToggle");
+	if (lowPowerModeToggle) {
+		lowPowerModeToggle.addEventListener("change", (e) => {
+			setLowPowerMode(e.target.checked);
+		});
+	}
 }
 
 function initParticles() {
@@ -1903,7 +1896,25 @@ function setActiveTab(id, keepView) {
 	updateNavButtons();
 }
 
+function updateAppVisualState() {
+	var tab = getActiveTab();
+	var url = tab ? String(tab.url || "").trim() : "";
+	var isInternal = !url ||
+		url.startsWith("frosted://") ||
+		url.startsWith("about:") ||
+		url.startsWith("blob:") ||
+		url.startsWith("data:");
+
+	if (isInternal) {
+		document.body.classList.remove("is-proxied");
+	} else {
+		document.body.classList.add("is-proxied");
+	}
+}
+
 function renderTabs() {
+	updateAppVisualState();
+
 	tabsEl.innerHTML = "";
 	tabs.forEach((tab) => {
 		var node = document.createElement("div");
@@ -2204,7 +2215,16 @@ var adblockHostPatterns = [
 	/(^|\.)criteo\.com$/i,
 	/(^|\.)adsrvr\.org$/i,
 	/(^|\.)scorecardresearch\.com$/i,
-];
+,
+	/(^|\.)ad-score\.com$/i,
+	/(^|\.)onclickads\.net$/i,
+	/(^|\.)popads\.net$/i,
+	/(^|\.)popcash\.net$/i,
+	/(^|\.)propellerads\.com$/i,
+	/(^|\.)ad-maven\.com$/i,
+	/(^|\.)revenuehits\.com$/i,
+	/(^|\.)zeroredirect1\.com$/i,
+	/(^|\.)directrev\.com$/i];
 
 var adblockVendorSuffixPatterns = [
 	/apple\.com$/i,
@@ -2239,6 +2259,9 @@ var adblockHostKeywordPatterns = [
 	/(^|[.-])pixel([.-]|$)/i,
 	/(^|[.-])logser([.-]|$)/i,
 	/(^|[.-])unityads([.-]|$)/i,
+	/(^|[.-])googlesyndication([.-]|$)/i,
+	/(^|[.-])googleadservices([.-]|$)/i,
+	/(^|[.-])doubleclick([.-]|$)/i,
 ];
 
 var adblockUrlPatterns = [
@@ -2271,6 +2294,10 @@ var adblockUrlPatterns = [
 	/logser\.realme\.com/i,
 	/realmemobile\.com/i,
 	/oppomobile\.com/i,
+	/doubleclick/i,
+	/googlesyndication/i,
+	/googleadservices/i,
+	/google-analytics/i,
 ];
 var adblockAllowlistHostPatterns = [
 	/(^|\.)cdn\.r9x\.in$/i,
@@ -2524,10 +2551,7 @@ function isScramjetTransportCrash(error) {
 }
 
 function toScramjetProxyUrl(rawUrl) {
-	var base = String(window.location.origin || "").replace(/\/+$/, "");
-	var target = String(rawUrl || "").trim();
-	if (!base || !target) return "";
-	return `${base}${scramjetPrefix}${encodeURIComponent(target)}`;
+	return buildScramjetFrameUrl(rawUrl);
 }
 
 function normalizeLikelyMalformedTargetUrl(value) {
@@ -2541,6 +2565,10 @@ function fromScramjetProxyUrl(rawUrl) {
 	if (!target) return "";
 	try {
 		var parsed = new URL(target, window.location.href);
+		var uvResolved = fromUltravioletProxyUrl(parsed.href);
+		if (uvResolved && uvResolved !== parsed.href) {
+			return normalizeLikelyMalformedTargetUrl(uvResolved);
+		}
 		var marker = scramjetPrefix;
 		if (!parsed.pathname.startsWith(marker)) {
 			if (!parsed.pathname.startsWith("/scramjet/")) return target;
@@ -2648,6 +2676,10 @@ function getFrameResolvedTargetUrl(frameElement) {
 	var mode = String(frameElement?.dataset?.proxyMode || "").trim().toLowerCase();
 	var resolved =
 		mode === "ultraviolet" ? fromUltravioletProxyUrl(frameHref) : fromScramjetProxyUrl(frameHref);
+	if (mode === "scramjet" && (!resolved || resolved === frameHref)) {
+		var uvResolved = fromUltravioletProxyUrl(frameHref);
+		if (uvResolved) resolved = uvResolved;
+	}
 	return String(resolved || "").trim();
 }
 
@@ -2821,10 +2853,65 @@ function injectAdblockIntoFrame(frameElement) {
 				: new OriginalWebSocket(url, protocols);
 		};
 		frameWindow.WebSocket.prototype = OriginalWebSocket.prototype;
-	}
+	var originalOpen = frameWindow.open;
+	frameWindow.open = function(url, name, features) {
+		if (shouldBlock(url, "navigation", frameWindow.location?.href)) {
+			console.log("[frosted] blocked popup redirect:", url);
+			return null;
+		}
+		try {
+			return originalOpen.call(frameWindow, url, name, features);
+		} catch (e) {
+			console.warn("[frosted] window.open failed:", e);
+			return null;
+		}
+	};
+
+	var originalCreateElement = frameWindow.document.createElement;
+	frameWindow.document.createElement = function(tagName, ...args) {
+		var el = originalCreateElement.call(frameWindow.document, tagName, ...args);
+		var tag = String(tagName).toLowerCase();
+		if (['script', 'img', 'iframe', 'frame', 'embed', 'video', 'audio'].includes(tag)) {
+			var originalSetAttribute = el.setAttribute;
+			el.setAttribute = function(name, value) {
+				if (String(name).toLowerCase() === 'src' && shouldBlock(value, tag, frameWindow.location?.href)) {
+					console.log(`[frosted] blocked dynamic ${tag} injection:`, value);
+					return;
+				}
+				return originalSetAttribute.call(el, name, value);
+			};
+			Object.defineProperty(el, 'src', {
+				get: function() { return el.getAttribute('src'); },
+				set: function(value) { el.setAttribute('src', value); },
+				configurable: true
+			});
+		}
+		return el;
+	};
+
+	var OriginalImage = frameWindow.Image;
+	frameWindow.Image = function(...args) {
+		var img = new OriginalImage(...args);
+		var originalSetAttribute = img.setAttribute;
+		img.setAttribute = function(name, value) {
+			if (String(name).toLowerCase() === 'src' && shouldBlock(value, "image-ctor", frameWindow.location?.href)) {
+				console.log("[frosted] blocked Image constructor src:", value);
+				return;
+			}
+			return originalSetAttribute.call(img, name, value);
+		};
+		Object.defineProperty(img, 'src', {
+			get: function() { return img.getAttribute('src'); },
+			set: function(value) { img.setAttribute('src', value); },
+			configurable: true
+		});
+		return img;
+	};
+}
 }
 
 async function loadUrl(url, pushHistory = true, allowProxyFallback = true, allowSameOriginNavigation = false) {
+	refreshVisitorBadge();
 	resetError();
 	var tab = getActiveTab();
 	if (!tab) {
@@ -3042,23 +3129,17 @@ function ensureTabFrame(tabId) {
 			? {
 				frame: document.createElement("iframe"),
 				go: (url) => {
-					if (!window.__uv$config?.encodeUrl) {
-						throw new Error("Ultraviolet runtime is not ready.");
-					}
-					var normalizedUrl = normalizeLikelyMalformedTargetUrl(url);
-					var prefix = window.__uv$config?.prefix || uvPrefix;
-					created.frame.src = window.location.origin + prefix + window.__uv$config.encodeUrl(normalizedUrl);
+					created.frame.src = buildUvProxyUrl(url);
 				},
 			}
 			: (() => {
 					var sj = scramjet.createFrame();
 					var originalGo = sj.go;
 					sj.go = (url) => {
-						var normalizedUrl = normalizeLikelyMalformedTargetUrl(url);
 						if (typeof originalGo === "function") {
-							originalGo.call(sj, normalizedUrl);
+							originalGo.call(sj, url);
 						} else {
-							sj.frame.src = scramjetPrefix + encodeURIComponent(normalizedUrl);
+							sj.frame.src = buildScramjetFrameUrl(url);
 						}
 					};
 					return sj;
@@ -3610,7 +3691,7 @@ function scheduleProxyRuntimePreload() {
 
 		await Promise.allSettled([
 			ensureUvRuntime(),
-			loadScriptOnce(withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`)),
+			loadScriptOnce(withRuntimeAssetVersion(`${appBasePath}scram/scramjet_bundled.js`)),
 		]);
 
 		if (getProxyMode() === "scramjet") {
@@ -4160,10 +4241,22 @@ async function openGameFromCatalog(url, options = {}) {
 		(/\bCrOS\b/i.test(navigator.userAgent || "") || /\bChromebook\b/i.test(navigator.userAgent || "")) &&
 		!/\bAndroid\b/i.test(navigator.userAgent || "");
 	var skipBlobMaterialization = isChromebookLike && (isFlashGame || isLikelyVex1);
+	var gameHost = "";
+	try {
+		gameHost = new URL(finalUrl, window.location.href).hostname.toLowerCase();
+	} catch {
+	}
+	var prefersDirectHtml =
+		specialFlags.includes("direct-html") ||
+		/\bretro\s*bowl\b/.test(gameTitle) ||
+		gameHost === "amhooman.github.io" ||
+		gameHost === "retrobowlweb.gitlab.io";
 
-	var shouldMaterializeHtml =
-		!skipBlobMaterialization &&
-		(Boolean(options?.useBlob) || /\.html?(?:[?#]|$)/i.test(finalUrl));
+	if (prefersDirectHtml) {
+		finalUrl = createDirectGameEmbedUrl(finalUrl, options?.title || "Game");
+	}
+
+	var shouldMaterializeHtml = !skipBlobMaterialization && !prefersDirectHtml && Boolean(options?.useBlob);
 	if (shouldMaterializeHtml) {
 		try {
 			finalUrl = await materializeGameBlobUrl(finalUrl);
@@ -4288,6 +4381,23 @@ function resolveGameUrl(url) {
 		return `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${branch}/${path}`;
 	}
 	return raw;
+}
+
+function createDirectGameEmbedUrl(url, title = "Game") {
+	var target = String(url || "").trim();
+	if (!target) return "";
+	var safeTitle = escapeHtml(String(title || "Game"));
+	var safeUrl = escapeHtml(target);
+	var wrapperHtml =
+		`<!doctype html><html><head><meta charset="utf-8"><title>${safeTitle}</title>` +
+		`<meta name="viewport" content="width=device-width,initial-scale=1">` +
+		`<style>` +
+		`html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}` +
+		`iframe{display:block;width:100%;height:100%;border:0;background:#000}` +
+		`</style></head><body>` +
+		`<iframe src="${safeUrl}" allow="autoplay; fullscreen; gamepad" allowfullscreen referrerpolicy="no-referrer"></iframe>` +
+		`</body></html>`;
+	return URL.createObjectURL(new Blob([wrapperHtml], { type: "text/html;charset=utf-8" }));
 }
 
 async function materializeGameBlobUrl(url) {
@@ -5797,6 +5907,7 @@ var wallpapers = {
 	"winter-darkness": {
 		label: "Winter Darkness",
 		file: "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/winterdarkness.mp4",
+		stillFile: "wallpapers/onyx.png",
 		type: "video",
 		theme: {
 			color1: "#b7bcc4",
@@ -5854,6 +5965,7 @@ var wallpapers = {
 		category: "animated-wallpapers",
 		type: "video",
 		file: "wallpapers/animated/winter.mp4",
+		stillFile: "wallpapers/twilight-ridge.png",
 		theme: {
 			color1: "#bad9ff",
 			color2: "#d9f2ff",
@@ -5889,6 +6001,18 @@ function getWallpaperFile(key) {
 	var normalized = normalizeWallpaperKey(key);
 	var registry = getWallpaperRegistry();
 	var file = registry[normalized]?.file || wallpapers.skynight.file;
+	try {
+		return new URL(file, window.location.href).toString();
+	} catch {
+		return file;
+	}
+}
+
+function getWallpaperStillFile(key) {
+	var normalized = normalizeWallpaperKey(key);
+	var registry = getWallpaperRegistry();
+	var file = registry[normalized]?.stillFile || "";
+	if (!file) return "";
 	try {
 		return new URL(file, window.location.href).toString();
 	} catch {
@@ -5968,19 +6092,61 @@ function ensureWallpaperVideoElement() {
 	return videoEl;
 }
 
+function isLowPowerModeEnabled() {
+	var raw = localStorage.getItem("frosted-low-power-mode");
+	if (raw === null) {
+		localStorage.setItem("frosted-low-power-mode", "true");
+		return true;
+	}
+	return raw === "true";
+}
+
+function freezeWallpaperVideo(videoEl) {
+	if (!videoEl) return;
+	var freezeAtSeconds = 0.001;
+	var applyFreeze = () => {
+		try {
+			if (videoEl.readyState >= 1) {
+				var duration = Number(videoEl.duration);
+				videoEl.currentTime = Number.isFinite(duration) && duration > freezeAtSeconds ? freezeAtSeconds : 0;
+			}
+		} catch {
+		}
+		videoEl.pause();
+	};
+	if (videoEl.readyState >= 1) {
+		applyFreeze();
+		return;
+	}
+	videoEl.addEventListener("loadedmetadata", applyFreeze, { once: true });
+}
+
+function syncWallpaperPlayback(videoEl = document.getElementById(wallpaperVideoElementId)) {
+	if (!videoEl) return;
+	if (
+		document.body.classList.contains("low-power-mode") ||
+		document.body.dataset.wallpaperPlayback === "frozen"
+	) {
+		freezeWallpaperVideo(videoEl);
+		return;
+	}
+	var playResult = videoEl.play();
+	if (playResult && typeof playResult.catch === "function") {
+		playResult.catch(() => { });
+	}
+}
+
+function shouldUseStaticWallpaperFallback(key) {
+	return isLowPowerModeEnabled() && getWallpaperType(key) === "video" && Boolean(getWallpaperStillFile(key));
+}
+
 function showWallpaperVideo(videoUrl, fallbackUrl = "") {
 	var videoEl = ensureWallpaperVideoElement();
 	if (!videoUrl) return;
 	var normalizedPrimary = String(videoUrl || "").trim();
 	var normalizedFallback = String(fallbackUrl || "").trim();
-	function tryPlayWallpaperVideo() {
-		var playResult = videoEl.play();
-		if (playResult && typeof playResult.catch === "function") {
-			playResult.catch(() => { });
-		}
-	}
-	videoEl.oncanplay = tryPlayWallpaperVideo;
-	videoEl.onloadedmetadata = tryPlayWallpaperVideo;
+	videoEl.oncanplay = () => syncWallpaperPlayback(videoEl);
+	videoEl.onloadedmetadata = () => syncWallpaperPlayback(videoEl);
 	videoEl.onerror = function () {
 		if (!normalizedFallback) return;
 		if (videoEl.dataset.fallbackApplied === "true") return;
@@ -5988,7 +6154,7 @@ function showWallpaperVideo(videoUrl, fallbackUrl = "") {
 		videoEl.src = normalizedFallback;
 		videoEl.dataset.src = normalizedFallback;
 		videoEl.load();
-		tryPlayWallpaperVideo();
+		syncWallpaperPlayback(videoEl);
 	};
 	if (videoEl.dataset.src !== normalizedPrimary) {
 		videoEl.dataset.fallbackApplied = "false";
@@ -5998,7 +6164,7 @@ function showWallpaperVideo(videoUrl, fallbackUrl = "") {
 	}
 	document.body.classList.add("has-video-wallpaper");
 	videoEl.classList.add("is-active");
-	tryPlayWallpaperVideo();
+	syncWallpaperPlayback(videoEl);
 }
 
 function hideWallpaperVideo() {
@@ -6025,7 +6191,10 @@ function applyWallpaper(key) {
 	var revision = bumpWallpaperRevision();
 	var theme = getWallpaperTheme(normalized);
 	var wallpaperType = getWallpaperType(normalized);
-	if (wallpaperType === "video") {
+	if (wallpaperType === "video" && shouldUseStaticWallpaperFallback(normalized)) {
+		hideWallpaperVideo();
+		renderWallpaperBackground(`url("${getWallpaperStillFile(normalized)}")`);
+	} else if (wallpaperType === "video") {
 		showWallpaperVideo(buildWallpaperAssetUrl(normalized, revision), getWallpaperFile(normalized));
 		renderWallpaperBackground("");
 	} else {
@@ -6050,7 +6219,10 @@ function bootstrapWallpaperFromStorage() {
 	}
 	var saved = normalizeWallpaperKey(raw);
 	var theme = getWallpaperTheme(saved);
-	if (getWallpaperType(saved) === "video") {
+	if (getWallpaperType(saved) === "video" && shouldUseStaticWallpaperFallback(saved)) {
+		hideWallpaperVideo();
+		renderWallpaperBackground(`url("${getWallpaperStillFile(saved)}")`);
+	} else if (getWallpaperType(saved) === "video") {
 		showWallpaperVideo(buildWallpaperAssetUrl(saved), getWallpaperFile(saved));
 		renderWallpaperBackground("");
 	} else {
@@ -6452,3 +6624,20 @@ setTimeout(hideInitialLoadingPopup, 1200);
 
 // gooncoded :heartbroken:
 
+function loadLowPowerModeSettings() {
+	var lowPowerModeToggle = qs("#lowPowerModeToggle");
+	var enabled = isLowPowerModeEnabled();
+	if (lowPowerModeToggle) {
+		lowPowerModeToggle.checked = enabled;
+	}
+	setLowPowerMode(enabled);
+}
+
+function setLowPowerMode(enabled) {
+	localStorage.setItem("frosted-low-power-mode", String(Boolean(enabled)));
+	document.body.classList.toggle("low-power-mode", enabled);
+	document.body.dataset.wallpaperPlayback = enabled ? "frozen" : "animated";
+	setParticlesVisible(!enabled && shouldShowParticlesForCurrentView());
+	syncWallpaperPlayback();
+	applyWallpaper(localStorage.getItem(wallpaperKey) || "winter-darkness");
+}
