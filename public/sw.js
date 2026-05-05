@@ -20,7 +20,7 @@ const SEED_CONFIG = {
 		importfn: "$scramjet$import",
 		rewritefn: "$scramjet$rewrite",
 		metafn: "$scramjet$meta",
-		setrealmfn: "$scramjet$setrealm",
+		wrappostmessagefn: "$scramjet$postmessage",
 		pushsourcemapfn: "$scramjet$pushsourcemap",
 		trysetfn: "$scramjet$tryset",
 		templocid: "$scramjet$temploc",
@@ -28,9 +28,8 @@ const SEED_CONFIG = {
 	},
 	files: {
 		all: "/scram/scramjet.all.js",
-		sync: "/scram/scramjet.sync.js"
+		wasm: "/scram/scramjet.wasm"
 	},
-	wasm: "/scram/scramjet.wasm.wasm",
 	flags: {
 		serviceworkers: false,
 		syncxhr: false,
@@ -142,7 +141,7 @@ async function ensureScramjetDB() {
 		});
 
 		const newDb = await new Promise((resolve, reject) => {
-			const req = indexedDB.open("$scramjet", 2);
+			const req = indexedDB.open("$scramjet", 1);
 			req.onupgradeneeded = (event) => {
 				const db = event.target.result;
 				for (const store of REQUIRED_STORES) {

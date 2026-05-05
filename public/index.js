@@ -858,7 +858,7 @@ async function initializeProxyRuntime() {
 				importfn: "$scramjet$import",
 				rewritefn: "$scramjet$rewrite",
 				metafn: "$scramjet$meta",
-				setrealmfn: "$scramjet$setrealm",
+				wrappostmessagefn: "$scramjet$postmessage",
 				pushsourcemapfn: "$scramjet$pushsourcemap",
 				trysetfn: "$scramjet$tryset",
 				templocid: "$scramjet$temploc",
@@ -866,9 +866,8 @@ async function initializeProxyRuntime() {
 			},
 			files: {
 				all: `${appBasePath}scram/scramjet.all.js`,
-				sync: `${appBasePath}scram/scramjet.sync.js`,
+				wasm: `${appBasePath}scram/scramjet.wasm`,
 			},
-			wasm: `${appBasePath}scram/scramjet.wasm.wasm`,
 			flags: {
 				serviceworkers: false,
 				syncxhr: false,
@@ -936,7 +935,7 @@ async function initializeProxyRuntime() {
 	async function rebuildScramjetIndexedDB() {
 		try {
 			const db = await new Promise((resolve, reject) => {
-				const request = indexedDB.open(scramjetDbName, 2);
+				const request = indexedDB.open(scramjetDbName, 1);
 				request.onupgradeneeded = (event) => {
 					const upgradeDb = event.target.result;
 					for (const storeName of scramjetRequiredStores) {
@@ -987,9 +986,9 @@ async function initializeProxyRuntime() {
 					strictRewrites: false,
 				},
 				files: {
-					wasm: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm.wasm`),
+					wasm: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.wasm`),
 					all: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`),
-					sync: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.sync.js`),
+					sync: withRuntimeAssetVersion(`${appBasePath}scram/scramjet.all.js`),
 				},
 			});
 		scramjet = createScramjet();
