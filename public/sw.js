@@ -7,7 +7,11 @@ importScripts("baremux/index.js?v=5");
 self.Ultraviolet.BareClient = self.BareMux.BareClient;
 importScripts("uv/uv.sw.js?v=33");
 
-const { ScramjetServiceWorker } = self.$scramjetLoadWorker();
+const { ScramjetServiceWorker, ScramjetFetchHandler } = (typeof self.$scramjetLoadWorker === 'function' ? self.$scramjetLoadWorker() : (self.$scramjet || {}));
+const ScramjetSW = ScramjetServiceWorker || ScramjetFetchHandler;
+if (!ScramjetSW) {
+	console.error("[frosted] Scramjet Service Worker classes not found in global scope.");
+}
 const uv = new self.UVServiceWorker();
 
 const SEED_CONFIG = {
@@ -224,9 +228,9 @@ async function getScramjet() {
 		await ensureScramjetDB();
 
 		try {
-			scramjet = new ScramjetServiceWorker(SEED_CONFIG);
+			scramjet = new ScramjetSW(SEED_CONFIG);
 		} catch (e) {
-			console.error("[frosted] ScramjetServiceWorker instantiation failed:", e);
+			console.error("[frosted] ScramjetSW instantiation failed:", e);
 			scramjetInitDone = true;
 			return null;
 		}

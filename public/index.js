@@ -970,12 +970,16 @@ async function initializeProxyRuntime() {
 			await loadScriptOnce(scramjetAllUrl);
 		}
 		var loadController =
-			typeof window.$scramjetLoadController === "function" ? window.$scramjetLoadController : $scramjetLoadController;
+			typeof window.$scramjetLoadController === "function"
+				? window.$scramjetLoadController
+				: typeof window.$scramjet !== "undefined"
+				? () => window.$scramjet
+				: null;
 		if (typeof loadController !== "function") {
 			throw new Error("Scramjet controller loader is unavailable.");
 		}
 		const controllerObj = loadController();
-		const ScramjetClient = controllerObj.ScramjetClient || controllerObj.ScramjetController;
+		const ScramjetClient = controllerObj.ScramjetClient || controllerObj.ScramjetController || controllerObj.ScramjetFetchHandler;
 		if (!ScramjetClient) {
 			throw new Error("Scramjet classes (ScramjetClient/ScramjetController) not found in controller object.");
 		}
@@ -1982,6 +1986,7 @@ function getTabFaviconCandidates(url) {
 			faviconOrigin = `${faviconOrigin}:${parsed.port}`;
 		}
 		return [
+			`https://www.google.com/s2/favicons?domain=${host}&sz=64`,
 			`https://icons.duckduckgo.com/ip3/${encodeURIComponent(host)}.ico`,
 			defaultAppIconHref,
 		];
