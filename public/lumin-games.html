@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<!--ai luminsdk--->
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>LuminSDK Games</title>
+	<style>
+		html,
+		body {
+			margin: 0;
+			min-height: 100%;
+			background:
+				radial-gradient(circle at top, rgba(55, 95, 155, 0.2), transparent 38%),
+				linear-gradient(180deg, #11161d 0%, #0d1218 100%);
+			font-family: "Poppins", system-ui, sans-serif;
+		}
+
+		#games {
+			min-height: 100vh;
+			padding: 10px;
+			box-sizing: border-box;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="games"></div>
+	<script
+		src="https://cdn.jsdelivr.net/gh/luminsdk/script@latest/lumin.min.js"
+		onerror="console.error('Failed to load LuminSDK CDN script.')"
+	></script>
+	<script>
+		function postToParent(type, payload = {}) {
+			if (window.parent === window) return;
+			window.parent.postMessage({ type, ...payload }, "*");
+		}
+
+		if (!window.Lumin || typeof window.Lumin.init !== "function") {
+			console.error("LuminSDK is unavailable on window.");
+		} else {
+			Lumin.init({
+				container: "#games",
+				theme: "dark",
+				onReady: async () => {
+					console.log("LuminSDK is ready");
+					try {
+						const result = await Lumin.getGames({ page: 1, limit: 8 });
+						const names = Array.isArray(result?.games)
+							? result.games.map((game) => String(game?.name || "")).filter(Boolean)
+							: [];
+						postToParent("fb-lumin-catalog", { names });
+					} catch (error) {
+						console.warn("Unable to inspect LuminSDK catalog.", error);
+					}
+				},
+				onGameStart: async (game) => {
+					const gameId = String(game?.id || "").trim();
+					const gameName = String(game?.name || "").trim();
+					try {
+						const playable = gameId ? await Lumin.getGameUrl(gameId) : null;
+						postToParent("fb-lumin-game-start", {
+							game: {
+								id: gameId,
+								name: gameName,
+								url: String(playable?.url || "").trim(),
+							},
+						});
+						Lumin.endGame();
+					} catch (error) {
+						console.error("Unable to open Lumin game in parent proxy.", error);
+						postToParent("fb-lumin-game-start", {
+							game: {
+								id: gameId,
+								name: gameName,
+								url: "",
+							},
+						});
+					}
+				},
+				onGameEnd: () => {
+					postToParent("fb-lumin-game-end");
+				},
+				onError: (err) => console.error("LuminSDK error:", err),
+			});
+		}
+	</script>
+</body>
+
+</html>

@@ -128,6 +128,9 @@ var pageRefs = {
 	gamesGrid: qs("#gamesGrid"),
 	gamesCount: qs("#gamesCount"),
 	gamesSearchInput: qs("#gamesSearchInput"),
+	gamesSourceSelect: qs("#gamesSourceSelect"),
+	luminGamesMount: qs("#luminGamesMount"),
+	luminGamesFrame: qs("#luminGamesFrame"),
 	aiPromptInput: qs("#aiPromptInput"),
 	aiSolveBtn: qs("#aiSolveBtn"),
 	aiResult: qs("#aiResult"),
@@ -239,6 +242,9 @@ var {
 	gamesGrid,
 	gamesCount,
 	gamesSearchInput,
+	gamesSourceSelect,
+	luminGamesMount,
+	luminGamesFrame,
 	aiPromptInput,
 	aiSolveBtn,
 	aiResult,
@@ -568,6 +574,7 @@ var nextTabId = 1;
 var transportReady = false;
 var gamesCatalogLoaded = false;
 var gamesCatalogLoadingPromise = null;
+var luminSdkInitialized = false;
 var wallpaperStoreCatalogLoaded = false;
 var wallpaperStoreCatalogLoadingPromise = null;
 var tabFrames = new Map();
@@ -591,6 +598,9 @@ var aiTypingRunId = 0;
 var aiUiThread = [];
 var aiAutoScrollThresholdPx = 32;
 var gamesCatalog = [];
+var activeGamesSource = "gnmath";
+var luminCatalogSourceLabel = "Source: LuminSDK";
+var localGamesJsonTitlesPromise = null;
 
 async function ensureBareMuxGlobal() {
 	if (globalThis.BareMux?.BareMuxConnection) return globalThis.BareMux;
@@ -986,7 +996,7 @@ async function initializeProxyRuntime() {
 			prefix: scramjetPrefix,
 			encode,
 			init: async () => {
-				await repairScramjetIndexedDB();
+					await repairScramjetIndexedDB();
 			},
 			createFrame: () => {
 				const frame = document.createElement("iframe");
@@ -1047,14 +1057,13 @@ var taglines = [
 	"Are you still you In a different time In a different place With the same memories? -crusader",
 	"check out our partners",
 	"star github if you want.. its not like im forcing you or anything",
+	"frostedOS comming soon..",
+	"stop joining goon servers yall some gooners ?? - mrdavidss",
 	"orange",
 	"1+2=3 now dont block my site",
 	"vscode autofill is straight up ass 😔",
 	"atleast this build is more stable than the other versions...",
-	"ok",
-	"claude code",
-	"state testing 😔😔",
-	"3-1=2"
+	"i was supposed to release this build 2 hours ago.."
 ];
 
 var frosteddBarConfig = {
@@ -1185,6 +1194,24 @@ function showUpdatePopupIfNeeded() {
 	showUpdatePopup();
 }
 
+function returnActiveTabToNewTabView() {
+	var tab = getActiveTab();
+	if (!tab) return;
+	tab.url = "";
+	tab.title = "New Tab";
+	setAddressDisplay("", getProxyMode());
+	showBlank();
+	renderTabs();
+	updateNavButtons();
+}
+
+function runUpdatePopupWallpaperIntroSequence() {
+	void loadUrl(wallpapersInternalUrl, false);
+	window.setTimeout(() => {
+		returnActiveTabToNewTabView();
+	}, 120);
+}
+
 function showUpdatePopup() {
 	if (document.getElementById("updatePopupOverlay")) return;
 	var overlay = document.createElement("div");
@@ -1232,6 +1259,10 @@ function showUpdatePopup() {
 	modal.appendChild(body);
 	overlay.appendChild(modal);
 	document.body.appendChild(overlay);
+
+	window.setTimeout(() => {
+		runUpdatePopupWallpaperIntroSequence();
+	}, 0);
 
 	var close = () => {
 		document.removeEventListener("keydown", onKeydown);
@@ -1472,9 +1503,17 @@ function bindEvents() {
 	}
 	if (gamesSearchInput) {
 		gamesSearchInput.addEventListener("input", () => {
-			renderGames();
+			if (activeGamesSource === "gnmath") {
+				renderGames();
+			}
 		});
 	}
+	if (gamesSourceSelect) {
+		gamesSourceSelect.addEventListener("change", () => {
+			void setGamesSource(gamesSourceSelect.value);
+		});
+	}
+	window.addEventListener("message", handleLuminFrameMessage);
 	if (cloakEnabledToggle) {
 		cloakEnabledToggle.addEventListener("change", () => {
 			localStorage.setItem(cloakEnabledStorage, cloakEnabledToggle.checked ? "true" : "false");
@@ -1900,7 +1939,6 @@ function setActiveTab(id, keepView) {
 function updateAppVisualState() {
 	var tab = getActiveTab();
 	var url = tab ? String(tab.url || "").trim() : "";
-	// Internal if no URL, starts with frosted://, about:, blob:, or data:
 	var isInternal = !url ||
 		url.startsWith("frosted://") ||
 		url.startsWith("about:") ||
@@ -2108,13 +2146,7 @@ function formatProxyDisplayUrl(rawUrl, mode) {
 	) {
 		return input;
 	}
-	try {
-		var parsed = new URL(input, window.location.href);
-		var proxyMode = getProxyDisplayMode(mode);
-		return `frosted://proxy/${proxyMode}/${parsed.toString()}`;
-	} catch {
-		return input;
-	}
+	return input;
 }
 
 function setAddressDisplay(rawUrl, mode) {
@@ -2855,7 +2887,6 @@ function injectAdblockIntoFrame(frameElement) {
 				: new OriginalWebSocket(url, protocols);
 		};
 		frameWindow.WebSocket.prototype = OriginalWebSocket.prototype;
-	// Prevent unauthorized redirects via window.open
 	var originalOpen = frameWindow.open;
 	frameWindow.open = function(url, name, features) {
 		if (shouldBlock(url, "navigation", frameWindow.location?.href)) {
@@ -2870,7 +2901,6 @@ function injectAdblockIntoFrame(frameElement) {
 		}
 	};
 
-	// Block dynamic script/image/iframe injections
 	var originalCreateElement = frameWindow.document.createElement;
 	frameWindow.document.createElement = function(tagName, ...args) {
 		var el = originalCreateElement.call(frameWindow.document, tagName, ...args);
@@ -2893,7 +2923,6 @@ function injectAdblockIntoFrame(frameElement) {
 		return el;
 	};
 
-	// Block Image constructor
 	var OriginalImage = frameWindow.Image;
 	frameWindow.Image = function(...args) {
 		var img = new OriginalImage(...args);
@@ -3436,6 +3465,14 @@ function showGamesPage() {
 	if (extensionStorePage) extensionStorePage.classList.remove("active");
 	addressInput.value = gamesInternalUrl;
 	setParticlesVisible(isMatrixThemeActive());
+	updateGamesSourceUi();
+	if (activeGamesSource === "lumin") {
+		void ensureLuminGamesInitialized();
+		if (gamesCount) {
+			gamesCount.textContent = getLuminSourceLabel();
+		}
+		return;
+	}
 	void ensureGamesCatalogLoaded();
 }
 
@@ -3875,8 +3912,145 @@ function applyPrivacyDefaults() {
 	sessionHistoryItems = [];
 }
 
+function updateGamesSourceUi() {
+	var isGnmath = activeGamesSource === "gnmath";
+	if (gamesSourceSelect) {
+		gamesSourceSelect.value = activeGamesSource;
+		gamesSourceSelect.dataset.source = activeGamesSource;
+	}
+	if (gamesSearchInput) {
+		gamesSearchInput.hidden = !isGnmath;
+	}
+	if (gamesGrid) {
+		gamesGrid.hidden = !isGnmath;
+		gamesGrid.classList.toggle("is-hidden", !isGnmath);
+	}
+	if (luminGamesMount) {
+		luminGamesMount.hidden = isGnmath;
+		luminGamesMount.classList.toggle("is-active", !isGnmath);
+	}
+}
+
+function getLuminSourceLabel() {
+	return luminCatalogSourceLabel;
+}
+
+function normalizeGameCatalogName(value) {
+	return String(value || "")
+		.trim()
+		.toLowerCase()
+		.replace(/\s+/g, " ");
+}
+
+async function getLocalGamesJsonTitleSet() {
+	if (Array.isArray(gamesCatalog) && gamesCatalog.length) {
+		return new Set(
+			gamesCatalog.map((entry) => normalizeGameCatalogName(entry?.title)).filter(Boolean)
+		);
+	}
+	if (localGamesJsonTitlesPromise) {
+		return localGamesJsonTitlesPromise;
+	}
+	localGamesJsonTitlesPromise = (async () => {
+		var candidates = [
+			"./games.json",
+			"/frostedsvg/games.json",
+			"https://raw.githubusercontent.com/Frostedbrowser/frostedsvg/refs/heads/main/games.json",
+		];
+		for (var candidate of candidates) {
+			try {
+				var response = await fetch(candidate, { cache: "no-store" });
+				if (!response.ok) continue;
+				var raw = await response.json().catch(() => []);
+				if (!Array.isArray(raw) || !raw.length) continue;
+				return new Set(
+					raw.map((entry) => normalizeGameCatalogName(entry?.title || entry?.name)).filter(Boolean)
+				);
+			} catch {
+			}
+		}
+		return new Set();
+	})().finally(() => {
+		localGamesJsonTitlesPromise = null;
+	});
+	return localGamesJsonTitlesPromise;
+}
+
+async function updateLuminCatalogSourceLabel(sampleNames) {
+	var normalizedNames = Array.isArray(sampleNames)
+		? sampleNames.map((entry) => normalizeGameCatalogName(entry)).filter(Boolean)
+		: [];
+	if (!normalizedNames.length) {
+		luminCatalogSourceLabel = "Source: LuminSDK";
+	} else {
+		var gamesJsonTitles = await getLocalGamesJsonTitleSet();
+		var overlapCount = normalizedNames.filter((name) => gamesJsonTitles.has(name)).length;
+		luminCatalogSourceLabel =
+			overlapCount >= Math.min(3, normalizedNames.length)
+				? "Source: GN-Math catalog (via LuminSDK)"
+				: "Source: LuminSDK";
+	}
+	if (activeGamesSource === "lumin" && gamesCount) {
+		gamesCount.textContent = getLuminSourceLabel();
+	}
+}
+
+function updateActiveGamesTabTitle(title) {
+	var tab = getActiveTab();
+	if (!tab) return;
+	if (!isGamesInternalUrl(tab.url)) return;
+	tab.title = String(title || "").trim() || "Games";
+	renderTabs();
+}
+
+function handleLuminFrameMessage(event) {
+	if (!luminGamesFrame || event?.source !== luminGamesFrame.contentWindow) return;
+	var data = event?.data || {};
+	if (!data || typeof data !== "object") return;
+	if (data.type === "fb-lumin-catalog") {
+		void updateLuminCatalogSourceLabel(data.names);
+		return;
+	}
+	if (data.type === "fb-lumin-game-start") {
+		var gameName = String(data?.game?.name || "Games");
+		var gameUrl = String(data?.game?.url || "").trim();
+		updateActiveGamesTabTitle(gameName);
+		if (gameUrl) {
+			void openGameFromCatalog(gameUrl, {
+				title: gameName,
+			});
+		}
+		return;
+	}
+	if (data.type === "fb-lumin-game-end") {
+		updateActiveGamesTabTitle("Games");
+	}
+}
+
+async function ensureLuminGamesInitialized() {
+	if (!luminGamesMount || !luminGamesFrame) return;
+	if (luminSdkInitialized) return;
+	luminCatalogSourceLabel = "Source: LuminSDK";
+	luminGamesFrame.src = new URL("lumin-games.html", document.baseURI).toString();
+	luminSdkInitialized = true;
+}
+
+async function setGamesSource(source) {
+	activeGamesSource = source === "lumin" ? "lumin" : "gnmath";
+	updateGamesSourceUi();
+	if (activeGamesSource === "lumin") {
+		if (gamesCount) {
+			gamesCount.textContent = getLuminSourceLabel();
+		}
+		await ensureLuminGamesInitialized();
+		return;
+	}
+	renderGames();
+}
+
 function renderGames() {
 	if (!gamesGrid) return;
+	if (activeGamesSource !== "gnmath") return;
 	var source = Array.isArray(gamesCatalog) ? gamesCatalog : [];
 	var query = String(gamesSearchInput?.value || "").trim().toLowerCase();
 	var filtered = query
@@ -3990,6 +4164,9 @@ async function loadGamesCatalog() {
 }
 
 async function ensureGamesCatalogLoaded() {
+	if (activeGamesSource !== "gnmath") {
+		return gamesCatalog;
+	}
 	if (gamesCatalogLoaded) {
 		renderGames();
 		return gamesCatalog;
@@ -5345,6 +5522,7 @@ var wallpaperStoreSort = "name";
 var wallpaperStoreQuery = "";
 var wallpaperStoreSelectedKey = "";
 var winterIslandDefaultStoreKey = "store-winter-darkness";
+var forcedWinterDarknessMigrationStorageKey = "fb_force_winter_darkness_v1";
 
 function sanitizeWallpaperStoreKey(raw, fallback = "wallpaper") {
 	var base = String(raw || "").trim().toLowerCase();
@@ -5354,6 +5532,31 @@ function sanitizeWallpaperStoreKey(raw, fallback = "wallpaper") {
 
 function getWallpaperRegistry() {
 	return { ...wallpapers, ...installedExtensionWallpapers };
+}
+
+function migrateSavedCatWallpapersToWinterDarkness() {
+	var alreadyMigrated = String(localStorage.getItem(forcedWinterDarknessMigrationStorageKey) || "").trim();
+	if (alreadyMigrated === "true") return false;
+	var savedRaw = sanitizeWallpaperStoreKey(
+		String(localStorage.getItem(wallpaperKey) || "").trim().toLowerCase(),
+		""
+	);
+	var catWallpaperKeys = new Set([
+		"cat-lake",
+		"moon-cat",
+		"silly-cat",
+		"store-cat-lake",
+		"store-moon-cat",
+		"store-silly-cat",
+	]);
+	if (!catWallpaperKeys.has(savedRaw)) {
+		localStorage.setItem(forcedWinterDarknessMigrationStorageKey, "true");
+		return false;
+	}
+	localStorage.setItem(wallpaperKey, "winter-darkness");
+	localStorage.setItem(firstVisitMp4AppliedStorageKey, "true");
+	localStorage.setItem(forcedWinterDarknessMigrationStorageKey, "true");
+	return true;
 }
 
 function normalizeStoreWallpaperTheme(theme) {
@@ -5674,22 +5877,22 @@ async function ensureFirstVisitMp4Wallpaper() {
 		return false;
 	}
 	await ensureWallpaperStoreCatalogLoaded();
-	var firstVideoEntry =
-		wallpaperStoreCatalog.find((entry) => String(entry?.type || "").toLowerCase() === "video") ||
-		getWinterIslandStoreEntry();
-	if (!firstVideoEntry?.key) return false;
-	installedExtensionWallpapers[firstVideoEntry.key] = {
-		label: firstVideoEntry.label,
-		category: firstVideoEntry.category,
-		type: firstVideoEntry.type,
-		file: firstVideoEntry.file,
-		theme: firstVideoEntry.theme,
+	var defaultEntry =
+		getWinterIslandStoreEntry() ||
+		wallpaperStoreCatalog.find((entry) => String(entry?.type || "").toLowerCase() === "video");
+	if (!defaultEntry?.key) return false;
+	installedExtensionWallpapers[defaultEntry.key] = {
+		label: defaultEntry.label,
+		category: defaultEntry.category,
+		type: defaultEntry.type,
+		file: defaultEntry.file,
+		theme: defaultEntry.theme,
 	};
 	saveInstalledExtensionWallpapers();
 	updateExtensionInstallCount();
-	localStorage.setItem(wallpaperKey, firstVideoEntry.key);
+	localStorage.setItem(wallpaperKey, defaultEntry.key);
 	localStorage.setItem(firstVisitMp4AppliedStorageKey, "true");
-	document.body.dataset.wallpaper = firstVideoEntry.key;
+	document.body.dataset.wallpaper = defaultEntry.key;
 	return true;
 }
 
@@ -6603,6 +6806,7 @@ function resetError() {
 	if (errorPanel) errorPanel.classList.remove("show");
 }
 
+migrateSavedCatWallpapersToWinterDarkness();
 bootstrapWallpaperFromStorage();
 init().catch((error) => {
 	showError("Failed to initialize proxy runtime.", error);

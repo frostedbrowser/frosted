@@ -1,15 +1,28 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Frosted</title>
-	<!-- v1.5.3 
-	- fixed games 
-	- fixed ultraviolet and scramjet
-	- stablized adblocking with claude
-	-->
+	<!-- firebase -->
+	<script type="module">
+		import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+		import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
+
+		const firebaseConfig = {
+			apiKey: "AIzaSyCC6w72Bx3cxFVjll6GYSUa5Kzm21dfBCI",
+			authDomain: "frostedbrowser.firebaseapp.com",
+			projectId: "frostedbrowser",
+			storageBucket: "frostedbrowser.firebasestorage.app",
+			messagingSenderId: "632242734367",
+			appId: "1:632242734367:web:e5935fc8f3d94c216a9c2a",
+			measurementId: "G-SQQ2MT0DFF"
+		};
+
+		const app = initializeApp(firebaseConfig);
+		const analytics = getAnalytics(app);
+	</script>
 	<meta name="theme-color" content="#0a0f14" />
 	<meta property="og:title" content="IXL | Math, Language Arts, Science, Social Studies, and Spanish">
 	<meta property="og:site_name" content="IXL Learning" />
@@ -34,13 +47,24 @@
 	<link rel="modulepreload" href="/libcurl/index.mjs?v=5" />
 	<link rel="modulepreload" href="/epoxy/index.mjs?v=5" />
 	<link rel="stylesheet" href="/index.css?v=12" />
+	<script>
+		(function () {
+			try {
+				var wallpaperKey = "fb_wallpaper";
+				var existing = String(localStorage.getItem(wallpaperKey) || "").trim();
+				if (!existing || existing === "skynight" || existing === "winter" || existing === "store-winter-island" || existing === "winter-island") {
+					localStorage.setItem(wallpaperKey, "winter-darkness");
+				}
+			} catch { }
+		})();
+	</script>
 	<script src="/register-sw.js?v=34" defer></script>
 	<script src="/search.js?v=5" defer></script>
 	<script src="/config.js?v=6" defer></script>
 	<script src="/index.js?v=34" defer></script>
 </head>
 
-<body>
+<body data-wallpaper="winter-darkness">
 	<div id="particles-js"></div>
 
 	<div class="app-shell">
@@ -459,10 +483,19 @@
 							<div class="settings-hint" id="gamesCount">Games: 0</div>
 						</div>
 						<div class="games-toolbar">
+							<select id="gamesSourceSelect" class="settings-select games-source-select"
+								aria-label="Game source selector">
+								<option value="gnmath">GN-Math</option>
+								<option value="lumin">LuminSDK</option>
+							</select>
 							<input id="gamesSearchInput" class="settings-input games-search" type="text"
 								placeholder="Search games..." />
 						</div>
 						<div class="games-grid" id="gamesGrid"></div>
+						<div id="luminGamesMount" class="lumin-games-mount" hidden>
+							<iframe id="luminGamesFrame" class="lumin-games-frame" title="LuminSDK Games"
+								loading="lazy"></iframe>
+						</div>
 					</div>
 				</div>
 				<div id="aiPage" class="internal-page">
@@ -548,8 +581,8 @@
 		<a href="frosted://credits" id="creditsLink">Credits</a>
 	</div>
 
-	<a class="visitor-badge" href="https://visitorbadge.io/status?path=frostedbrowser.cfd"
-		target="_blank" rel="noopener noreferrer">
+	<a class="visitor-badge" href="https://visitorbadge.io/status?path=frostedbrowser.cfd" target="_blank"
+		rel="noopener noreferrer">
 		<img id="visitorBadgeImage"
 			src="https://api.visitorbadge.io/api/visitors?path=frostedbrowser.cfd&countColor=%23697689"
 			alt="Visitor count" referrerpolicy="no-referrer" />

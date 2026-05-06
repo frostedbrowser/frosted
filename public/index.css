@@ -1,23 +1,23 @@
 :root {
 	--font-ui: "Poppins", "Montserrat", system-ui, sans-serif;
-	--bg: #0a0f14;
-	--bg-darker: #141c24;
+	--bg: #161a1f;
+	--bg-darker: #1f242b;
 	--bg-card: rgba(10, 15, 20, 0.92);
 	--bg-input: rgba(20, 28, 36, 0.85);
 	--text: #d4d4d4;
 	--muted: #6b7280;
-	--team-color-1: #88c0d0;
-	--team-color-2: #81a1c1;
-	--glow-color-1: rgba(136, 192, 208, 0.35);
-	--glow-color-2: rgba(129, 161, 193, 0.2);
-	--accent-soft: rgba(136, 192, 208, 0.45);
+	--team-color-1: #b7bcc4;
+	--team-color-2: #d4d7dc;
+	--glow-color-1: rgba(183, 188, 196, 0.25);
+	--glow-color-2: rgba(212, 215, 220, 0.16);
+	--accent-soft: rgba(183, 188, 196, 0.38);
 	--wallpaper-image: none;
 	--surface-1: rgba(10, 15, 20, 0.92);
 	--surface-2: rgba(20, 28, 36, 0.84);
 	--surface-3: rgba(20, 28, 36, 0.64);
 	--border: rgba(255, 255, 255, 0.07);
-	--chrome-toolbar-bg: rgba(42, 68, 113, 0.78);
-	--chrome-tabs-bg: rgba(22, 34, 58, 0.9);
+	--chrome-toolbar-bg: rgba(58, 63, 70, 0.78);
+	--chrome-tabs-bg: rgba(43, 47, 53, 0.9);
 	--chrome-address-bg: rgba(12, 18, 31, 0.86);
 	--chrome-button-bg: rgba(15, 23, 40, 0.74);
 	--chrome-border-color: rgba(255, 255, 255, 0.12);
@@ -2026,9 +2026,12 @@ body.has-video-wallpaper .home-search input::placeholder {
 	max-width: none;
 	width: 100%;
 	margin: 0;
+	min-height: calc(100vh - 2rem);
 	border: 1px solid var(--border);
 	border-radius: 1rem;
 	background: var(--bg-card);
+	display: flex;
+	flex-direction: column;
 }
 
 .games-toolbar {
@@ -2039,9 +2042,27 @@ body.has-video-wallpaper .home-search input::placeholder {
 	flex-wrap: wrap;
 }
 
+.games-source-select {
+	flex: 0 0 180px;
+	min-width: 180px;
+	font-family: "Poppins", system-ui, sans-serif;
+	padding-left: 2.6rem;
+	background-repeat: no-repeat;
+	background-position: 0.9rem center;
+	background-size: 1.1rem 1.1rem;
+}
+
+.games-source-select[data-source="gnmath"] {
+	background-image: url("https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/icons/gnmath.png");
+}
+
 .games-search {
 	flex: 1 1 280px;
 	font-family: "Poppins", system-ui, sans-serif;
+}
+
+.games-search[hidden] {
+	display: none;
 }
 
 .ai-page-shell {
@@ -2355,6 +2376,51 @@ body.has-video-wallpaper .home-search input::placeholder {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
 	gap: 0.75rem;
+}
+
+.games-grid.is-hidden {
+	display: none !important;
+}
+
+.lumin-games-mount {
+	display: none;
+	padding: 0.75rem 1rem 1rem;
+	min-height: calc(100vh - 10rem);
+	flex: 1 1 auto;
+}
+
+.lumin-games-mount.is-active {
+	display: block !important;
+}
+
+.lumin-games-mount[hidden] {
+	display: none;
+}
+
+.lumin-games-frame {
+	width: 100%;
+	height: calc(100vh - 13rem);
+	min-height: 78vh;
+	border: 1px solid var(--border);
+	border-radius: 1rem;
+	background: rgba(12, 16, 22, 0.92);
+	box-shadow: 0 22px 60px rgba(0, 0, 0, 0.28);
+}
+
+@media (max-width: 900px) {
+	.games-page-shell {
+		min-height: calc(100vh - 1.4rem);
+	}
+
+	.lumin-games-mount {
+		min-height: calc(100vh - 8.5rem);
+		padding: 0.55rem 0.7rem 0.8rem;
+	}
+
+	.lumin-games-frame {
+		height: calc(100vh - 11rem);
+		min-height: 68vh;
+	}
 }
 
 .game-card {

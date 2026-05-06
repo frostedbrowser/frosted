@@ -150,6 +150,7 @@ if (typeof window !== "undefined") {
 	);
 	bindBareMuxServiceWorkerPortBridge();
 	window.registerSW = registerSW;
+
 if (!navigator.serviceWorker.controller && !sessionStorage.getItem('swReloaded')) {
   console.log('%c[frosted]%c Service worker not controlling page, reloading...', 'color: #00ffa6; font-weight: bold;', '');
   sessionStorage.setItem('swReloaded', '1');
