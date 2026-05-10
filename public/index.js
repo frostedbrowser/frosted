@@ -125,6 +125,7 @@ var pageRefs = {
 	partnersPage: qs("#partnersPage"),
 	gamesPage: qs("#gamesPage"),
 	aiPage: qs("#aiPage"),
+	aboutBlankPage: qs("#aboutBlankPage"),
 	extensionPage: qs("#extensionPage"),
 	extensionStorePage: qs("#extensionStorePage"),
 	gamesGrid: qs("#gamesGrid"),
@@ -241,6 +242,7 @@ var {
 	partnersPage,
 	gamesPage,
 	aiPage,
+	aboutBlankPage,
 	extensionPage,
 	extensionStorePage,
 	gamesGrid,
@@ -1318,6 +1320,7 @@ var gamesInternalUrl = "frosted://games";
 var aiInternalUrl = "frosted://ai";
 var partnersInternalUrl = "frosted://partners";
 var wallpapersInternalUrl = "frosted://wallpapers";
+var aboutBlankInternalUrl = "frosted://about:blank";
 var flagsInternalPrefix = "frosted://flags";
 var forceFullscreenSessionStorage = "fb_flag_force_fullscreen_session";
 
@@ -1954,6 +1957,7 @@ function setParticlesVisible(visible) {
 function shouldShowParticlesForCurrentView() {
 	var matrixActive = isMatrixThemeActive();
 	var onBlank = blankState?.style.display === "flex";
+	var onAboutBlank = aboutBlankPage?.classList.contains("active");
 	var onInternal =
 		settingsPage?.classList.contains("active") ||
 		gamesPage?.classList.contains("active") ||
@@ -1962,7 +1966,7 @@ function shouldShowParticlesForCurrentView() {
 		creditsPage?.classList.contains("active") ||
 		extensionPage?.classList.contains("active") ||
 		extensionStorePage?.classList.contains("active");
-	if (onBlank) return true;
+	if (onBlank || onAboutBlank) return true;
 	if (onInternal) return matrixActive;
 	return false;
 }
@@ -2173,7 +2177,9 @@ function setActiveTab(id, keepView) {
 	var tab = getActiveTab();
 	if (!tab) return;
 
-	if (!tab.url) {
+	if (isAboutBlankInternalUrl(tab.url)) {
+		showAboutBlankPage();
+	} else if (!tab.url) {
 		addressInput.value = "";
 		homeSearchInput.value = "";
 		showBlank();
@@ -2295,7 +2301,8 @@ function getTabFaviconCandidates(url) {
 		isCreditsInternalUrl(url) ||
 		isPartnersInternalUrl(url) ||
 		isExtensionInternalUrl(url) ||
-		isExtensionStoreInternalUrl(url)
+		isExtensionStoreInternalUrl(url) ||
+		isAboutBlankInternalUrl(url)
 	)
 		return [defaultAppIconHref];
 	if (isGamesInternalUrl(url)) return [defaultAppIconHref];
@@ -2330,7 +2337,7 @@ function getActiveTab() {
 }
 
 function getDisplayTitle(url) {
-	if (!url) return "New Tab";
+	if (!url || isAboutBlankInternalUrl(url)) return "New Tab";
 	if (isSettingsInternalUrl(url)) return "Settings";
 	if (isPartnersInternalUrl(url)) return "Partners";
 	if (isGamesInternalUrl(url)) return "Games";
@@ -2380,6 +2387,7 @@ function normalizeInput(input) {
 			return normalizeLikelyMalformedTargetUrl(proxyDisplayMatch[1]);
 		}
 	}
+	if (isAboutBlankInternalUrl(raw)) return aboutBlankInternalUrl;
 	if (isSettingsInternalUrl(raw)) return settingsInternalUrl;
 	if (isPartnersInternalUrl(raw)) return partnersInternalUrl;
 	if (isGamesInternalUrl(raw)) return gamesInternalUrl;
@@ -2423,7 +2431,8 @@ function formatProxyDisplayUrl(rawUrl, mode) {
 		isAiInternalUrl(input) ||
 		isExtensionInternalUrl(input) ||
 		isExtensionStoreInternalUrl(input) ||
-		isCreditsInternalUrl(input)
+		isCreditsInternalUrl(input) ||
+		isAboutBlankInternalUrl(input)
 	) {
 		return input;
 	}
@@ -2640,8 +2649,8 @@ function updateAdblockToggleLabel() {
 	if (!adsToggleBtn) return;
 	var enabled = isAdblockEnabled();
 	adsToggleBtn.innerHTML = enabled
-		? '<span class="ads-toggle-icon" aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></span><span class="ads-toggle-label">Shield</span>'
-		: '<span class="ads-toggle-icon" aria-hidden="true"><i class="fa-solid fa-shield"></i></span><span class="ads-toggle-label">Allow Ads</span>';
+		? '<span class="ads-toggle-icon" aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></span><span class="ads-toggle-label">blocking</span>'
+		: '<span class="ads-toggle-icon" aria-hidden="true"><i class="fa-solid fa-shield"></i></span><span class="ads-toggle-label">allowing ads</span>';
 	adsToggleBtn.setAttribute("aria-pressed", enabled ? "true" : "false");
 	adsToggleBtn.setAttribute(
 		"aria-label",
@@ -3399,6 +3408,15 @@ async function loadUrl(url, pushHistory = true, allowProxyFallback = true, allow
 	}
 
 	var internalUrl = normalizeInternalScheme(url);
+	if (isAboutBlankInternalUrl(internalUrl)) {
+		tab.url = aboutBlankInternalUrl;
+		tab.title = "New Tab";
+		setAddressDisplay(tab.url, getProxyMode());
+		showAboutBlankPage();
+		renderTabs();
+		updateNavButtons();
+		return;
+	}
 	if (isSettingsInternalUrl(internalUrl)) {
 		tab.url = settingsInternalUrl;
 		tab.title = "Settings";
@@ -4007,6 +4025,28 @@ function showCreditsPage() {
 	setParticlesVisible(isMatrixThemeActive());
 }
 
+function showAboutBlankPage() {
+	showLoading(false);
+	if (actionMenu) actionMenu.classList.remove("context-hidden");
+	blankState.style.display = "none";
+	tabFrames.forEach((item) => {
+		item.element.style.display = "none";
+	});
+	if (settingsPage) settingsPage.classList.remove("active");
+	if (creditsPage) creditsPage.classList.remove("active");
+	if (partnersPage) partnersPage.classList.remove("active");
+	if (gamesPage) gamesPage.classList.remove("active");
+	if (aiPage) aiPage.classList.remove("active");
+	if (extensionPage) extensionPage.classList.remove("active");
+	if (extensionStorePage) extensionStorePage.classList.remove("active");
+	if (aboutBlankPage) {
+		aboutBlankPage.classList.add("active");
+		animateViewIn(aboutBlankPage);
+	}
+	addressInput.value = aboutBlankInternalUrl;
+	setParticlesVisible(isMatrixThemeActive());
+}
+
 function hideInternalPages() {
 	if (actionMenu) actionMenu.classList.remove("context-hidden");
 	if (settingsPage) settingsPage.classList.remove("active");
@@ -4016,6 +4056,7 @@ function hideInternalPages() {
 	if (aiPage) aiPage.classList.remove("active");
 	if (extensionPage) extensionPage.classList.remove("active");
 	if (extensionStorePage) extensionStorePage.classList.remove("active");
+	if (aboutBlankPage) aboutBlankPage.classList.remove("active");
 }
 
 function updateNavButtons() {
@@ -4915,6 +4956,11 @@ function getInternalRoute(value) {
 function isFlagsRootInternalUrl(url) {
 	var normalized = getInternalRoute(url);
 	return normalized === flagsInternalPrefix;
+}
+
+function isAboutBlankInternalUrl(url) {
+	var normalized = getInternalRoute(url);
+	return normalized === aboutBlankInternalUrl;
 }
 
 function isSettingsInternalUrl(url) {
