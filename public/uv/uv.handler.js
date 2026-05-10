@@ -885,6 +885,19 @@
         get: () => e,
         enumerable: !1,
       }),
+      a.nativeMethods.defineProperty(o, e.methods.setSource, {
+        value: function (t) {
+          return a.nativeMethods.isExtensible(this)
+            ? (a.nativeMethods.defineProperty(this, e.methods.source, {
+                value: t,
+                writable: !0,
+                enumerable: !1,
+              }),
+              this)
+            : this;
+        },
+        enumerable: !1,
+      }),
       a.nativeMethods.defineProperty(o.Object.prototype, e.methods.setSource, {
         value: function (t) {
           return a.nativeMethods.isExtensible(this)
@@ -896,6 +909,11 @@
               this)
             : this;
         },
+        enumerable: !1,
+      }),
+      a.nativeMethods.defineProperty(o, e.methods.source, {
+        value: e,
+        writable: !0,
         enumerable: !1,
       }),
       a.nativeMethods.defineProperty(o.Object.prototype, e.methods.source, {

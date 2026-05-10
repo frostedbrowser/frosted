@@ -4,36 +4,185 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>LuminSDK Games</title>
+	<title>LuminSDK - Frosted</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Poppins:wght@400;500;600;700&display=swap"
+		rel="stylesheet" />
 	<style>
+		:root {
+			color-scheme: dark;
+			--bg-top: #182432;
+			--bg-bottom: #0c1117;
+			--surface: rgba(13, 18, 24, 0.92);
+			--surface-2: rgba(20, 27, 35, 0.88);
+			--surface-3: rgba(30, 40, 52, 0.72);
+			--border: rgba(153, 178, 200, 0.18);
+			--border-strong: rgba(153, 178, 200, 0.28);
+			--text: #eef6ff;
+			--text-soft: rgba(223, 233, 244, 0.72);
+			--accent: #8cf0ff;
+			--accent-2: #6de0c3;
+			--shadow: 0 24px 70px rgba(0, 0, 0, 0.33);
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
 		html,
 		body {
 			margin: 0;
 			min-height: 100%;
+		}
+
+		body {
 			background:
-				radial-gradient(circle at top, rgba(55, 95, 155, 0.2), transparent 38%),
-				linear-gradient(180deg, #11161d 0%, #0d1218 100%);
+				radial-gradient(circle at top left, rgba(89, 146, 222, 0.2), transparent 28%),
+				radial-gradient(circle at top right, rgba(100, 224, 193, 0.15), transparent 24%),
+				linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+			color: var(--text);
 			font-family: "Poppins", system-ui, sans-serif;
 		}
 
-		#games {
+		.page-shell {
 			min-height: 100vh;
-			padding: 10px;
-			box-sizing: border-box;
+			padding: 18px;
+		}
+
+		.page-panel {
+			position: relative;
+			min-height: calc(100vh - 36px);
+			padding: 18px;
+			border: 1px solid var(--border);
+			border-radius: 24px;
+			background:
+				linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0)),
+				var(--surface);
+			box-shadow: var(--shadow);
+			overflow: hidden;
+		}
+
+		.page-panel::before {
+			content: "";
+			position: absolute;
+			inset: 0 auto auto 0;
+			width: 220px;
+			height: 220px;
+			background: radial-gradient(circle, rgba(140, 240, 255, 0.12), transparent 70%);
+			pointer-events: none;
+		}
+
+		.games-shell {
+			position: relative;
+			min-height: calc(100vh - 36px);
+			padding: 0;
+			border: 0;
+			border-radius: 18px;
+			background: transparent;
+		}
+
+		.games-shell::after {
+			content: "";
+			position: absolute;
+			inset: 0;
+			border-radius: inherit;
+			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+			pointer-events: none;
+		}
+
+		#games {
+			min-height: calc(100vh - 36px);
+			border-radius: 18px;
+			overflow: hidden;
+		}
+
+		.sdk-loading {
+			display: grid;
+			place-items: center;
+			min-height: calc(100vh - 36px);
+			padding: 28px;
+			border: 1px dashed var(--border);
+			border-radius: 18px;
+			background:
+				radial-gradient(circle at top, rgba(82, 136, 214, 0.16), transparent 32%),
+				rgba(18, 25, 33, 0.9);
+			text-align: center;
+		}
+
+		.sdk-loading[hidden] {
+			display: none !important;
+		}
+
+		.loading-card {
+			max-width: 420px;
+		}
+
+		.loading-card h2 {
+			margin: 0 0 10px;
+			font-family: "Nunito", system-ui, sans-serif;
+			font-size: 1.4rem;
+			font-weight: 800;
+		}
+
+		.loading-card p {
+			margin: 0;
+			color: var(--text-soft);
+			line-height: 1.6;
+		}
+
+		@media (max-width: 720px) {
+			.page-shell {
+				padding: 12px;
+			}
+
+			.page-panel {
+				min-height: calc(100vh - 24px);
+				padding: 12px;
+				border-radius: 20px;
+			}
+
+			.games-shell {
+				min-height: calc(100vh - 24px);
+			}
+
+			#games,
+			.sdk-loading {
+				min-height: calc(100vh - 24px);
+			}
 		}
 	</style>
 </head>
 
 <body>
-	<div id="games"></div>
+	<div class="page-shell">
+		<div class="page-panel">
+			<div class="games-shell">
+				<div id="sdkLoading" class="sdk-loading">
+					<div class="loading-card">
+						<h2>loading luminsdk</h2>
+						<p>loading LuminSDK...</p>
+					</div>
+				</div>
+				<div id="games"></div>
+			</div>
+		</div>
+	</div>
 	<script
 		src="https://cdn.jsdelivr.net/gh/luminsdk/script@latest/lumin.min.js"
-		onerror="console.error('Failed to load LuminSDK CDN script.')"
+		onerror="console.error('failed  to load luminsdk')"
 	></script>
 	<script>
 		function postToParent(type, payload = {}) {
 			if (window.parent === window) return;
 			window.parent.postMessage({ type, ...payload }, "*");
+		}
+
+		function setLoadingVisible(visible) {
+			var loading = document.getElementById("sdkLoading");
+			if (!loading) return;
+			loading.hidden = !visible;
 		}
 
 		if (!window.Lumin || typeof window.Lumin.init !== "function") {
@@ -43,7 +192,8 @@
 				container: "#games",
 				theme: "dark",
 				onReady: async () => {
-					console.log("LuminSDK is ready");
+					console.log("ready");
+					setLoadingVisible(false);
 					try {
 						const result = await Lumin.getGames({ page: 1, limit: 8 });
 						const names = Array.isArray(result?.games)
@@ -51,7 +201,7 @@
 							: [];
 						postToParent("fb-lumin-catalog", { names });
 					} catch (error) {
-						console.warn("Unable to inspect LuminSDK catalog.", error);
+						console.warn("unable to inspect lumin sdk", error);
 					}
 				},
 				onGameStart: async (game) => {
@@ -68,7 +218,7 @@
 						});
 						Lumin.endGame();
 					} catch (error) {
-						console.error("Unable to open Lumin game in parent proxy.", error);
+						console.error("unable to open game in proxy.", error);
 						postToParent("fb-lumin-game-start", {
 							game: {
 								id: gameId,

@@ -1,0 +1,735 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Frosted</title>
+	<!-- firebase -->
+	<script type="module">
+		import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+		import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
+
+		const firebaseConfig = {
+			apiKey: "AIzaSyCC6w72Bx3cxFVjll6GYSUa5Kzm21dfBCI",
+			authDomain: "frostedbrowser.firebaseapp.com",
+			projectId: "frostedbrowser",
+			storageBucket: "frostedbrowser.firebasestorage.app",
+			messagingSenderId: "632242734367",
+			appId: "1:632242734367:web:e5935fc8f3d94c216a9c2a",
+			measurementId: "G-SQQ2MT0DFF"
+		};
+
+		const app = initializeApp(firebaseConfig);
+		const analytics = getAnalytics(app);
+	</script>
+	<meta name="theme-color" content="#0a0f14" />
+	<meta property="og:title" content="IXL | Math, Language Arts, Science, Social Studies, and Spanish">
+	<meta property="og:site_name" content="IXL Learning" />
+	<meta name="msapplication-TileColor" content="#00ffa6">
+	<meta property="og:image"
+		content="https://www.ixl.com/dv3/powZqMuTE7du4asFrVyNGxxoqkw/yui3/opengraph/assets/general_us.png">
+	<meta name="description"
+		content="IXL is the world's most popular subscription-based learning site for Kâ€“12. Used by over 17 million students, IXL provides personalized learning in more than 17,000 topics, covering math, language arts, science, social studies, and Spanish. Interactive questions, awards, and certificates keep kids motivated as they master skills.">
+	<meta property="og:description"
+		content="IXL is the world's most popular subscription-based learning site for Kâ€“12. Used by over 17 million students, IXL provides personalized learning in more than 17,000 topics, covering math, language arts, science, social studies, and Spanish. Interactive questions, awards, and certificates keep kids motivated as they master skills.">
+	<link rel="icon" href="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/frosted.png" />
+	<meta name="description"
+		content="Frosted is a highly niche proxy used for evading internet censorship or accessing websites in a controlled sandbox using the power of service-workers. Unblock sites today!" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap"
+		rel="stylesheet" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+	<link rel="modulepreload" href="/baremux/index.mjs?v=5" />
+	<link rel="modulepreload" href="/libcurl/index.mjs?v=5" />
+	<link rel="modulepreload" href="/epoxy/index.mjs?v=5" />
+	<link rel="stylesheet" href="/index.css?v=12" />
+	<script>
+		(function () {
+			try {
+				var wallpaperKey = "fb_wallpaper";
+				var existing = String(localStorage.getItem(wallpaperKey) || "").trim();
+				if (!existing || existing === "skynight" || existing === "winter" || existing === "store-winter-island" || existing === "winter-island") {
+					localStorage.setItem(wallpaperKey, "winter-darkness");
+				}
+			} catch { }
+		})();
+	</script>
+	<script>
+		(function () {
+			function createMemoryStorage() {
+				var store = Object.create(null);
+				return {
+					getItem: function (key) {
+						return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null;
+					},
+					setItem: function (key, value) {
+						store[key] = String(value);
+					},
+					removeItem: function (key) {
+						delete store[key];
+					},
+					clear: function () {
+						for (var key in store) delete store[key];
+					},
+					key: function (index) {
+						return Object.keys(store)[index] ?? null;
+					}
+				};
+			}
+
+			function ensureStorage(name) {
+				try {
+					var existing = window[name];
+					if (existing && typeof existing.getItem === "function") return existing;
+				} catch { }
+				var fallback = createMemoryStorage();
+				try {
+					Object.defineProperty(window, name, {
+						value: fallback,
+						configurable: true,
+						writable: true
+					});
+					return fallback;
+				} catch { }
+				try {
+					window[name] = fallback;
+				} catch { }
+				return fallback;
+			}
+
+			ensureStorage("localStorage");
+			ensureStorage("sessionStorage");
+
+			try {
+				var originalCreateElement = Document.prototype.createElement;
+				if (!window.__frostedGeoRewriteInstalled && typeof originalCreateElement === "function") {
+					window.__frostedGeoRewriteInstalled = true;
+					Document.prototype.createElement = function () {
+						var element = originalCreateElement.apply(this, arguments);
+						try {
+							if (String(arguments[0] || "").toLowerCase() === "script") {
+								var originalSetAttribute = element.setAttribute;
+								Object.defineProperty(element, "src", {
+									configurable: true,
+									enumerable: true,
+									get: function () {
+										return this.getAttribute("src") || "";
+									},
+									set: function (value) {
+										var next = String(value || "");
+										if (next === "https://cdn.r9x.in/geo.js") next = "/gn/geo.js";
+										this.setAttribute("src", next);
+									}
+								});
+								element.setAttribute = function (name, value) {
+									if (String(name || "").toLowerCase() === "src" && String(value || "") === "https://cdn.r9x.in/geo.js") {
+										value = "/gn/geo.js";
+									}
+									return originalSetAttribute.call(this, name, value);
+								};
+							}
+						} catch { }
+						return element;
+					};
+				}
+			} catch { }
+		})();
+	</script>
+	<script src="/register-sw.js?v=34" defer></script>
+	<script src="/search.js?v=5" defer></script>
+	<script src="/config.js?v=6" defer></script>
+	<script src="/index.js?v=34" defer></script>
+</head>
+
+<body data-wallpaper="winter-darkness">
+	<div id="particles-js"></div>
+
+	<div class="app-shell">
+		<div class="chrome">
+			<div class="chrome-row">
+				<div class="toolbar">
+					<div class="toolbar-nav">
+						<button class="nav-btn" id="backBtn" aria-label="Back">
+							<i class="fa-solid fa-arrow-left"></i>
+						</button>
+						<button class="nav-btn" id="forwardBtn" aria-label="Forward">
+							<i class="fa-solid fa-arrow-right"></i>
+						</button>
+						<button class="nav-btn" id="reloadBtn" aria-label="Reload">
+							<i class="fa-solid fa-rotate-right"></i>
+						</button>
+					</div>
+					<form class="address-bar" id="toolbarForm" autocomplete="off">
+						<input id="addressInput" type="text" placeholder="Search or enter address" autocomplete="off"
+							autocorrect="off" autocapitalize="off" spellcheck="false" />
+						<button id="goBtn" aria-label="Go">
+							<i class="fa-solid fa-arrow-right"></i>
+						</button>
+					</form>
+					<div class="toolbar-actions">
+						<div class="action-menu-wrap">
+							<button class="toolbar-btn action-menu-btn" id="actionMenuBtn" type="button"
+								aria-label="Open menu" aria-haspopup="true" aria-expanded="false">
+								<i class="fa-solid fa-bars"></i>
+							</button>
+							<div class="action-menu" id="actionMenu" role="menu" aria-label="Quick actions">
+								<button class="action-menu-item" id="actionHomeBtn" type="button" role="menuitem"
+									aria-label="Home" title="Home">
+									<i class="fa-solid fa-house"></i>
+								</button>
+								<button class="action-menu-item" id="fullscreenBtn" type="button" role="menuitem"
+									aria-label="Enter fullscreen" title="Fullscreen">
+									<i class="fa-solid fa-expand"></i>
+								</button>
+								<button class="action-menu-item action-menu-item-code" id="erudaBtn" type="button"
+									role="menuitem" aria-label="Open eruda console" title="Open eruda console">
+									&lt;/&gt;
+								</button>
+								<button class="action-menu-item" id="gamesBtn" type="button" role="menuitem"
+									aria-label="Games" title="Games">
+									<i class="fa-solid fa-gamepad"></i>
+								</button>
+								<button class="action-menu-item" id="aiBtn" type="button" role="menuitem"
+									aria-label="AI" title="AI">
+									<i class="fa-solid fa-globe"></i>
+								</button>
+								<button class="action-menu-item" id="chatgptBtn" type="button" role="menuitem"
+									aria-label="ChatGPT" title="ChatGPT">
+									<img src="./chatgpt-logo.svg" alt="ChatGPT" />
+								</button>
+								<button class="action-menu-item" id="actionSettingsBtn" type="button" role="menuitem"
+									aria-label="Settings" title="Settings">
+									<i class="fa-solid fa-gear"></i>
+								</button>
+								<button class="action-menu-item" id="wallpaperAppBtn" type="button" role="menuitem"
+									aria-label="Wallpapers" title="Wallpapers">
+									<i class="fa-solid fa-image"></i>
+								</button>
+								<button class="action-menu-item" id="adsToggleBtn" type="button" role="menuitem"
+									aria-label="Toggle ad blocker" title="Toggle ad blocker">
+									<span class="ads-toggle-icon" aria-hidden="true">
+										<i class="fa-solid fa-shield-halved"></i>
+									</span>
+									<span class="ads-toggle-label">Adblock</span>
+								</button>
+								<button class="action-menu-item" id="partnershipBtn" type="button" role="menuitem"
+									aria-label="Partners" title="Partners">
+									<i class="fa-solid fa-handshake"></i>
+								</button>
+								<button class="action-menu-item" id="actionNewTabBtn" type="button" role="menuitem"
+									aria-label="New tab" title="New tab">
+									<i class="fa-solid fa-plus"></i>
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="tabs-row">
+					<div class="tabs" id="tabs"></div>
+					<button class="tab-add" id="newTabBtn" aria-label="New Tab">+</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="browser-shell">
+			<div class="browser-main">
+				<div class="browser-stage">
+					<div class="loading-banner" id="loadingBanner" role="status" aria-live="polite">
+						<div class="loading-popup">
+							<div class="loading-popup-title">Loading рΓοху...</div>
+							<div class="loading-popup-copy">
+								join the discord
+								<a class="loading-popup-link" href="https://dsc.gg/frostedbrowser" target="_blank"
+									rel="noopener noreferrer">
+									dsc.gg/frostedbrowser
+								</a>
+							</div>
+						</div>
+					</div>
+					<iframe id="browserFrame" title="Browser content"></iframe>
+					<div class="browser-overlay" id="blankState">
+						<div class="home-shell">
+							<div class="home-logo">Frosted</div>
+							<div class="home-tagline" id="randomTagline">
+
+							</div>
+							<div class="home-search-row">
+								<details class="search-engine-dropdown" id="searchEngineDropdown">
+									<summary class="search-engine-trigger" aria-label="Select search engine"
+										title="Select search engine">
+										<img id="searchEngineTriggerLogo" class="search-engine-trigger-logo"
+											src="https://brave.com/static-assets/images/brave-logo-sans-text.svg"
+											alt="Brave Search" />
+										<span class="search-engine-trigger-caret">
+											<i class="fa-solid fa-chevron-down"></i>
+										</span>
+									</summary>
+									<div class="search-engine-menu" aria-label="Search engine">
+										<button class="search-engine-chip is-active" type="button"
+											data-template="https://search.brave.com/search?q=%s" data-engine="brv"
+											data-logo="https://brave.com/static-assets/images/brave-logo-sans-text.svg"
+											aria-pressed="true" aria-label="Brave Search" title="Brave Search">
+											<img class="search-engine-chip-icon"
+												src="https://brave.com/static-assets/images/brave-logo-sans-text.svg"
+												alt="" />
+										</button>
+										<button class="search-engine-chip" type="button"
+											data-template="https://duckduckgo.com/?q=%s" data-engine="ddg"
+											data-logo="data:image/svg+xml;base64,PHN2ZyBmaWxsPSJub25lIiB2aWV3Qm94PSIwIDAgMTYgMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGggZmlsbD0iI0RFNTgzMyIgZD0iTTExLjM2Ni44ODZjLjI5NS0xLjE4IDEuOTczLTEuMTggMi4yNjggMGwuMTM2LjU0NGExLjEgMS4xIDAgMCAwIC44LjhsLjU0NC4xMzZjMS4xOC4yOTUgMS4xOCAxLjk3MyAwIDIuMjY4bC0uNTQ0LjEzNmExLjEgMS4xIDAgMCAwLS40MzkuMjI1IDcuNSA3LjUgMCAxIDEtMy4xMjYtMy4xMjZjLjEwNS0uMTI2LjE4My0uMjc1LjIyNS0uNDRsLjEzNi0uNTQzWiIvPgogIDxwYXRoIGZpbGw9IiNEREQiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTguNTU1IDE0LjA5NmMwLS4wNTkuMDE0LS4wNzItLjE3Mi0uNDQzLS40OTUtLjk5Mi0uOTkzLTIuMzktLjc2Ni0zLjI5LjA0LS4xNjQtLjQ2Ny02LjA2NC0uODI1LTYuMjU0LS40LS4yMTMtLjg5LS41NS0xLjMzOS0uNjI1YTIuODUyIDIuODUyIDAgMCAwLS43Ni4wMTJjLS4wNC4wMDYtLjA0Mi4wOC0uMDAzLjA5NC4xNTQuMDUyLjM0LjE0Mi40NS4yNzguMDIuMDI2LS4wMDguMDY3LS4wNDEuMDY4LS4xMDMuMDA0LS4yOS4wNDctLjUzOC4yNTctLjAyOS4wMjQtLjAwNS4wNy4wMzIuMDYyLjUzMS0uMTA1IDEuMDc0LS4wNTMgMS4zOTQuMjM4LjAyMS4wMTkuMDEuMDUzLS4wMTcuMDYtMi43NzcuNzU0LTIuMjI3IDMuMTctMS40ODggNi4xMzQuNjU5IDIuNjQuOTA3IDMuNDkxLjk4NSAzLjc1YS4wODQuMDg0IDAgMCAwIC4wNS4wNTVjLjk1NS4zOCAzLjAzOC4zOTggMy4wMzgtLjI1di0uMTQ2WiIgY2xpcC1ydWxlPSJldmVub2RkIi8+CiAgPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTguOTM1IDE0LjY1MmMtLjMzNy4xMzItLjk5Ni4xOS0xLjM3Ny4xOS0uNTU4IDAtMS4zNjItLjA4Ny0xLjY1NS0uMjE5YTY1LjcyNiA2NS43MjYgMCAwIDEtMS4yNTctNC40NzVsLS4wNTMtLjIxNHYtLjAwMmMtLjYzNi0yLjU5Ni0xLjE1NS00LjcxNyAxLjY5LTUuMzgzLjAyNy0uMDA2LjA0LS4wMzcuMDIyLS4wNTgtLjMyNi0uMzg3LS45MzgtLjUxNC0xLjcxMS0uMjQ3LS4wMzIuMDEtLjA2LS4wMjEtLjA0LS4wNDguMTUyLS4yMS40NDgtLjM3LjU5NS0uNDQuMDMtLjAxNS4wMjgtLjA2LS4wMDQtLjA3YTMuMjY0IDMuMjY0IDAgMCAwLS40NDItLjEwNWMtLjA0My0uMDA3LS4wNDctLjA4MS0uMDA0LS4wODcgMS4wOTctLjE0NyAyLjI0MS4xODIgMi44MTYuOTA1YS4wMzguMDM4IDAgMCAwIC4wMjIuMDE0QzkuNjQgNC44NjUgOS43OSA4LjE5IDkuNTQ5IDguMzQyYy0uMDQ4LjAzLS4yMDEuMDEzLS40MDMtLjAxLS44MTktLjA5Mi0yLjQ0LS4yNzMtMS4xMDIgMi4yMmEuMDQ0LjA0NCAwIDAgMS0uMDMyLjA2MmMtLjc1NC4xMTcuMjEzIDIuNDgxLjkyMyA0LjAzOFoiLz4KICA8cGF0aCBmaWxsPSIjZmZmIiBkPSJNNy41IDJjLjUyNiAwIDEuMDM3LjA2MyAxLjUyNy4xOC4yNTQuMDYyLjI4NC40NzQuMTQ4LjY5N2ExLjE0MyAxLjE0MyAwIDAgMC0uMDM3LjA2NmMtLjA3NC4xNDItLjIzLjIzOC0uMzg3LjIwMWE1LjUgNS41IDAgMSAwIDQuMTA1IDQuMTA1Yy0uMDM3LS4xNTYuMDU5LS4zMTMuMi0uMzg3bC4wNjctLjAzN2MuMjIzLS4xMzYuNjM0LS4xMDcuNjk2LjE0N0E2LjUgNi41IDAgMSAxIDcuNSAyWiIvPgogIDxwYXRoIGZpbGw9IiMzQ0E4MkIiIGQ9Ik05Ljg3NiAxMS42MjljLS4xNi0uMDc1LS43NzYuMzY3LTEuMTg0LjcwNi0uMDg2LS4xMi0uMjQ3LS4yMDktLjYxLS4xNDYtLjMxOC4wNTYtLjQ5NC4xMzMtLjU3Mi4yNjUtLjUwMi0uMTktMS4zNDYtLjQ4NC0xLjU1LS4yLS4yMjMuMzEuMDU1IDEuNzc2LjM1MiAxLjk2Ni4xNTQuMS44OTQtLjM3NiAxLjI4LS43MDMuMDYyLjA4Ny4xNjMuMTM4LjM2OS4xMzMuMzEyLS4wMDcuODE4LS4wOC44OTYtLjIyNWEuMTY0LjE2NCAwIDAgMCAuMDEzLS4wMzFjLjM5Ni4xNDggMS4wOTUuMzA1IDEuMjUxLjI4Mi40MDctLjA2Mi0uMDU2LTEuOTYtLjI0NS0yLjA0N1oiLz4KICA8cGF0aCBmaWxsPSIjNENCQTNDIiBkPSJNOC43MyAxMi4zNzlhLjY0LjY0IDAgMCAxIC4wNDEuMDkzYy4wNTcuMTU5LjE0OS42NjIuMDguNzg3LS4wNy4xMjQtLjUyNC4xODQtLjgwMy4xODktLjI4LjAwNS0uMzQyLS4wOTgtLjM5OS0uMjU2LS4wNDUtLjEyNi0uMDY3LS40MjQtLjA2Ny0uNTk1LS4wMTEtLjI1Mi4wODEtLjM0MS41MDgtLjQxLjMxNi0uMDUxLjQ4My4wMDguNTguMTEuNDQ4LS4zMzUgMS4xOTctLjgwOCAxLjI3LS43MjEuMzY0LjQzLjQxIDEuNDU1LjMzIDEuODY4LS4wMjUuMTM0LTEuMjMtLjEzNC0xLjIzLS4yOCAwLS42MDMtLjE1Ny0uNzY5LS4zMS0uNzg1Wm0tMi42NDEtLjE4OWMuMDk5LS4xNTYuOS4wMzggMS4zMzkuMjM0IDAgMC0uMDkuNDA5LjA1My44OS4wNDIuMTQyLTEuMDExLjc3LTEuMTQ4LjY2MS0uMTYtLjEyNS0uNDUyLTEuNDU3LS4yNDQtMS43ODVaIi8+CiAgPHBhdGggZmlsbD0iI0ZDMyIgZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNNi40NzcgOS4wMTZjLjA2NC0uMjgxLjM2Ni0uODEyIDEuNDQ0LS43OTkuNTQ0LS4wMDIgMS4yMiAwIDEuNjctLjA1MWE2LjAwNyA2LjAwNyAwIDAgMCAxLjQ5LS4zNjNjLjQ2Ny0uMTc4LjYzMy0uMTM4LjY5LS4wMzIuMDY0LjExNy0uMDEuMzItLjE3NC41MDUtLjMxLjM1NS0uODcuNjMtMS44NTkuNzEyLS45ODguMDgyLTEuNjQzLS4xODMtMS45MjUuMjQ4LS4xMjEuMTg3LS4wMjcuNjI1LjkyOC43NjQgMS4yOTIuMTg2IDIuMzUzLS4yMjUgMi40ODQuMDIzLjEzLjI0OC0uNjI0Ljc1My0xLjkxOC43NjQtMS4yOTMuMDEtMi4xMDEtLjQ1My0yLjM4OC0uNjgzLS4zNjMtLjI5My0uNTI2LS43MTktLjQ0Mi0xLjA4OFoiIGNsaXAtcnVsZT0iZXZlbm9kZCIvPgogIDxnIGZpbGw9IiMxNDMwN0UiIG9wYWNpdHk9Ii44Ij4KICAgIDxwYXRoIGQ9Ik04LjEyNCA1LjkzN2MuMDcyLS4xMTkuMjMyLS4yMS40OTQtLjIxcy4zODUuMTA0LjQ3LjIyYy4wMTguMDI0LS4wMDguMDUyLS4wMzUuMDRhNi4xNCA2LjE0IDAgMCAxLS4wMi0uMDA4Ljk2Mi45NjIgMCAwIDAtLjQxNS0uMDk2Ljg1NC44NTQgMCAwIDAtLjQzNy4wOTdjLS4wMjkuMDE2LS4wNzQtLjAxNS0uMDU3LS4wNDNabS0yLjk0OC4xNTFhLjkzNS45MzUgMCAwIDEgLjU5Ni0uMDZjLjAzLjAwOC4wNS0uMDI0LjAyNi0uMDQzLS4xMS0uMDg5LS4zNTUtLjE5OS0uNjc1LS4wOC0uMjg1LjEwNy0uNDIuMzI4LS40Mi40NzQtLjAwMS4wMzQuMDcuMDM3LjA4OC4wMDguMDQ5LS4wNzguMTMtLjE5My4zODUtLjNaIi8+CiAgICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik04Ljg0IDcuNTUzYS40MDcuNDA3IDAgMSAxIDAtLjgxMy40MDcuNDA3IDAgMCAxIDAgLjgxM1ptLjI4Ny0uNTRhLjEwNS4xMDUgMCAwIDAtLjIxIDAgLjEwNS4xMDUgMCAwIDAgLjIxIDBabS0yLjk4NC40MTVhLjQ3NC40NzQgMCAxIDEtLjk0Ny0uMDAxLjQ3NC40NzQgMCAwIDEgLjk0Ny4wMDFabS0uMTQtLjE1N2EuMTIzLjEyMyAwIDAgMC0uMjQ1IDAgLjEyMy4xMjMgMCAwIDAgLjI0NSAwWiIgY2xpcC1ydWxlPSJldmVub2RkIi8+CiAgPC9nPgogIDxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0xMi4yNjQgNS44OWMuMDYxLjI0NS40MS4yNDUuNDcyIDBsLjEzNi0uNTQ0YTIuMDI2IDIuMDI2IDAgMCAxIDEuNDc0LTEuNDc0bC41NDQtLjEzNmMuMjQ1LS4wNjIuMjQ1LS40MSAwLS40NzJsLS41NDQtLjEzNmEyLjAyNiAyLjAyNiAwIDAgMS0xLjQ3NC0xLjQ3NGwtLjEzNi0uNTQ0Yy0uMDYyLS4yNDUtLjQxLS4yNDUtLjQ3MiAwbC0uMTM2LjU0NGEyLjAyNiAyLjAyNiAwIDAgMS0xLjQ3NCAxLjQ3NGwtLjU0NC4xMzZjLS4yNDYuMDYyLS4yNDYuNDEgMCAuNDcybC41NDQuMTM2YTIuMDI2IDIuMDI2IDAgMCAxIDEuNDc0IDEuNDc0bC4xMzYuNTQ0WiIvPgo8L3N2Zz4K"
+											aria-pressed="false" aria-label="DuckDuckGo" title="DuckDuckGo">
+											<img class="search-engine-chip-icon"
+												src="data:image/svg+xml;base64,PHN2ZyBmaWxsPSJub25lIiB2aWV3Qm94PSIwIDAgMTYgMTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGggZmlsbD0iI0RFNTgzMyIgZD0iTTExLjM2Ni44ODZjLjI5NS0xLjE4IDEuOTczLTEuMTggMi4yNjggMGwuMTM2LjU0NGExLjEgMS4xIDAgMCAwIC44LjhsLjU0NC4xMzZjMS4xOC4yOTUgMS4xOCAxLjk3MyAwIDIuMjY4bC0uNTQ0LjEzNmExLjEgMS4xIDAgMCAwLS40MzkuMjI1IDcuNSA3LjUgMCAxIDEtMy4xMjYtMy4xMjZjLjEwNS0uMTI2LjE4My0uMjc1LjIyNS0uNDRsLjEzNi0uNTQzWiIvPgogIDxwYXRoIGZpbGw9IiNEREQiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTguNTU1IDE0LjA5NmMwLS4wNTkuMDE0LS4wNzItLjE3Mi0uNDQzLS40OTUtLjk5Mi0uOTkzLTIuMzktLjc2Ni0zLjI5LjA0LS4xNjQtLjQ2Ny02LjA2NC0uODI1LTYuMjU0LS40LS4yMTMtLjg5LS41NS0xLjMzOS0uNjI1YTIuODUyIDIuODUyIDAgMCAwLS43Ni4wMTJjLS4wNC4wMDYtLjA0Mi4wOC0uMDAzLjA5NC4xNTQuMDUyLjM0LjE0Mi40NS4yNzguMDIuMDI2LS4wMDguMDY3LS4wNDEuMDY4LS4xMDMuMDA0LS4yOS4wNDctLjUzOC4yNTctLjAyOS4wMjQtLjAwNS4wNy4wMzIuMDYyLjUzMS0uMTA1IDEuMDc0LS4wNTMgMS4zOTQuMjM4LjAyMS4wMTkuMDEuMDUzLS4wMTcuMDYtMi43NzcuNzU0LTIuMjI3IDMuMTctMS40ODggNi4xMzQuNjU5IDIuNjQuOTA3IDMuNDkxLjk4NSAzLjc1YS4wODQuMDg0IDAgMCAwIC4wNS4wNTVjLjk1NS4zOCAzLjAzOC4zOTggMy4wMzgtLjI1di0uMTQ2WiIgY2xpcC1ydWxlPSJldmVub2RkIi8+CiAgPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTguOTM1IDE0LjY1MmMtLjMzNy4xMzItLjk5Ni4xOS0xLjM3Ny4xOS0uNTU4IDAtMS4zNjItLjA4Ny0xLjY1NS0uMjE5YTY1LjcyNiA2NS43MjYgMCAwIDEtMS4yNTctNC40NzVsLS4wNTMtLjIxNHYtLjAwMmMtLjYzNi0yLjU5Ni0xLjE1NS00LjcxNyAxLjY5LTUuMzgzLjAyNy0uMDA2LjA0LS4wMzcuMDIyLS4wNTgtLjMyNi0uMzg3LS45MzgtLjUxNC0xLjcxMS0uMjQ3LS4wMzIuMDEtLjA2LS4wMjEtLjA0LS4wNDguMTUyLS4yMS40NDgtLjM3LjU5NS0uNDQuMDMtLjAxNS4wMjgtLjA2LS4wMDQtLjA3YTMuMjY0IDMuMjY0IDAgMCAwLS40NDItLjEwNWMtLjA0My0uMDA3LS4wNDctLjA4MS0uMDA0LS4wODcgMS4wOTctLjE0NyAyLjI0MS4xODIgMi44MTYuOTA1YS4wMzguMDM4IDAgMCAwIC4wMjIuMDE0QzkuNjQgNC44NjUgOS43OSA4LjE5IDkuNTQ5IDguMzQyYy0uMDQ4LjAzLS4yMDEuMDEzLS40MDMtLjAxLS44MTktLjA5Mi0yLjQ0LS4yNzMtMS4xMDIgMi4yMmEuMDQ0LjA0NCAwIDAgMS0uMDMyLjA2MmMtLjc1NC4xMTcuMjEzIDIuNDgxLjkyMyA0LjAzOFoiLz4KICA8cGF0aCBmaWxsPSIjZmZmIiBkPSJNNy41IDJjLjUyNiAwIDEuMDM3LjA2MyAxLjUyNy4xOC4yNTQuMDYyLjI4NC40NzQuMTQ4LjY5N2ExLjE0MyAxLjE0MyAwIDAgMC0uMDM3LjA2NmMtLjA3NC4xNDItLjIzLjIzOC0uMzg3LjIwMWE1LjUgNS41IDAgMSAwIDQuMTA1IDQuMTA1Yy0uMDM3LS4xNTYuMDU5LS4zMTMuMi0uMzg3bC4wNjctLjAzN2MuMjIzLS4xMzYuNjM0LS4xMDcuNjk2LjE0N0E2LjUgNi41IDAgMSAxIDcuNSAyWiIvPgogIDxwYXRoIGZpbGw9IiMzQ0E4MkIiIGQ9Ik05Ljg3NiAxMS42MjljLS4xNi0uMDc1LS43NzYuMzY3LTEuMTg0LjcwNi0uMDg2LS4xMi0uMjQ3LS4yMDktLjYxLS4xNDYtLjMxOC4wNTYtLjQ5NC4xMzMtLjU3Mi4yNjUtLjUwMi0uMTktMS4zNDYtLjQ4NC0xLjU1LS4yLS4yMjMuMzEuMDU1IDEuNzc2LjM1MiAxLjk2Ni4xNTQuMS44OTQtLjM3NiAxLjI4LS43MDMuMDYyLjA4Ny4xNjMuMTM4LjM2OS4xMzMuMzEyLS4wMDcuODE4LS4wOC44OTYtLjIyNWEuMTY0LjE2NCAwIDAgMCAuMDEzLS4wMzFjLjM5Ni4xNDggMS4wOTUuMzA1IDEuMjUxLjI4Mi40MDctLjA2Mi0uMDU2LTEuOTYtLjI0NS0yLjA0N1oiLz4KICA8cGF0aCBmaWxsPSIjNENCQTNDIiBkPSJNOC43MyAxMi4zNzlhLjY0LjY0IDAgMCAxIC4wNDEuMDkzYy4wNTcuMTU5LjE0OS42NjIuMDguNzg3LS4wNy4xMjQtLjUyNC4xODQtLjgwMy4xODktLjI4LjAwNS0uMzQyLS4wOTgtLjM5OS0uMjU2LS4wNDUtLjEyNi0uMDY3LS40MjQtLjA2Ny0uNTk1LS4wMTEtLjI1Mi4wODEtLjM0MS41MDgtLjQxLjMxNi0uMDUxLjQ4My4wMDguNTguMTEuNDQ4LS4zMzUgMS4xOTctLjgwOCAxLjI3LS43MjEuMzY0LjQzLjQxIDEuNDU1LjMzIDEuODY4LS4wMjUuMTM0LTEuMjMtLjEzNC0xLjIzLS4yOCAwLS42MDMtLjE1Ny0uNzY5LS4zMS0uNzg1Wm0tMi42NDEtLjE4OWMuMDk5LS4xNTYuOS4wMzggMS4zMzkuMjM0IDAgMC0uMDkuNDA5LjA1My44OS4wNDIuMTQyLTEuMDExLjc3LTEuMTQ4LjY2MS0uMTYtLjEyNS0uNDUyLTEuNDU3LS4yNDQtMS43ODVaIi8+CiAgPHBhdGggZmlsbD0iI0ZDMyIgZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNNi40NzcgOS4wMTZjLjA2NC0uMjgxLjM2Ni0uODEyIDEuNDQ0LS43OTkuNTQ0LS4wMDIgMS4yMiAwIDEuNjctLjA1MWE2LjAwNyA2LjAwNyAwIDAgMCAxLjQ5LS4zNjNjLjQ2Ny0uMTc4LjYzMy0uMTM4LjY5LS4wMzIuMDY0LjExNy0uMDEuMzItLjE3NC41MDUtLjMxLjM1NS0uODcuNjMtMS44NTkuNzEyLS45ODguMDgyLTEuNjQzLS4xODMtMS45MjUuMjQ4LS4xMjEuMTg3LS4wMjcuNjI1LjkyOC43NjQgMS4yOTIuMTg2IDIuMzUzLS4yMjUgMi40ODQuMDIzLjEzLjI0OC0uNjI0Ljc1My0xLjkxOC43NjQtMS4yOTMuMDEtMi4xMDEtLjQ1My0yLjM4OC0uNjgzLS4zNjMtLjI5My0uNTI2LS43MTktLjQ0Mi0xLjA4OFoiIGNsaXAtcnVsZT0iZXZlbm9kZCIvPgogIDxnIGZpbGw9IiMxNDMwN0UiIG9wYWNpdHk9Ii44Ij4KICAgIDxwYXRoIGQ9Ik04LjEyNCA1LjkzN2MuMDcyLS4xMTkuMjMyLS4yMS40OTQtLjIxcy4zODUuMTA0LjQ3LjIyYy4wMTguMDI0LS4wMDguMDUyLS4wMzUuMDRhNi4xNCA2LjE0IDAgMCAxLS4wMi0uMDA4Ljk2Mi45NjIgMCAwIDAtLjQxNS0uMDk2Ljg1NC44NTQgMCAwIDAtLjQzNy4wOTdjLS4wMjkuMDE2LS4wNzQtLjAxNS0uMDU3LS4wNDNabS0yLjk0OC4xNTFhLjkzNS45MzUgMCAwIDEgLjU5Ni0uMDZjLjAzLjAwOC4wNS0uMDI0LjAyNi0uMDQzLS4xMS0uMDg5LS4zNTUtLjE5OS0uNjc1LS4wOC0uMjg1LjEwNy0uNDIuMzI4LS40Mi40NzQtLjAwMS4wMzQuMDcuMDM3LjA4OC4wMDguMDQ5LS4wNzguMTMtLjE5My4zODUtLjNaIi8+CiAgICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik04Ljg0IDcuNTUzYS40MDcuNDA3IDAgMSAxIDAtLjgxMy40MDcuNDA3IDAgMCAxIDAgLjgxM1ptLjI4Ny0uNTRhLjEwNS4xMDUgMCAwIDAtLjIxIDAgLjEwNS4xMDUgMCAwIDAgLjIxIDBabS0yLjk4NC40MTVhLjQ3NC40NzQgMCAxIDEtLjk0Ny0uMDAxLjQ3NC40NzQgMCAwIDEgLjk0Ny4wMDFabS0uMTQtLjE1N2EuMTIzLjEyMyAwIDAgMC0uMjQ1IDAgLjEyMy4xMjMgMCAwIDAgLjI0NSAwWiIgY2xpcC1ydWxlPSJldmVub2RkIi8+CiAgPC9nPgogIDxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0xMi4yNjQgNS44OWMuMDYxLjI0NS40MS4yNDUuNDcyIDBsLjEzNi0uNTQ0YTIuMDI2IDIuMDI2IDAgMCAxIDEuNDc0LTEuNDc0bC41NDQtLjEzNmMuMjQ1LS4wNjIuMjQ1LS40MSAwLS40NzJsLS41NDQtLjEzNmEyLjAyNiAyLjAyNiAwIDAgMS0xLjQ3NC0xLjQ3NGwtLjEzNi0uNTQ0Yy0uMDYyLS4yNDUtLjQxLS4yNDUtLjQ3MiAwbC0uMTM2LjU0NGEyLjAyNiAyLjAyNiAwIDAgMS0xLjQ3NCAxLjQ3NGwtLjU0NC4xMzZjLS4yNDYuMDYyLS4yNDYuNDEgMCAuNDcybC41NDQuMTM2YTIuMDI2IDIuMDI2IDAgMCAxIDEuNDc0IDEuNDc0bC4xMzYuNTQ0WiIvPgo8L3N2Zz4K"
+												alt="" />
+										</button>
+										<button class="search-engine-chip" type="button"
+											data-template="https://www.startpage.com/search?query=%s" data-engine="sp"
+											data-logo="https://www.startpage.com/favicon.ico" aria-pressed="false"
+											aria-label="Startpage" title="Startpage">
+											<img class="search-engine-chip-icon"
+												src="https://www.startpage.com/favicon.ico" alt="" />
+										</button>
+									</div>
+								</details>
+								<form class="home-search" id="homeForm" autocomplete="off">
+									<span class="home-search-icon">
+										<i class="fa-solid fa-magnifying-glass"></i>
+									</span>
+									<input id="homeSearchInput" type="text" placeholder="Search for anything..."
+										autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+									<button id="homeSearchBtn" aria-label="Search">
+										<i class="fa-solid fa-arrow-right"></i>
+									</button>
+								</form>
+							</div>
+							<div class="home-tiles">
+								<button class="home-tile" data-url="https://lossless.wtf/">
+									<div class="tile-icon"><i class="fa-brands fa-spotify"></i></div>
+									<div class="tile-label">Spotify (Monochrome)</div>
+								</button>
+								<button class="home-tile" data-url="https://tiktok.com">
+									<div class="tile-icon"><i class="fa-brands fa-tiktok"></i></div>
+									<div class="tile-label">Tiktok</div>
+								</button>
+								<button class="home-tile" data-url="frosted://games">
+									<div class="tile-icon"><i class="fa fa-gamepad"></i></div>
+									<div class="tile-label">frosted games</div>
+								</button>
+							</div>
+						</div>
+					</div>
+					<div id="settingsPage" class="internal-page">
+						<div class="settings-page-shell">
+							<div class="settings-page-header">
+								<h2>Settings</h2>
+							</div>
+							<div class="settings-page-body">
+								<div class="settings-section">
+									<label class="settings-label" for="proxySelect">Proxy Engine</label>
+									<select class="settings-select" id="proxySelect">
+										<option value="scramjet">Scramjet</option>
+										<option value="ultraviolet">Ultraviolet</option>
+									</select>
+									<div class="settings-hint" id="proxy-status">
+										Proxy mode: Scramjet
+									</div>
+								</div>
+								<div class="settings-section">
+									<label class="settings-label">Open in ...</label>
+									<div class="settings-row open-mode-row">
+										<button class="settings-btn open-mode-btn" id="openModeAboutBtn" type="button">
+											Open in about:blank
+										</button>
+										<button class="settings-btn open-mode-btn" id="openModeBlobBtn" type="button">
+											Open in blob:
+										</button>
+									</div>
+								</div>
+								<div class="settings-section">
+									<label class="settings-label">Panic Key</label>
+									<div class="panic-box">
+										<h3 class="panic-title">Current Panic Key:</h3>
+										<div class="settings-row">
+											<span id="current-panic-key" class="panic-key-pill">`</span>
+											<button class="settings-btn" id="change-panic-key-btn" type="button">
+												Change Key
+											</button>
+										</div>
+										<p class="settings-hint" id="listening-status"></p>
+									</div>
+									<label class="settings-label" for="panic-url">Panic URL</label>
+									<div class="settings-row">
+										<input class="settings-input" id="panic-url" type="text"
+											placeholder="https://google.com" />
+										<button class="settings-btn" id="save-panic-btn" type="button">
+											Save URL
+										</button>
+									</div>
+									<div class="settings-row">
+										<button class="settings-btn" id="panic-now-btn" type="button">
+											Open about:blank
+										</button>
+									</div>
+									<div class="settings-hint" id="panic-status">Panic key is active</div>
+								</div>
+								<div class="settings-section">
+									<label class="settings-label" for="cloakEnabledToggle">Cloak</label>
+									<div class="settings-row">
+										<input id="cloakEnabledToggle" type="checkbox" />
+									</div>
+									<div class="settings-row">
+										<label class="settings-label" for="cloakPresetSelect">Preset</label>
+										<select class="settings-select" id="cloakPresetSelect">
+											<option value="ixl">IXL</option>
+											<option value="google">Google</option>
+											<option value="docs">Google Docs</option>
+											<option value="drive">Google Drive</option>
+											<option value="custom">Custom</option>
+										</select>
+									</div>
+									<div class="settings-row">
+										<input class="settings-input" id="cloak-title" type="text" placeholder="IXL" />
+										<button class="settings-btn" id="save-cloak-title-btn" type="button">
+											Save Title
+										</button>
+									</div>
+									<div class="settings-row">
+										<input class="settings-input" id="cloak-favicon" type="text"
+											placeholder="/ixl.ico" />
+										<button class="settings-btn" id="save-cloak-favicon-btn" type="button">
+											Save Icon
+										</button>
+									</div>
+								</div>
+								<div class="settings-section">
+									<label class="settings-label" for="lowPowerModeToggle">Low Power Mode</label>
+									<div class="settings-row">
+										<input id="lowPowerModeToggle" type="checkbox" />
+										<label for="lowPowerModeToggle" class="settings-hint">
+											peformance mode that reduces CPU and RAM by disabling moving wallpapers.
+										</label>
+									</div>
+								</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="creditsPage" class="internal-page">
+						<div class="credits-page-shell">
+							<div class="settings-page-header">
+								<h2>Credits</h2>
+							</div>
+							<div class="settings-page-body">
+								<div class="settings-section">
+									<p class="settings-hint">Built with these projects:</p>
+									<p>
+										<a class="credits-link"
+											href="https://github.com/titaniumnetwork-dev/Ultraviolet" target="_blank"
+											rel="noopener noreferrer">UltraViolet by Titanium
+											Network</a>
+									</p>
+									<p>
+										<a class="credits-link" href="https://github.com/MercuryWorkshop/scramjet"
+											target="_blank" rel="noopener noreferrer">Scramjet by Mercury
+											Workshop</a>
+									</p>
+									chudportal (idea for cloaker)
+									<p>
+									<p>
+										GN-MATH / Games - mizumath
+									</p>
+									<p>
+										groq / AI Chatbot
+									</p>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="partnersPage" class="internal-page">
+						<div class="partners-page-shell">
+							<div class="settings-page-header partners-header">
+								<h2>partners</h2>
+							</div>
+							<div class="partners-grid">
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/ol.png"
+											alt="OnlyLessons logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">OL</div>
+									</div>
+									<h3>// OnlyLessons</h3>
+									<a class="partner-btn" href="https://discord.gg/cmdkxMgBEm" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/zypher.png"
+											alt="zypher" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">zy</div>
+									</div>
+									<h3>// Zypher</h3>
+									<a class="partner-btn" href="https://discord.gg/WFvTbse78V" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/nikehub.png"
+											alt="NikeHub logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">NH</div>
+									</div>
+									<h3>// NikeHub</h3>
+									<a class="partner-btn" href="https://discord.gg/Y4uMau4dGy" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/icons/flux.png"
+											alt="flux logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">FL</div>
+									</div>
+									<h3>// Flux</h3>
+									<a class="partner-btn" href="https://discord.gg/uCzkJ3tNa" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/flux2.png"
+											alt="flux2 Logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">fl2</div>
+									</div>
+									<h3>// Flux</h3>
+									<a class="partner-btn" href="https://discord.gg/3fbJG2emb6" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/linkspot.png"
+											alt="Link Spot Logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">LS</div>
+									</div>
+									<h3>// Link Spot</h3>
+									<a class="partner-btn" href="https://discord.gg/6AMD9YzyTM" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/xylora.png"
+											alt="Xylora Logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">XY</div>
+									</div>
+									<h3>// Xylora</h3>
+									<a class="partner-btn" href="https://discord.gg/3Yn5Fk4h2Z" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/mk.png"
+											alt="MK Logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">MK</div>
+									</div>
+									<h3>// Medieval Kingdom</h3>
+									<a class="partner-btn" href="https://discord.gg/QkMqmwypEC" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/kapi.png"
+											alt="Kapix Logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">KI</div>
+									</div>
+									<h3>// Kapi</h3>
+									<a class="partner-btn" href="https://discord.gg/VrpcTtftB" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/images/best.png"
+											alt="BestSpark's Games Logo" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">BSG</div>
+									</div>
+									<h3>// BestSpark's Games</h3>
+									<a class="partner-btn" href="https://discord.gg/bestspark" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+								<article class="partner-card">
+									<div class="partner-logo-wrap">
+										<img class="partner-logo-img"
+											src="https://raw.githubusercontent.com/mrdavidzs/assets/refs/heads/main/mizumath.png"
+											alt="mizumath" width="56" height="56" loading="lazy"
+											onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';" />
+										<div class="partner-logo">BSG</div>
+									</div>
+									<h3>// mizumath</h3>
+									<a class="partner-btn" href="https://discord.gg/MwKRJkJrJB" target="_blank"
+										rel="noopener noreferrer">
+										<i class="fa-brands fa-discord"></i>
+									</a>
+								</article>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="gamesPage" class="internal-page">
+					<div class="games-page-shell">
+						<div class="settings-page-header">
+							<h2>Games</h2>
+							<div class="settings-hint" id="gamesCount">Games: 0</div>
+						</div>
+						<div class="games-toolbar">
+							<select id="gamesSourceSelect" class="settings-select games-source-select"
+								aria-label="Game source selector">
+								<option value="gnmath">GN-Math</option>
+								<option value="lumin">LuminSDK</option>
+							</select>
+							<input id="gamesSearchInput" class="settings-input games-search" type="text"
+								placeholder="Search games..." />
+						</div>
+						<div class="games-grid" id="gamesGrid"></div>
+						<div id="luminGamesMount" class="lumin-games-mount" hidden>
+							<iframe id="luminGamesFrame" class="lumin-games-frame" title="LuminSDK Games"
+								loading="lazy"></iframe>
+						</div>
+					</div>
+				</div>
+				<div id="aiPage" class="internal-page">
+					<div class="ai-page-shell">
+						<div class="settings-page-header">
+							<h2>FrostedAI V.2</h2>
+						</div>
+						<div class="ai-body">
+							<div class="ai-chat">
+								<div class="ai-speed-row">
+									<label class="settings-label" for="aiModelSelect">Model</label>
+									<select id="aiModelSelect" class="settings-select ai-speed-select">
+										<option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile</option>
+										<option value="llama-3.1-8b-instant">Llama 3.1 8B Instant</option>
+										<option value="mixtral-8x7b-32768">Mixtral 8x7B 32k</option>
+										<option value="gemma2-9b-it">Gemma2 9B IT</option>
+									</select>
+								</div>
+								<div id="aiResult" class="ai-result">Ask FrostedAI anything.</div>
+								<div class="ai-prompt-wrap">
+									<input id="aiPromptInput" class="settings-input ai-prompt" type="text"
+										autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+										placeholder="Ask FrostedAI..." />
+									<button id="aiSolveBtn" class="settings-btn" type="button">Send</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="extensionStorePage" class="internal-page">
+					<div class="settings-page-shell extension-store-page-shell">
+						<div class="settings-page-header extension-store-page-header">
+							<h2>Wallpapers</h2>
+							<p class="settings-hint extension-store-copy">Browse and apply wallpaper packs.</p>
+						</div>
+						<div class="settings-page-body extension-store-page-body">
+							<div class="wallpaper-store-shell wallpaper-store-shell-v2">
+								<div class="wallpaper-store-stage">
+									<section class="wallpaper-store-rail">
+										<div class="wallpaper-store-tabs">
+											<button class="wallpaper-store-tab" id="wallpaperStoreTabInstalled"
+												type="button">Installed</button>
+											<button class="wallpaper-store-tab" id="wallpaperStoreTabStore"
+												type="button">Store</button>
+										</div>
+										<div class="wallpaper-store-filters">
+											<input id="wallpaperStoreSearchInput" class="settings-input" type="text"
+												placeholder="Search wallpapers..." />
+											<button id="wallpaperStoreExitBtn" class="settings-btn"
+												type="button">Close</button>
+										</div>
+									</section>
+									<section class="wallpaper-store-content">
+										<div class="extension-store-grid" id="wallpaperStoreGrid"></div>
+									</section>
+									<aside class="wallpaper-store-preview" id="wallpaperStorePreview">
+										<div class="wallpaper-preview-media" id="wallpaperStorePreviewMedia"></div>
+										<h3 id="wallpaperStorePreviewTitle">Select a wallpaper</h3>
+										<div class="settings-hint" id="wallpaperStorePreviewMeta">No wallpaper
+											selected.
+										</div>
+										<div class="settings-row wallpaper-store-actions">
+											<button id="wallpaperStoreInstallBtn"
+												class="settings-btn wallpaper-store-btn" type="button">Install</button>
+											<button id="wallpaperStoreUninstallBtn"
+												class="settings-btn wallpaper-store-btn"
+												type="button">Uninstall</button>
+											<button id="wallpaperStoreApplyBtn" class="settings-btn wallpaper-store-btn"
+												type="button">Apply</button>
+										</div>
+									</aside>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+
+	<div class="home-credits">
+		<a href="frosted://credits" id="creditsLink">Credits</a>
+	</div>
+
+	<a class="visitor-badge" href="https://visitorbadge.io/status?path=frostedbrowser.cfd" target="_blank"
+		rel="noopener noreferrer">
+		<img id="visitorBadgeImage"
+			src="https://api.visitorbadge.io/api/visitors?path=frostedbrowser.cfd&countColor=%23697689"
+			alt="Visitor count" referrerpolicy="no-referrer" />
+	</a>
+
+	<input id="sj-search-engine" type="hidden" value="https://search.brave.com/search?q=%s" />
+
+	<button class="fullscreen-exit-btn" id="fullscreenExitBtn" type="button" aria-label="Exit fullscreen">
+		<span class="fullscreen-exit-icon">⛶</span>
+	</button>
+</body>
+
+</html>

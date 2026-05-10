@@ -77,6 +77,279 @@ let scramjet = null;
 let scramjetInitDone = false;
 let scramjetInitPromise = null;
 
+function buildNetworkFailureResponse(requestUrl, statusText = "Proxy fetch failed") {
+	return new Response("", {
+		status: 502,
+		statusText,
+		headers: {
+			"content-type": "text/plain; charset=utf-8",
+			"x-frosted-network-error": "1",
+			"x-frosted-request-url": String(requestUrl || ""),
+		},
+	});
+}
+
+function decodeProxiedRequestUrl(requestUrl) {
+	try {
+		const parsed = new URL(requestUrl, self.location.origin);
+		const activeUvServicePrefix = self.__uv$config?.prefix || defaultUvServicePrefix;
+		if (parsed.pathname.startsWith(activeUvServicePrefix) && self.__uv$config?.decodeUrl) {
+			const encoded = parsed.pathname.slice(activeUvServicePrefix.length);
+			return self.__uv$config.decodeUrl(encoded);
+		}
+		const prefix = SEED_CONFIG.prefix || scramjetAssetPrefix;
+		if (parsed.pathname.startsWith(prefix)) {
+			const encoded = parsed.pathname.slice(prefix.length).split("?")[0];
+			return decodeURIComponent(encoded);
+		}
+	} catch {
+	}
+	return String(requestUrl || "");
+}
+
+function isDirectFallbackStaticHost(hostname) {
+	const host = String(hostname || "").trim().toLowerCase();
+	if (!host) return false;
+	return (
+		host === "cdn.jsdelivr.net" ||
+		host.endsWith(".cdn.jsdelivr.net")
+	);
+}
+
+function looksLikeStaticAssetPath(pathname) {
+	const path = String(pathname || "").trim().toLowerCase();
+	if (!path) return false;
+	return /\.(?:js|mjs|css|json|map|png|jpe?g|gif|webp|svg|ico|woff2?|ttf|otf)(?:$|\?)/i.test(path);
+}
+
+function shouldDirectFetchDecodedTarget(decodedTarget, request) {
+	try {
+		if (String(request?.method || "GET").toUpperCase() !== "GET") return false;
+		const parsed = new URL(String(decodedTarget || ""), self.location.origin);
+		if (!/^https?:$/i.test(parsed.protocol)) return false;
+		if (!isDirectFallbackStaticHost(parsed.hostname)) return false;
+		return looksLikeStaticAssetPath(parsed.pathname);
+	} catch {
+		return false;
+	}
+}
+
+function getLocalProxyAssetFallbackUrl(decodedTarget) {
+	try {
+		const parsed = new URL(String(decodedTarget || ""), self.location.origin);
+		const host = String(parsed.hostname || "").trim().toLowerCase();
+		const path = String(parsed.pathname || "").trim().toLowerCase();
+		if (
+			host === "cdn.r9x.in" &&
+			path.endsWith("/ailogic_gn-math.dev_obf.js")
+		) {
+			return new URL(`${appBasePath}gn/ailogic_gn-math.dev_obf.js`, self.location.origin).href;
+		}
+		if (
+			host === "cdn.r9x.in" &&
+			path.endsWith("/geo.js")
+		) {
+			return new URL(`${appBasePath}gn/geo.js`, self.location.origin).href;
+		}
+	} catch {
+	}
+	return "";
+}
+
+function buildInlineGeoFallbackResponse() {
+	return new Response(
+		"window.__GEO__=window.__GEO__||{};window.__GEO__.country='US';window.__GEO__.state='IN';",
+		{
+			status: 200,
+			headers: {
+				"content-type": "application/javascript; charset=utf-8",
+				"cache-control": "no-store",
+				"x-frosted-local-fallback": "geo-inline"
+			}
+		}
+	);
+}
+
+function buildInlineAilogicBootstrapResponse() {
+	const localScriptUrl = new URL(`${appBasePath}gn/ailogic_gn-math.dev_obf.js`, self.location.origin).href;
+	const localGeoUrl = new URL(`${appBasePath}gn/geo.js`, self.location.origin).href;
+	const body = `
+(function(){
+	function createMemoryStorage() {
+		var store = Object.create(null);
+		return {
+			getItem: function(key) {
+				return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null;
+			},
+			setItem: function(key, value) {
+				store[key] = String(value);
+			},
+			removeItem: function(key) {
+				delete store[key];
+			},
+			clear: function() {
+				Object.keys(store).forEach(function(key) { delete store[key]; });
+			},
+			key: function(index) {
+				return Object.keys(store)[index] ?? null;
+			}
+		};
+	}
+
+	function installStorageShim(name) {
+		var fallback = createMemoryStorage();
+		var assigned;
+		try { assigned = globalThis[name]; } catch (_) {}
+		try {
+			Object.defineProperty(globalThis, name, {
+				configurable: true,
+				enumerable: true,
+				get: function() {
+					try {
+						var current = assigned;
+						if (current && typeof current.getItem === "function") return current;
+					} catch (_) {}
+					return fallback;
+				},
+				set: function(value) {
+					assigned = value;
+				}
+			});
+		} catch (_) {
+			try {
+				if (!assigned || typeof assigned.getItem !== "function") globalThis[name] = fallback;
+			} catch (_) {}
+		}
+	}
+
+	function installGeoRewrite() {
+		try {
+			if (globalThis.__frostedGeoRewriteInstalled) return;
+			globalThis.__frostedGeoRewriteInstalled = true;
+			var originalCreateElement = Document.prototype.createElement;
+			if (typeof originalCreateElement !== "function") return;
+			Document.prototype.createElement = function() {
+				var element = originalCreateElement.apply(this, arguments);
+				try {
+					if (String(arguments[0] || "").toLowerCase() === "script") {
+						var originalSetAttribute = element.setAttribute;
+						Object.defineProperty(element, "src", {
+							configurable: true,
+							enumerable: true,
+							get: function() {
+								return this.getAttribute("src") || "";
+							},
+							set: function(value) {
+								var next = String(value || "");
+								if (next === "https://cdn.r9x.in/geo.js") next = ${JSON.stringify(localGeoUrl)};
+								this.setAttribute("src", next);
+							}
+						});
+						element.setAttribute = function(name, value) {
+							if (String(name || "").toLowerCase() === "src" && String(value || "") === "https://cdn.r9x.in/geo.js") {
+								value = ${JSON.stringify(localGeoUrl)};
+							}
+							return originalSetAttribute.call(this, name, value);
+						};
+					}
+				} catch (_) {}
+				return element;
+			};
+		} catch (_) {}
+	}
+
+	installStorageShim("localStorage");
+	installStorageShim("sessionStorage");
+	installGeoRewrite();
+
+	var script = document.createElement("script");
+	script.src = ${JSON.stringify(localScriptUrl)};
+	script.async = false;
+	document.head.appendChild(script);
+})();
+`.trim();
+
+	return new Response(body, {
+		status: 200,
+		headers: {
+			"content-type": "application/javascript; charset=utf-8",
+			"cache-control": "no-store",
+			"x-frosted-local-fallback": "ailogic-bootstrap"
+		}
+	});
+}
+
+async function maybeFetchLocalProxyAssetFallback(decodedTarget, request) {
+	try {
+		if (String(request?.method || "GET").toUpperCase() !== "GET") return null;
+		try {
+			const parsed = new URL(String(decodedTarget || ""), self.location.origin);
+			if (String(parsed.hostname || "").trim().toLowerCase() === "cdn.r9x.in" && String(parsed.pathname || "").trim().toLowerCase().endsWith("/geo.js")) {
+				console.log("[frosted] SW served inline geo fallback:", decodedTarget);
+				return buildInlineGeoFallbackResponse();
+			}
+			if (String(parsed.hostname || "").trim().toLowerCase() === "cdn.r9x.in" && String(parsed.pathname || "").trim().toLowerCase().endsWith("/ailogic_gn-math.dev_obf.js")) {
+				console.log("[frosted] SW served inline ailogic bootstrap fallback:", decodedTarget);
+				return buildInlineAilogicBootstrapResponse();
+			}
+		} catch {
+		}
+		const localAssetUrl = getLocalProxyAssetFallbackUrl(decodedTarget);
+		if (!localAssetUrl) return null;
+		const response = await fetch(
+			new Request(localAssetUrl, {
+				method: "GET",
+				headers: request?.headers,
+				credentials: "same-origin",
+				cache: "default",
+				mode: "same-origin",
+			})
+		);
+		if (!response.ok) return null;
+		console.log("[frosted] SW served local proxy asset fallback:", decodedTarget, "->", localAssetUrl);
+		return response;
+	} catch (error) {
+		console.warn("[frosted] SW local proxy asset fallback failed:", decodedTarget, error);
+		return null;
+	}
+}
+
+async function fetchDecodedTargetDirectly(decodedTarget, request) {
+	const requestMode = String(request?.mode || "").trim().toLowerCase();
+	const init = {
+		method: request?.method || "GET",
+		credentials: "omit",
+		redirect: request?.redirect || "follow",
+		referrer: request?.referrer || "",
+		referrerPolicy: request?.referrerPolicy || "",
+		integrity: request?.integrity || "",
+		cache: request?.cache || "default",
+		mode: "no-cors",
+	};
+	return fetch(new Request(decodedTarget, init));
+}
+
+async function maybeRetryStaticAssetDirectly(response, request) {
+	try {
+		if (response && response.ok) return response;
+		if (response && response.status !== 502 && response.status !== 503 && response.status !== 504) {
+			return response;
+		}
+		const decodedTarget = decodeProxiedRequestUrl(request?.url);
+		const localFallbackResponse = await maybeFetchLocalProxyAssetFallback(decodedTarget, request);
+		if (localFallbackResponse) return localFallbackResponse;
+		if (!shouldDirectFetchDecodedTarget(decodedTarget, request)) return response;
+		try {
+			return await fetchDecodedTargetDirectly(decodedTarget, request);
+		} catch (directError) {
+			console.warn("[frosted] SW direct retry after proxy response failed:", decodedTarget, directError);
+			return response;
+		}
+	} catch {
+		return response;
+	}
+}
+
 function pathStartsWith(pathname, prefix) {
 	if (!prefix) return false;
 	try {
@@ -271,7 +544,7 @@ self.addEventListener("fetch", (event) => {
 				return await fetch(event.request);
 			} catch (error) {
 				console.warn("[frosted] SW direct fetch failed:", event.request.url, error);
-				return Response.error();
+				return buildNetworkFailureResponse(event.request.url, "Direct fetch failed");
 			}
 		}
 
@@ -297,7 +570,8 @@ self.addEventListener("fetch", (event) => {
 					});
 					const fakeEvent = { request: newRequest };
 					if (uv.route(fakeEvent)) {
-						return await uv.fetch(fakeEvent);
+						const proxyResponse = await uv.fetch(fakeEvent);
+						return await maybeRetryStaticAssetDirectly(proxyResponse, event.request);
 					}
 				} catch (e) {
 					console.warn("[frosted] Scramjet→UV fallback failed:", e);
@@ -309,7 +583,8 @@ self.addEventListener("fetch", (event) => {
 
 		try {
 			if (uv.route(event)) {
-				return await uv.fetch(event);
+				const proxyResponse = await uv.fetch(event);
+				return await maybeRetryStaticAssetDirectly(proxyResponse, event.request);
 			}
 		} catch (e) {
 			console.error("[frosted] UV SW fetch error:", e);
@@ -318,8 +593,18 @@ self.addEventListener("fetch", (event) => {
 		try {
 			return await fetch(event.request);
 		} catch (error) {
-			console.warn("[frosted] SW network fallback failed:", event.request.url, error);
-			return Response.error();
+			const decodedTarget = decodeProxiedRequestUrl(event.request.url);
+			const localFallbackResponse = await maybeFetchLocalProxyAssetFallback(decodedTarget, event.request);
+			if (localFallbackResponse) return localFallbackResponse;
+			if (shouldDirectFetchDecodedTarget(decodedTarget, event.request)) {
+				try {
+					return await fetchDecodedTargetDirectly(decodedTarget, event.request);
+				} catch (directError) {
+					console.warn("[frosted] SW direct decoded fallback failed:", decodedTarget, directError);
+				}
+			}
+			console.warn("[frosted] SW network fallback failed:", decodedTarget, error);
+			return buildNetworkFailureResponse(decodedTarget);
 		}
 	})());
 });

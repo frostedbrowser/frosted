@@ -313,6 +313,52 @@
 			"bg1": "#0c1d2a",
 			"bg2": "#143044"
 		}
+		
+	},
+	{
+		"id": "maid",
+		"label": "Maids ❤️",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/femboy.mp4",
+		"theme": {
+			"color1": "#ffd9f3",
+			"color2": "#d8e8ff",
+			"nav1": "#3c3f74",
+			"nav2": "#2a2c55",
+			"bg1": "#14182f",
+			"bg2": "#1f2444"
+		}
+	},
+	{
+		"id": "cat-maid",
+		"label": "Cat Maid ❤️",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/catmaid.mp4",
+		"theme": {
+			"color1": "#ffd9f3",
+			"color2": "#d8e8ff",
+			"nav1": "#3c3f74",
+			"nav2": "#2a2c55",
+			"bg1": "#14182f",
+			"bg2": "#1f2444"
+		}
+	},
+	{
+		"id": "gt3maid",
+		"label": "GT3 Maid ❤️",
+		"type": "video",
+		"category": "animated-wallpapers",
+		"file": "https://raw.githubusercontent.com/mrdavidzs/assets/main/wallpapers/animated/gt3maid.mp4",
+		"theme": {
+			"color1": "#ffd9f3",
+			"color2": "#d8e8ff",
+			"nav1": "#3c3f74",
+			"nav2": "#2a2c55",
+			"bg1": "#14182f",
+			"bg2": "#1f2444"
+		}
 	}
 ]
 
